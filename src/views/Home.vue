@@ -1,18 +1,51 @@
 <template>
-  <div class="home">
-    <img alt="Vue logo" src="../assets/logo.png">
-    <HelloWorld msg="Welcome to Your Vue.js App"/>
-  </div>
+  
+  <header>
+    <Navbar />
+  </header>
+      
+  <main>
+    <div class="container">
+          
+          <h4>Welcome to Gadol online</h4>
+          
+          <hr>
+          <p>Gadol is an exciting game of strategy and finance. Outwit your opponents in order for you to create the most value. Login or Sign up if you would like to play.</p>
+          <br>
+          <div class="center">
+            <router-link to="/login" class="waves-effect waves-light btn space-right green darken-3"><i class="material-icons left">account_circle</i>Login</router-link>
+            <router-link to="/signup" class="waves-effect waves-light btn green darken-3"><i class="material-icons left">add_circle</i>Sign up</router-link>
+          </div>
+
+    <br>      
+    </div>
+  </main>
+      
+  
+    
+
 </template>
 
 <script>
-// @ is an alias to /src
-import HelloWorld from '@/components/HelloWorld.vue'
+import Foot from '../components/Foot.vue'
+import Navbar from '../components/Navbar'
+
 
 export default {
-  name: 'Home',
-  components: {
-    HelloWorld
-  }
+  components: { Navbar, Foot  }
+  
 }
 </script>
+
+<style scoped>
+main {
+    display: flex;
+    flex-direction: column;
+
+  }
+footer {
+  margin-top: auto;
+}
+
+
+</style>
