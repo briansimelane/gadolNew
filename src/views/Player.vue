@@ -27,10 +27,29 @@
               <h6>Your created rooms:</h6>
               <div v-show="!haveRooms">
                 <p class="red-text"><em>You currenly have no rooms open</em></p>
+                
               </div>
 
               <div v-show="haveRooms">
-                <p class="green-text">You have rooms available</p>
+                <table class="highlight">
+                  <thead>
+                    <tr>
+                        <th>Room name</th>
+                        <th class="center">Player count</th>
+                        <th class="center">Timed game?</th>
+                        <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr v-for="room in roomsData" :key="room.id">
+                      <td>{{ room.name }}</td>
+                      <td class="center">{{ room.players }}</td>
+                      <td class="center">{{ room.timed }}</td>
+                      <td><button class="btn space-allaround green darken-3" >Join</button><button class="btn red darken-4" @click="deleteRoom(room.id)">Delete</button></td>
+                    </tr>
+                  </tbody>
+                </table>
+
               </div>
 
             </div>
@@ -45,23 +64,68 @@
 
 import NavbarLoggedIn from '../components/NavbarLoggedIn'
 import getUser from '../composables/getUser'
-import useCollection from '../composables/useCollection'
+import getCollection from '../composables/getCollection'
+import { projectAuth } from '../firebase/config'
+import { projectFirestore } from '../firebase/config'
+import { ref } from '@vue/reactivity'
+
 
 export default {
   components: { NavbarLoggedIn },
   setup() {
     const { user } = getUser() 
-    const { error, addDoc } = useCollection('Rooms')
+    const roomsData = ref(null)
+
+// Keep track of User's authentication status (listen for auth status changes)
+projectAuth.onAuthStateChanged(user => {
+    if(user) {
+        // If there is a user - it means they are logged in
+        // get data from the database
+        projectFirestore.collection('rooms').where('creator', '==', user.uid).onSnapshot(snapshot => {
+        // calls the function in the app.js to setup guides
+        
+          let results = []
+
+          snapshot.docs.forEach(doc => {
+            results.push({...doc.data(), id: doc.id})
+          })
+          
+        
+          // update values
+          roomsData.value = results
+          console.log(results)
+        
+
+        
+
+            projectFirestore.collection('players').doc(user.uid).get().then(doc => {
+                const surname = doc.data().surname
+                
+                console.log('user logged in: ' + surname);
+            });
+
+        }, err => {
+                console.log(err.message);
+            });
+        
+    }else {
+        // User not logged in
+        
+        console.log('user logged out')
+    }
+})
 
 
-    const handleLogin = () => {
-      console.log('Handle login clicked');
-    };
+const haveRooms = 1;
 
+const deleteRoom = async (room) => {
+  await projectFirestore.collection('rooms').doc(room).delete()
+  M.toast({html: 'Room has been deleted.'})
+  console.log(room)
 
-    const haveRooms = null;
+}
 
-    return { handleLogin, user, haveRooms, error, addDoc }
+    return { user, haveRooms, roomsData, deleteRoom }
   }
 }
 

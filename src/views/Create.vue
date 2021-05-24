@@ -113,21 +113,25 @@ import NavbarLoggedIn from '../components/NavbarLoggedIn'
 import M from 'materialize-css'
 import { ref } from '@vue/reactivity'
 import getUser from '../composables/getUser'
-
+import useCollection from '../composables/useCollection'
+import { useRouter } from 'vue-router'
 
 export default {
   components: { NavbarLoggedIn },
   setup() {
-    const { user } = getUser();
+    const { user } = getUser()
+    const { error, addDoc } = useCollection('rooms')
+    const router = useRouter()
+
     const roomName = ref('')
     const numberPlayers = ref('')
-    const gameContracts = ref('')
     const gameTimed = ref('')
     const gameReserve = ref('')
     const gameWinCondition = ref('')
    
 
-    const createRoom = () => {
+    const createRoom = async () => {
+            
       const roomDetails = {
         creator: user.value.uid,
         name: roomName.value,
@@ -136,6 +140,14 @@ export default {
         reserve: gameReserve.value,
         rules: gameWinCondition.value
       }
+
+      await addDoc(roomDetails)
+            if(!error.value) {
+              
+              router.push ({ name: 'Player'})
+              console.log('Room created');
+              M.toast({html: 'Room has been created'})
+        }
 
       console.log(roomDetails)
       
@@ -146,7 +158,7 @@ export default {
 
     const haveRooms = null;
 
-    return { createRoom, haveRooms, user, roomName, numberPlayers, gameContracts, gameTimed, gameReserve, gameWinCondition }
+    return { createRoom, haveRooms, user, roomName, numberPlayers, gameTimed, gameReserve, gameWinCondition }
   },
   mounted() {
         M.AutoInit()

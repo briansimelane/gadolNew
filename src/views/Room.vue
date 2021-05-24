@@ -7,6 +7,11 @@
         <div class="center">
           <h5>In the room</h5>
         </div>
+        <div class="row">
+          <div class="col s12 center">
+            <span>Redirect to your dashboard: <router-link to="Player">here</router-link>.</span>
+          </div>
+        </div>
       </div>
 
   </div>
