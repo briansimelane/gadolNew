@@ -1,11 +1,11 @@
 <template>
   <div class="container-fluid">
     
-      <NavbarLoggedIn />
+      <NavbarLoggedIn  />
 
       <div class="container">
         
-        <h5>Welcome {{ Player.name }}</h5>
+        <h5>Welcome {{ user.displayName }}!</h5>
         
         <div class="row">
             <div class="col s12 m12">
@@ -15,7 +15,7 @@
 
         <div class="row">
           <div class="col s12 m12 center">
-            <router-link to="/create" class="waves-effect waves-light btn space-right amber accent-4  black-text"><i class="material-icons left">build</i>Create a room</router-link>
+            <router-link to="/create" class="waves-effect waves-light btn space-allaround amber accent-4  black-text"><i class="material-icons left">build</i>Create a room</router-link>
             <router-link to="/join" class="waves-effect waves-light btn amber accent-4  black-text"><i class="material-icons left">fingerprint</i>Join a room</router-link>
           </div>
         </div>
@@ -42,20 +42,26 @@
 </template>
 
 <script>
+
 import NavbarLoggedIn from '../components/NavbarLoggedIn'
+import getUser from '../composables/getUser'
+import useCollection from '../composables/useCollection'
 
 export default {
   components: { NavbarLoggedIn },
   setup() {
+    const { user } = getUser() 
+    const { error, addDoc } = useCollection('Rooms')
+
+
     const handleLogin = () => {
       console.log('Handle login clicked');
     };
 
-    const Player = { name: 'Brian' };
 
     const haveRooms = null;
 
-    return { handleLogin, Player, haveRooms }
+    return { handleLogin, user, haveRooms, error, addDoc }
   }
 }
 

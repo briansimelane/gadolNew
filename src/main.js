@@ -5,5 +5,15 @@ import 'materialize-css'
 import 'materialize-css/dist/css/materialize.min.css'
 import '../src/styles/main.css'
 
+import { projectAuth } from './firebase/config'
 
-createApp(App).use(router).mount('#app')
+let app
+
+projectAuth.onAuthStateChanged(() => {
+    if(!app){
+        app = createApp(App)
+        .use(router)
+        .mount('#app')
+    }
+})
+

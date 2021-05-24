@@ -3,10 +3,21 @@
   margin-right: 10px;
 }
 
+.space-allaround {
+  margin: 10px;
+}
+
+
 .multipadding-10 {
   padding: 10px;
 }
 
+.remove-margin {
+  margin-bottom: 0px;
+}
 
+.margin-bottom {
+  margin-bottom: 40px;
+}
 
  

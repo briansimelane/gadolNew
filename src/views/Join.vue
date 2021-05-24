@@ -1,26 +1,82 @@
 <template>
   <div class="container-fluid">
     
-      <Navbar />
+      <NavbarLoggedIn />
 
       <div class="container">
-        
-        <h4>Join</h4>
-        
-        <hr>
-        <p>Gadol is an exciting game of strategy and finance. Outwit your opponents in order for you to create the most value. Login or Sign up if you would like to play.</p>
-        <br>
         <div class="center">
-          <router-link to="/join" class="waves-effect waves-light btn space-right green darken-3"><i class="material-icons left">account_circle</i>Login</router-link>
-          <router-link to="/signup" class="waves-effect waves-light btn green darken-3"><i class="material-icons left">add_circle</i>Sign up</router-link>
+          <h5><i class="material-icons space-right">fingerprint</i>Join a game room</h5>
         </div>
         
-      </div>
+        
+        <div class="row">
+            <div class="col s12 m12">
+              <p class="center">A room is a place where you can join your friends or teammates to play Gadol.</p>
+              <p class="center">Use the ID given to you to join the game.</p>
+            </div>
+        </div>
 
+        <div class="row">
+          <!-- spacing div -->
+          <div class="col s12 m2"></div>
+
+          <div class="col s12 m8">
+            <div class="card horizontal">           
+              <div class="card-stacked">
+                <div class="card-content">
+                  
+                    <form>
+                            <div class="row">
+                              <div class="input-field col s12 m12 ">
+                                <input id="room_id" type="text" class="validate">
+                                <label for="room_id">Enter the room ID</label>
+                              </div>
+                            </div>
+                            
+                            <div class="row">
+                              <div class="col s12 m12 center">
+                                <a class="waves-effect waves-light btn amber accent-4 black-text" @click="joinRoom"><i class="material-icons left">fingerprint</i>Join a room</a>
+                                <div class="center space-allaround"><span>If you would like to create a room instead, click <router-link to="/create">here</router-link>.</span></div>
+                              </div>
+                            </div>
+                        </form>  
+
+
+
+                </div>
+              </div>
+            </div>
+          </div>  
+
+          <!-- spacing div -->
+          <div class="col s12 m2"></div>
+
+        </div>
+
+        
+
+      </div>
 
   </div>
 </template>
 
 <script>
+import NavbarLoggedIn from '../components/NavbarLoggedIn'
+
+
+export default {
+  components: { NavbarLoggedIn },
+  setup() {
+    const joinRoom = () => {
+      console.log('Join a room clicked');
+    };
+
+    const Player = { name: 'Brian' };
+
+    const haveRooms = null;
+
+    return { joinRoom, Player, haveRooms }
+  }
+}
 
 </script>

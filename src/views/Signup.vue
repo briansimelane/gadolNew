@@ -18,25 +18,25 @@
             <form class="col s12">
               <div class="row small-padding">
                 <div class="input-field col s6">
-                  <input placeholder="" id="first_name" type="text" class="validate">
+                  <input id="first_name" type="text" class="validate" required v-model="displayName">
                   <label for="first_name">First Name</label>
                 </div>
                 <div class="input-field col s6">
-                  <input id="last_name" type="text" class="validate">
+                  <input id="last_name" type="text" class="validate" required v-model="lastName">
                   <label for="last_name">Last Name</label>
                 </div>
               </div>
               
               <div class="row small-padding">
                 <div class="input-field col s12">
-                  <input id="email" type="email" class="validate">
+                  <input id="email" type="email" class="validate" required v-model="email">
                   <label for="email">Email</label>
                 </div>
               </div>
 
               <div class="row small-padding">
                 <div class="input-field col s12">
-                  <input id="password" type="password" class="validate">
+                  <input id="password" type="password" class="validate" required v-model="password" autocomplete="off">
                   <label for="password">Password</label>
                 </div>
               </div>
@@ -47,7 +47,8 @@
                 </div>
                 
                     <div class="center">
-                    <a to="/join" class="waves-effect waves-light btn space-right green darken-3" @click="handleSignup"><i class="material-icons left">add_circle</i>Sign up</a>
+                      <div class="red-text">{{ error }}</div>
+                    <button to="/join" class="waves-effect waves-light btn space-right green darken-3" @click="handleSignup"><i class="material-icons left">add_circle</i>Sign up</button>
                     <p class="multipadding-10">Registered already? Please <router-link to="/login" class="">login</router-link> instead.</p>
                   </div>
                 
@@ -62,16 +63,35 @@
 
 <script>
 import Navbar from '../components/Navbar'
+import { ref } from '@vue/reactivity'
+import useSignup from '../composables/useSignup'
+import { useRouter } from 'vue-router'
 
 export default {
   components: { Navbar },
-  setup() {
-    const handleSignup = () => {
-      console.log('Handle signup clicked');
+  
+  setup(props, context) {
+    const { error, signup } = useSignup()
+
+    const displayName = ref('')
+    const lastName = ref('')
+    const email = ref('')
+    const password = ref('')
+    
+    const router = useRouter()
+    
+    const handleSignup = async () => {
+      
+            await signup(email.value, password.value, displayName.value, lastName.value)
+            if(!error.value) {
+              //context.emit('signup')
+              router.push ({ name: 'Player'})
+            }
+          }
+
+    return { handleSignup, displayName, email, password, error, lastName }
     }
-    return { handleSignup }
   }
-}
 
 </script>
 

@@ -6,6 +6,20 @@ import Join from '../views/Join.vue'
 import Room from '../views/Room.vue'
 import Login from '../views/Login.vue'
 import Signup from '../views/Signup.vue'
+import { projectAuth } from '../firebase/config'
+
+
+// auth guard
+const requireAuth = async (to, from, next) => {
+  let user = projectAuth.currentUser
+  console.log('currect user in auth guard: ', user)
+  if(!user){
+    next({ name: 'Home' })
+  } else
+    next()
+ 
+}
+
 
 const routes = [
   {
@@ -26,22 +40,26 @@ const routes = [
   {
     path: '/player',
     name: 'Player',
-    component: Player
+    component: Player,
+    beforeEnter: requireAuth
   },
   {
     path: '/create',
     name: 'Create',
-    component: Create
+    component: Create,
+    beforeEnter: requireAuth
   },
   {
     path: '/join',
     name: 'Join',
-    component: Join
+    component: Join,
+    beforeEnter: requireAuth
   },
   {
     path: '/room',
     name: 'Room',
-    component: Room
+    component: Room,
+    beforeEnter: requireAuth
   }
 ]
 

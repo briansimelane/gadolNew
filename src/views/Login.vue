@@ -19,14 +19,14 @@
               
               <div class="row small-padding">
                 <div class="input-field col s12">
-                  <input id="email" type="email" class="validate">
+                  <input id="email" type="email" class="validate" v-model="email">
                   <label for="email">Email</label>
                 </div>
               </div>
 
               <div class="row small-padding">
                 <div class="input-field col s12">
-                  <input id="password" type="password" class="validate">
+                  <input id="password" type="password" class="validate" v-model="password">
                   <label for="password">Password</label>
                 </div>
               </div>
@@ -37,6 +37,7 @@
                 </div>
                 
                     <div class="center">
+                      <div class="red-text">{{ error }}</div>
                     <a to="/join" class="waves-effect waves-light btn space-right green darken-3" @click="handleLogin"><i class="material-icons left">account_circle</i>Login</a>
                     <p class="multipadding-10">Not yet registered? Please <router-link to="/signup" class="">sign up</router-link> instead.</p>
                   </div>
@@ -52,17 +53,36 @@
 
 <script>
 import Navbar from '../components/Navbar'
+import { ref } from '@vue/reactivity'
+import useLogin from '../composables/useLogin'
+import { useRouter } from 'vue-router'
 
 export default {
   components: { Navbar },
   setup() {
-    const handleLogin = () => {
-      console.log('Handle login clicked');
+    const { error, login } = useLogin()
+    const email = ref('')
+    const password = ref('')
+
+    const router = useRouter()
+
+
+  const handleClick = () => {      
+      console.log('Clicked');
+        }
+
+    const handleLogin = async () => {
+            await login(email.value, password.value)
+            if(!error.value) {
+              router.push ({ name: 'Player'})
+              console.log('User logged in');
+              M.toast({html: 'You have logged in'})
+        }
+    
     }
-    return { handleLogin }
+    return { email, password, handleLogin, error, handleClick }
   }
 }
-
 </script>
 
 <style scoped>
