@@ -9,9 +9,9 @@ const getGame = (id) => {
     const load = async() => {
         try {
             let res = await projectFirestore.collection('rooms').doc(id).get()
-            game.value = res.docs.map(doc => {
-                return { ...doc.data(), id: doc.id }
-            })
+                    game.value = { ...res.data(), id: res.id }
+            
+            
         }
         catch(err) {
             error.value = err.message

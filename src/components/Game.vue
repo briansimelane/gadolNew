@@ -1,6 +1,6 @@
 <template>
-  <h3>This is where the game will be. </h3>
-  <p>Game ID : {{ game.name}}</p>
+  <h5>Game component output </h5>
+  <p>Game ID : {{ game}}</p> 
 </template>
 
 <script>
@@ -13,11 +13,11 @@ export default {
         const route = useRoute()
         console.log(route)
 
-        const { game, error, load } = getGame(props.value)
+        const { game, error, load } = getGame(props.gameID)
 
         load()
         
-
+        console.log('From the Game component: ', game )
         return { game, error }
     }
 

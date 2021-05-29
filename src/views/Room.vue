@@ -15,7 +15,9 @@
         </div>
         <div class="row">
           <div class="col s12">
-             <!-- <Game :gameID="id"/> -->
+            <h6>Game data</h6>
+            
+              <Game :gameID="id"/>  
           </div>
         </div>
       </div>
@@ -35,6 +37,7 @@
 
 import NavbarInRoom from '../components/NavbarInRoom'
 import Game from '../components/Game'
+import getGame from '../composables/getRoomData'
 
 
 
@@ -43,9 +46,12 @@ export default {
   components: { NavbarInRoom, Game },
   props: ['id'],
   setup(props) {
-    
-    
-    return {  }
+      console.log('Prop id output: ', props.id)
+    const { game, error, load } = getGame(props.id)
+
+        load()
+        
+        return { game, error }
   }
 }
 
