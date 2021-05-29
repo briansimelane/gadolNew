@@ -56,9 +56,10 @@ const routes = [
     beforeEnter: requireAuth
   },
   {
-    path: '/room',
+    path: '/room/:id',
     name: 'Room',
     component: Room,
+    props: true,
     beforeEnter: requireAuth
   }
 ]

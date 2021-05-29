@@ -45,7 +45,8 @@
                       <td>{{ room.name }}</td>
                       <td class="center">{{ room.players }}</td>
                       <td class="center">{{ room.timed }}</td>
-                      <td><button class="btn space-allaround green darken-3" >Join</button><button class="btn red darken-4" @click="deleteRoom(room.id)">Delete</button></td>
+                      <td><button class="btn space-allaround green darken-3" @click="joinRoom(room.id)" >Join</button>
+                        <button class="btn red darken-4" @click="deleteRoom(room.id)">Delete</button></td>
                     </tr>
                   </tbody>
                 </table>
@@ -64,10 +65,10 @@
 
 import NavbarLoggedIn from '../components/NavbarLoggedIn'
 import getUser from '../composables/getUser'
-import getCollection from '../composables/getCollection'
 import { projectAuth } from '../firebase/config'
 import { projectFirestore } from '../firebase/config'
 import { ref } from '@vue/reactivity'
+import { useRouter } from 'vue-router'
 
 
 export default {
@@ -75,6 +76,7 @@ export default {
   setup() {
     const { user } = getUser() 
     const roomsData = ref(null)
+    const router = useRouter()
 
 // Keep track of User's authentication status (listen for auth status changes)
 projectAuth.onAuthStateChanged(user => {
@@ -125,7 +127,13 @@ const deleteRoom = async (room) => {
 
 }
 
-    return { user, haveRooms, roomsData, deleteRoom }
+const joinRoom = (roomToJoin) => {
+  router.push ({ name: 'Room', params: {id: roomToJoin}})
+  console.log('Room joined');
+  M.toast({html: 'Room has been joined'})
+}
+
+    return { user, haveRooms, roomsData, deleteRoom, joinRoom }
   }
 }
 
