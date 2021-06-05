@@ -128,7 +128,7 @@ const deleteRoom = async (room) => {
 }
 
 const joinRoom = (roomToJoin) => {
-  router.push ({ name: 'Room', params: {id: roomToJoin}})
+  router.push ({ name: 'GameRoom', params: {id: roomToJoin}})
   console.log('Room joined');
   M.toast({html: 'Room has been joined'})
 }

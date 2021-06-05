@@ -1,26 +1,46 @@
 <template>
-  <h5>Game component output </h5>
-  <p>Game ID : {{ game}}</p> 
+   <p>Game room : {{ game }}</p> 
+  
+
 </template>
 
 <script>
 import getGame from '../composables/getRoomData'
 import { useRoute } from 'vue-router'
+import { ref } from '@vue/reactivity'
 
 export default {
    props: ['gameID'],
-    setup(props) {
+   data() {
+     return {
+       
+     }
+   },
+   mounted(){
+     const currentGame = ref()
         const route = useRoute()
         console.log(route)
 
-        const { game, error, load } = getGame(props.gameID)
+        const { game, error, load } = getGame(this.gameID)
 
         load()
-        
-        console.log('From the Game component: ', game )
-        return { game, error }
-    }
 
+        const rules = () => {
+
+          if(game.rules == 2) {
+            rules = "Contracts" }
+            else {
+              rules = "1st to 15 points"
+            }
+        }
+        
+       
+
+        console.log('From the Game component: ', game )
+        console.log('From the Game component JSON: ', currentGame.value )
+        return { game, error, currentGame, rules }
+   }
+    
 
 }
 </script>

@@ -28,9 +28,10 @@
                     <form>
                             <div class="row">
                               <div class="input-field col s12 m12 ">
-                                <input id="room_id" type="text" class="validate">
-                                <label for="room_id">Enter the room ID</label>
+                                <input id="room_id" type="text" class="validate" v-model="roomID">
+                                <label for="room_id" >Enter the room ID</label>
                               </div>
+                             
                             </div>
                             
                             <div class="row">
@@ -39,6 +40,7 @@
                                 <div class="center space-allaround"><span>If you would like to create a room instead, click <router-link to="/create">here</router-link>.</span></div>
                               </div>
                             </div>
+
                         </form>  
 
 
@@ -61,13 +63,23 @@
 </template>
 
 <script>
+import { ref } from '@vue/reactivity';
 import NavbarLoggedIn from '../components/NavbarLoggedIn'
+import { useRouter } from 'vue-router'
 
 
 export default {
   components: { NavbarLoggedIn },
   setup() {
+    let roomID =ref()
+    const router = useRouter()
+  //const roomGameId = roomID.value
+
     const joinRoom = () => {
+      
+      router.push ({ name: 'GameRoom', params: {id: roomID.value }})
+      console.log('Room joined', roomID.value );
+      M.toast({html: 'Room has been joined'})
       console.log('Join a room clicked');
     };
 
@@ -75,7 +87,7 @@ export default {
 
     const haveRooms = null;
 
-    return { joinRoom, Player, haveRooms }
+    return { joinRoom, Player, haveRooms, roomID }
   }
 }
 
