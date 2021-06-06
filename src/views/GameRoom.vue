@@ -19,7 +19,7 @@
             <h6>Game data</h6>
             <!-- <p>{{ game }}</p> -->
             <p> Room name: {{ gameData.name}}</p>
-            <p> Players: {{ gameData.players}}</p>
+            <p> Players: {{ gameData.numPlayers}}</p>
             
             
           </div>

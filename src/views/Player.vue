@@ -43,7 +43,7 @@
                   <tbody>
                     <tr v-for="room in roomsData" :key="room.id">
                       <td>{{ room.name }}</td>
-                      <td class="center">{{ room.players }}</td>
+                      <td class="center">{{ room.numPlayers }}</td>
                       <td class="center">{{ room.timed }}</td>
                       <td><button class="btn space-allaround green darken-3" @click="joinRoom(room.id)" >Join</button>
                         <button class="btn red darken-4" @click="deleteRoom(room.id)">Delete</button></td>
@@ -133,8 +133,10 @@ const joinRoom = (roomToJoin) => {
   M.toast({html: 'Room has been joined'})
 }
 
+
     return { user, haveRooms, roomsData, deleteRoom, joinRoom }
   }
+  
 }
 
 </script>

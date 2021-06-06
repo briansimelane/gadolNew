@@ -4,6 +4,7 @@ import router from './router'
 import 'materialize-css'
 import 'materialize-css/dist/css/materialize.min.css'
 import '../src/styles/main.css'
+import '../src/assets/reset.json'
 
 import { projectAuth } from './firebase/config'
 
