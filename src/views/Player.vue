@@ -107,7 +107,7 @@ projectAuth.onAuthStateChanged(user => {
             });
 
         }, err => {
-                console.log(err.message);
+                console.log("This is the error: " + err.message);
             });
         
     }else {
@@ -123,7 +123,7 @@ const haveRooms = 1;
 const deleteRoom = async (room) => {
   await projectFirestore.collection('rooms').doc(room).delete()
   M.toast({html: 'Room has been deleted.'})
-  console.log(room)
+  console.log("Room deleted: " + room)
 
 }
 

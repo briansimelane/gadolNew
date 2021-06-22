@@ -3,10 +3,13 @@
   margin-right: 10px;
 }
 
+.space-left {
+  margin-left: 10px;
+}
+
 .space-allaround {
   margin: 10px;
 }
-
 
 .multipadding-10 {
   padding: 10px;
@@ -19,5 +22,85 @@
 .margin-bottom {
   margin-bottom: 40px;
 }
+.margin-bottom-small {
+  margin-bottom: 10px;
+}
+/* FONT STYLING */
+.inlinelink {
+  cursor: pointer;
+  font-weight: 600;
+  color: blue;
+}
 
- 
+/* Layout */
+.GameArea {
+  background-color: cadetblue;
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr 1fr;
+  grid-template-rows: 40px 200px auto;
+  grid-template-areas:
+    "notifications notifications notifications leftside"
+    "mainarea mainarea mainarea leftside"
+    "mainarea mainarea mainarea leftside";
+  align-content: start;
+}
+
+.nofitications {
+  grid-area: notifications;
+  background-color: #ede7f6;
+  padding: 10px;
+  text-align: center;
+  font-weight: 600;
+}
+
+.MainArea {
+  margin: 0px;
+  grid-area: mainarea;
+  display: grid;
+  grid-template-columns: 3fr 1fr;
+  grid-template-rows: auto auto;
+  grid-template-areas:
+    "market tempResources"
+    "market cardsTofollow";
+  align-content: start;
+  justify-content: start;
+}
+
+.cardsArea {
+  grid-area: market;
+}
+
+.tempResources {
+  grid-area: tempResources;
+}
+
+.nextCards {
+  grid-area: cardsTofollow;
+}
+
+.SideArea {
+  margin: 0px;
+  padding: 0px;
+  background-color: yellow;
+  grid-area: leftside;
+  display: grid;
+  grid-template-columns: 1fr;
+  grid-template-rows: 50% 50%;
+  grid-template-areas:
+    "scoring"
+    "chat";
+  align-content: start;
+}
+
+.ScoringArea {
+  margin: 0px;
+  grid-area: scoring;
+}
+
+.ChatArea {
+  margin: 0px;
+  grid-area: chat;
+}
+
+@media only screen and (max-width: 500px) {
+}
