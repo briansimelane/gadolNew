@@ -4,19 +4,13 @@
       <NavbarInRoom />
 
       <div class="container-fluid">
-        <div class="center">
-          <h5>Game room page</h5>
-          <h6>Room ID: <span class="red-text">{{id}}</span> </h6>
+        <div class="col s12 space-left">
+          <h6> Welcome to Game Room ID: <span class="red-text grey lighten-3 multipadding-5">{{id}}</span> </h6>
         </div>
-        <div class="row">
-          <div class="col s12 center">
-            <span>Return your dashboard: <button class="btn" @click="returnToplayer()">here</button></span>
-            
-          </div>
-        </div>
+        
         <div class="row">
           <div class="col s12">
-            <h6>Game data</h6>
+            <p>Game data</p>
             <!-- <p>{{ game }}</p> -->
             <p> Room name: {{ gameData.name}}</p>
             <p> Players: {{ gameData.numPlayers}}</p>
@@ -93,16 +87,6 @@ projectAuth.onAuthStateChanged(user => {
 
 
 
-const returnToplayer = () => {
-  router.push ({ name: 'Player'})
-  console.log('Room exited');
-  M.toast({html: 'Game room exited'})
-}
-
-
-
-
-
 
      /* USING THE getGame composable 
      const { game, error, load } = getGame(props.id)
@@ -114,7 +98,7 @@ const returnToplayer = () => {
 
         return { game, error, gameData } */
 
-        return { user, gameData, returnToplayer  }
+        return { user, gameData  }
   }
 }
 

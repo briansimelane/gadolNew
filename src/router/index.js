@@ -3,7 +3,6 @@ import Home from '../views/Home.vue'
 import Player from '../views/Player.vue'
 import Create from '../views/Create.vue'
 import Join from '../views/Join.vue'
-import Room from '../views/Room.vue'
 import GameRoom from '../views/GameRoom.vue'
 import Login from '../views/Login.vue'
 import Signup from '../views/Signup.vue'
@@ -57,13 +56,6 @@ const routes = [
     beforeEnter: requireAuth
   },
   {
-    path: '/room/:id',
-    name: 'Room',
-    component: Room,
-    props: true,
-    beforeEnter: requireAuth
-  },
-  {
     path: '/gameroom/:id',
     name: 'GameRoom',
     component: GameRoom,
@@ -74,6 +66,7 @@ const routes = [
 
 const router = createRouter({
   history: createWebHistory(process.env.BASE_URL),
+  //mode: 'history',
   routes
 })
 
