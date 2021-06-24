@@ -21,6 +21,11 @@
 
 .remove-margin {
   margin-bottom: 0px;
+  margin-top: 0px;
+}
+
+.remove-padding {
+  padding-bottom: 0px;
 }
 
 .margin-bottom {
@@ -37,74 +42,618 @@
 }
 
 /* Layout */
-.GameArea {
-  background-color: cadetblue;
+.gameArea {
   display: grid;
-  grid-template-columns: 1fr 1fr 1fr 1fr;
-  grid-template-rows: 40px 200px auto;
+  grid-template-columns: 1fr 0.8fr 1fr 1.2fr;
+  grid-template-rows: 30px auto;
   grid-template-areas:
-    "notifications notifications notifications leftside"
-    "mainarea mainarea mainarea leftside"
-    "mainarea mainarea mainarea leftside";
+    "notifications notifications notifications rightside"
+    "mainarea mainarea mainarea rightside";
   align-content: start;
 }
 
-.nofitications {
+.gameNotifications {
   grid-area: notifications;
-  background-color: #ede7f6;
-  padding: 10px;
+  background-color: #e4d6f1ab;
+  padding: 5px;
   text-align: center;
   font-weight: 600;
 }
 
-.MainArea {
-  margin: 0px;
+.gameAreaLeft {
+  padding-left: 5px;
+  padding-top: 5px;
+  margin-top: 0px;
+  border-right: 1px dotted #707070;
   grid-area: mainarea;
+  background: #ffffff; /*rgb(19, 46, 31);*/
   display: grid;
-  grid-template-columns: 3fr 1fr;
-  grid-template-rows: auto auto;
+  grid-template-columns: 1fr 1fr 1fr 1fr;
+  grid-template-rows: auto auto auto auto auto;
   grid-template-areas:
-    "market tempResources"
-    "market cardsTofollow";
+    "onTableContracts onTableContracts onTableContracts tempResources"
+    "onTableRow1 onTableRow1 onTableRow1 onTableRow1"
+    "onTableRow2 onTableRow2 onTableRow2 onTableRow2"
+    "onTableRow3 onTableRow3 onTableRow3 onTableRow3"
+    "upComingCards upComingCards upComingCards upComingCards";
   align-content: start;
   justify-content: start;
 }
 
-.cardsArea {
-  grid-area: market;
+.gameAreaLeft > h5 {
+  color: #000000;
+  margin: 5px;
+  margin-left: 10px;
+  font-weight: 400;
+  font-size: 10px;
+  text-transform: uppercase;
+}
+
+.onTableContracts {
+  grid-area: onTableContracts;
+  display: flex;
+  flex-wrap: wrap;
+  padding-bottom: 20px;
+}
+
+.onTableRow1 {
+  grid-area: onTableRow1;
+  display: flex;
+  flex-wrap: wrap;
+  padding-bottom: 20px;
+}
+
+.onTableRow2 {
+  grid-area: onTableRow2;
+  display: flex;
+  flex-wrap: wrap;
+  padding-bottom: 20px;
+}
+
+.onTableRow3 {
+  grid-area: onTableRow3;
+  display: flex;
+  flex-wrap: wrap;
+  padding-bottom: 20px;
+}
+
+.upComingCards {
+  grid-area: upComingCards;
+  display: flex;
+  flex-wrap: wrap;
+  padding-bottom: 20px;
 }
 
 .tempResources {
   grid-area: tempResources;
+  margin-right: 10px;
 }
 
-.nextCards {
-  grid-area: cardsTofollow;
-}
-
-.SideArea {
+.gameAreaRight {
   margin: 0px;
   padding: 0px;
-  background-color: yellow;
-  grid-area: leftside;
+  background-color: rgb(243, 243, 224);
+  grid-area: rightside;
   display: grid;
   grid-template-columns: 1fr;
-  grid-template-rows: 50% 50%;
+  grid-template-rows: 30px auto auto;
   grid-template-areas:
+    "scoreheader"
     "scoring"
     "chat";
-  align-content: start;
 }
 
-.ScoringArea {
+.gameScoringHeader {
+  background-color: #f7f7f7;
+  padding: 5px;
+  text-align: center;
+  font-weight: 600;
+  grid-area: scoreheader;
+}
+
+.gameScoring {
   margin: 0px;
   grid-area: scoring;
 }
 
-.ChatArea {
+.gameChat {
   margin: 0px;
   grid-area: chat;
 }
 
-@media only screen and (max-width: 500px) {
+/* Cards styling */
+.contract_card {
+  background: #ffffff;
+  border: 1px solid gray;
+  width: 140px;
+  height: 170px;
+  padding-right: 0px;
+  margin-left: 10px;
+  display: inline-block;
+  background-image: url(../assets/img/ContractBg.png);
+  background-repeat: no-repeat;
+  background-position: 0px;
+  background-size: 100%;
+  border-radius: 5px;
+}
+
+.tokens_card {
+  background: #c9c7c7;
+  border: 1px solid gray;
+  width: 296px;
+  height: 170px;
+  padding-right: 0px;
+  margin-left: 10px;
+  display: inline-block;
+  border-radius: 5px;
+}
+
+.resource_card {
+  background: rgba(0, 0, 0, 0.3);
+  position: relative;
+  border: 1px solid gray;
+  width: 140px;
+  height: 140px;
+  margin-left: 10px;
+  padding-right: 0px;
+  padding-top: 0px;
+  display: inline-block;
+  background-repeat: no-repeat;
+  background-size: 100%;
+  position: relative;
+  border-radius: 5px;
+}
+
+/* background images */
+.redResource {
+  background-image: url(../assets/img/ResourceCardRed.png);
+}
+
+.greenResource {
+  background-image: url(../assets/img/ResourceCardGreen.png);
+}
+
+.purpleResource {
+  background-image: url(../assets/img/ResourceCardPurple.png);
+}
+
+.yellowResource {
+  background-image: url(../assets/img/ResourceCardYellow.png);
+}
+
+.blackResource {
+  background-image: url(../assets/img/ResourceCardBlack.png);
+}
+
+/* Position inside Resource Cards */
+.card_details {
+  position: relative;
+  font-weight: 600;
+  font-size: 20px;
+  width: 100%;
+  height: 100%;
+  cursor: pointer;
+}
+
+.productsValue {
+  display: inline-block;
+  position: absolute;
+  top: 5px;
+  left: 23px;
+  font-size: 26px;
+}
+.redCost {
+  display: inline-block;
+  position: absolute;
+  top: 2px;
+  right: 12px;
+}
+
+.greenCost {
+  display: inline-block;
+  position: absolute;
+  top: 28px;
+  right: 12px;
+}
+
+.yellowCost {
+  display: inline-block;
+  position: absolute;
+  top: 54px;
+  right: 12px;
+}
+
+.purpleCost {
+  display: inline-block;
+  position: absolute;
+  top: 81px;
+  right: 12px;
+}
+
+.blackCost {
+  display: inline-block;
+  position: absolute;
+  top: 107px;
+  right: 12px;
+}
+
+/* Positioning inside contract card */
+.contract_details {
+  position: relative;
+  font-family: Arial, Helvetica, sans-serif;
+  font-weight: 600;
+  font-size: 18px;
+  width: 100%;
+  height: 100%;
+  cursor: pointer;
+}
+
+.contractValue {
+  display: inline-block;
+  position: absolute;
+  top: -6px;
+  right: 53px;
+  font-size: 30px;
+  color: #ffffff;
+}
+
+.contractCash {
+  display: inline-block;
+  position: absolute;
+  top: 42px;
+  right: 40px;
+  font-size: 14px;
+}
+
+.contractDebtors {
+  display: inline-block;
+  position: absolute;
+  top: 56px;
+  right: 40px;
+  font-size: 14px;
+}
+
+.redValue {
+  display: inline-block;
+  position: absolute;
+  top: 77px;
+  right: 34px;
+}
+
+.greenValue {
+  display: inline-block;
+  position: absolute;
+  top: 102px;
+  right: 52px;
+}
+
+.yellowValue {
+  display: inline-block;
+  position: absolute;
+  top: 126px;
+  right: 52px;
+}
+
+.purpleValue {
+  display: inline-block;
+  position: absolute;
+  top: 102px;
+  right: 13px;
+}
+
+.blackValue {
+  display: inline-block;
+  position: absolute;
+  top: 126px;
+  right: 13px;
+}
+
+.productValue {
+  display: inline-block;
+  position: absolute;
+  top: 70px;
+  right: 102px;
+  font-size: 24px;
+}
+
+/* tokens details */
+.tokens_details {
+  position: relative;
+  font-family: Arial, Helvetica, sans-serif;
+  font-weight: 600;
+  font-size: 18px;
+}
+
+.redTokens {
+  position: absolute;
+  display: inline-block;
+  top: 0px;
+  left: 0px;
+  width: 90px;
+  height: 90px;
+  background-image: url(../assets/img/RedCounter.png);
+  background-repeat: no-repeat;
+  background-position: 0px;
+  background-size: cover;
+  cursor: pointer;
+}
+
+.greenTokens {
+  position: absolute;
+  display: inline-block;
+  top: 82px;
+  left: 0px;
+  width: 90px;
+  height: 90px;
+  background-image: url(../assets/img/GreenCounter.png);
+  background-repeat: no-repeat;
+  background-position: 0px;
+  background-size: cover;
+  cursor: pointer;
+}
+
+.purpleTokens {
+  position: absolute;
+  display: inline-block;
+  top: 0px;
+  right: 0px;
+  width: 90px;
+  height: 90px;
+  background-image: url(../assets/img/PurpleCounter.png);
+  background-repeat: no-repeat;
+  background-position: 0px;
+  background-size: cover;
+  cursor: pointer;
+}
+
+.blackTokens {
+  position: absolute;
+  display: inline-block;
+  top: 82px;
+  right: 0px;
+  width: 90px;
+  height: 90px;
+  background-image: url(../assets/img/BlackCounter.png);
+  background-repeat: no-repeat;
+  background-position: 0px;
+  background-size: cover;
+  cursor: pointer;
+}
+
+.yellowTokens {
+  position: absolute;
+  display: inline-block;
+  top: 81px;
+  right: 104px;
+  width: 90px;
+  height: 90px;
+  background-image: url(../assets/img/YellowCounter.png);
+  background-repeat: no-repeat;
+  background-position: 0px;
+  background-size: cover;
+  cursor: pointer;
+}
+
+.tokensLabel {
+  position: absolute;
+  display: inline-block;
+  top: 31px;
+  right: 104px;
+  width: 90px;
+  height: 44px;
+}
+
+/* Tokens value */
+
+#redTokensValue {
+  position: absolute;
+  display: inline-block;
+  top: 6px;
+  left: 40px;
+  width: 20px;
+  height: 20px;
+  z-index: 2;
+}
+#greenTokensValue {
+  position: absolute;
+  display: inline-block;
+  top: 88px;
+  left: 40px;
+  width: 20px;
+  height: 20px;
+  z-index: 2;
+}
+
+#yellowTokensValue {
+  position: absolute;
+  display: inline-block;
+  top: 88px;
+  left: 142px;
+  width: 20px;
+  height: 20px;
+  z-index: 2;
+}
+
+#purpleTokensValue {
+  position: absolute;
+  display: inline-block;
+  top: 6px;
+  left: 246px;
+  width: 20px;
+  height: 20px;
+  z-index: 2;
+}
+
+#blackTokensValue {
+  position: absolute;
+  display: inline-block;
+  top: 88px;
+  left: 246px;
+  width: 20px;
+  height: 20px;
+  z-index: 2;
+}
+
+/* Contracts Modal positioning and styling */
+
+.contract_details_modal {
+  position: relative;
+  font-family: Arial, Helvetica, sans-serif;
+  font-weight: 600;
+  font-size: 18px;
+  width: 100%;
+  height: 100%;
+  cursor: default;
+}
+
+.contract_card .Value {
+  display: inline-block;
+  position: absolute;
+  top: -6px;
+  right: 53px;
+  font-size: 30px;
+  color: #ffffff;
+}
+
+.contract_card .Cash {
+  display: inline-block;
+  position: absolute;
+  top: 42px;
+  right: 40px;
+  font-size: 14px;
+}
+
+.contract_card .Debtors {
+  display: inline-block;
+  position: absolute;
+  top: 56px;
+  right: 40px;
+  font-size: 14px;
+}
+
+.contract_card .CostRed {
+  display: inline-block;
+  position: absolute;
+  top: 77px;
+  right: 34px;
+}
+
+.contract_card .CostGreen {
+  display: inline-block;
+  position: absolute;
+  top: 102px;
+  right: 52px;
+}
+
+.contract_card .CostYellow {
+  display: inline-block;
+  position: absolute;
+  top: 126px;
+  right: 52px;
+}
+
+.contract_card .CostPurple {
+  display: inline-block;
+  position: absolute;
+  top: 102px;
+  right: 13px;
+}
+
+.contract_card .CostBlack {
+  display: inline-block;
+  position: absolute;
+  top: 126px;
+  right: 13px;
+}
+
+.contract_card .Production {
+  display: inline-block;
+  position: absolute;
+  top: 70px;
+  right: 102px;
+  font-size: 24px;
+}
+
+.contract_card .Index {
+  display: none;
+}
+
+.contract_card .Identifier {
+  display: none;
+}
+
+.contract_card .Ref {
+  display: none;
+}
+
+.contract_card .Colour {
+  display: none;
+}
+
+/* Resource cards modal styling */
+.card_details_modal {
+  position: relative;
+  font-weight: 600;
+  font-size: 20px;
+  width: 100%;
+  height: 100%;
+  cursor: default;
+}
+
+.resource_card .Production {
+  display: inline-block;
+  position: absolute;
+  top: 5px;
+  left: 23px;
+  font-size: 26px;
+}
+.resource_card .CostRed {
+  display: inline-block;
+  position: absolute;
+  top: 2px;
+  right: 12px;
+}
+
+.resource_card .CostGreen {
+  display: inline-block;
+  position: absolute;
+  top: 28px;
+  right: 12px;
+}
+
+.resource_card .CostYellow {
+  display: inline-block;
+  position: absolute;
+  top: 54px;
+  right: 12px;
+}
+
+.resource_card .CostPurple {
+  display: inline-block;
+  position: absolute;
+  top: 81px;
+  right: 12px;
+}
+
+.resource_card .CostBlack {
+  display: inline-block;
+  position: absolute;
+  top: 107px;
+  right: 12px;
+}
+
+.resource_card .Index {
+  display: none;
+}
+
+.resource_card .Identifier {
+  display: none;
+}
+
+.resource_card .Ref {
+  display: none;
+}
+
+.resource_card .Colour {
+  display: none;
 }

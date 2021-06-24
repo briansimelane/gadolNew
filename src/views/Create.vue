@@ -68,9 +68,9 @@
                             
                               <div class="col s12">
                                 <select v-model="gameWinCondition">
-                                  <option value="0" disabled selected>Choose your option</option>
-                                  <option value="1">1st to 15 points (No contract fulfilment) </option>
-                                  <option value="2">Highest value (Game ends with a contract fulfilment)</option>
+                                  <option value="points" disabled selected>Choose your option</option>
+                                  <option value="points">1st to 15 points (No contract fulfilment) </option>
+                                  <option value="contracts">Highest value (Game ends with a contract fulfilment)</option>
                                 </select>
                                 
                               </div>
@@ -130,7 +130,7 @@ export default {
     const gameReserve = ref('')
     const gameWinCondition = ref('')
 
-    const numPlayers = numberPlayers.value
+    const numPlayers = parseInt(numberPlayers.value)
     
     // global variables for the game
     let resetValues // JSON reset file values
@@ -228,7 +228,7 @@ export default {
     
 
 
-    console.log('from create view - reset values (Number of players): ', playerStartCash)
+    console.log('from create view - reset values (Player start cash): ', playerStartCash)
       })
  
 
@@ -257,26 +257,21 @@ const shuffle = (array) => {
     const shuffledRedCards = shuffle(resetRedCards);
     const shuffledPurpleCards = shuffle(resetPurpleCards);
     const shuffledBlackCards = shuffle(resetBlackCards);
-    const playerScoreCash = new Array(numPlayers).fill(playerStartCash);
-    const playerScoreProduction = new Array(numPlayers).fill(playerStartProduction);
-    const playerScoreContractValue = new Array(numPlayers).fill(playerStartValue);
-    const playerScoreContractCost = new Array(numPlayers).fill(playerStartCost);
-    const playerScoreContractDebtors = new Array(numPlayers).fill(playerStartDebtors);
-    const playerScoreTempRed = new Array(numPlayers).fill(playerTempRed);
-    const playerScoreTempGreen = new Array(numPlayers).fill(playerTempGreen);
-    const playerScoreTempYellow = new Array(numPlayers).fill(playerTempYellow);
-    const playerScoreTempPurple = new Array(numPlayers).fill(playerTempPurple);
-    const playerScoreTempBlack = new Array(numPlayers).fill(playerTempBlack);
-    const playerScorePermRed = new Array(numPlayers).fill(playerPermRed);
-    const playerScorePermGreen = new Array(numPlayers).fill(playerPermGreen);
-    const playerScorePermYellow = new Array(numPlayers).fill(playerPermYellow);
-    const playerScorePermPurple = new Array(numPlayers).fill(playerPermPurple);
-    const playerScorePermBlack = new Array(numPlayers).fill(playerPermBlack);
-
-
-
-
-
+    const playerScoreCash = new Array(resetValues.numberOfPlayers).fill(playerStartCash);
+    const playerScoreProduction = new Array(resetValues.numberOfPlayers).fill(playerStartProduction);
+    const playerScoreContractValue = new Array(resetValues.numberOfPlayers).fill(playerStartValue);
+    const playerScoreContractCost = new Array(resetValues.numberOfPlayers).fill(playerStartCost);
+    const playerScoreContractDebtors = new Array(resetValues.numberOfPlayers).fill(playerStartDebtors);
+    const playerScoreTempRed = new Array(resetValues.numberOfPlayers).fill(playerTempRed);
+    const playerScoreTempGreen = new Array(resetValues.numberOfPlayers).fill(playerTempGreen);
+    const playerScoreTempYellow = new Array(resetValues.numberOfPlayers).fill(playerTempYellow);
+    const playerScoreTempPurple = new Array(resetValues.numberOfPlayers).fill(playerTempPurple);
+    const playerScoreTempBlack = new Array(resetValues.numberOfPlayers).fill(playerTempBlack);
+    const playerScorePermRed = new Array(resetValues.numberOfPlayers).fill(playerPermRed);
+    const playerScorePermGreen = new Array(resetValues.numberOfPlayers).fill(playerPermGreen);
+    const playerScorePermYellow = new Array(resetValues.numberOfPlayers).fill(playerPermYellow);
+    const playerScorePermPurple = new Array(resetValues.numberOfPlayers).fill(playerPermPurple);
+    const playerScorePermBlack = new Array(resetValues.numberOfPlayers).fill(playerPermBlack);
 
             
             const roomDetails = {
