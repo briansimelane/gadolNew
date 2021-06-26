@@ -77,6 +77,7 @@ export default {
     const { user } = getUser() 
     const roomsData = ref(null)
     const router = useRouter()
+    const userID = ref()
 
 // Keep track of User's authentication status (listen for auth status changes)
 projectAuth.onAuthStateChanged(user => {
@@ -96,7 +97,7 @@ projectAuth.onAuthStateChanged(user => {
           // update values
           roomsData.value = results
           console.log(results)
-        
+          userID.value = user.uid
 
         
 
@@ -129,7 +130,18 @@ const deleteRoom = async (room) => {
 
 const joinRoom = (roomToJoin) => {
   router.push ({ name: 'GameRoom', params: {id: roomToJoin}})
-  console.log('Room joined');
+  console.log('Room joined')
+  const joinedPlayersArray = ref()
+
+
+/* if(roomsData.value.joinedPlayers.includes(userID.value)) {
+    console.log('Room includes Player')
+  } else {
+    console.log('Room did not include Player')
+  } */
+
+  console.log('Player joined: ', userID.value)
+  
   M.toast({html: 'Room has been joined'})
 }
 

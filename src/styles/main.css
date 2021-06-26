@@ -41,10 +41,19 @@
   color: blue;
 }
 
+.boldTempResources {
+  font-weight: bold;
+  font-size: 1.5rem;
+}
+
+td {
+  padding: 0px;
+  border: none;
+}
 /* Layout */
 .gameArea {
   display: grid;
-  grid-template-columns: 1fr 0.8fr 1fr 1.2fr;
+  grid-template-columns: 1fr 1fr 1.2fr 1fr;
   grid-template-rows: 30px auto;
   grid-template-areas:
     "notifications notifications notifications rightside"
@@ -64,15 +73,14 @@
   padding-left: 5px;
   padding-top: 5px;
   margin-top: 0px;
-  border-right: 1px dotted #707070;
   grid-area: mainarea;
   background: #ffffff; /*rgb(19, 46, 31);*/
   display: grid;
-  grid-template-columns: 1fr 1fr 1fr 1fr;
+  grid-template-columns: 1fr 1.2fr 0.8fr 1fr;
   grid-template-rows: auto auto auto auto auto;
   grid-template-areas:
-    "onTableContracts onTableContracts onTableContracts tempResources"
-    "onTableRow1 onTableRow1 onTableRow1 onTableRow1"
+    "onTableContracts onTableContracts tempResources tempResources"
+    "onTableRow1 onTableRow1 tempActionsTestArea tempActionsTestArea"
     "onTableRow2 onTableRow2 onTableRow2 onTableRow2"
     "onTableRow3 onTableRow3 onTableRow3 onTableRow3"
     "upComingCards upComingCards upComingCards upComingCards";
@@ -87,6 +95,16 @@
   font-weight: 400;
   font-size: 10px;
   text-transform: uppercase;
+}
+
+.tempActionsTestArea {
+  grid-area: tempActionsTestArea;
+  display: flex;
+  flex-wrap: wrap;
+  padding: 5px;
+  border: 1px solid grey;
+  border-radius: 10px;
+  margin: 5px;
 }
 
 .onTableContracts {
@@ -122,17 +140,25 @@
   display: flex;
   flex-wrap: wrap;
   padding-bottom: 20px;
+  padding-top: 10px;
+  border-top: 1px dotted grey;
 }
 
 .tempResources {
   grid-area: tempResources;
   margin-right: 10px;
+  margin-left: 10px;
+}
+
+.tempResources > h6 {
+  margin-top: 0px;
+  padding: 5px;
 }
 
 .gameAreaRight {
   margin: 0px;
   padding: 0px;
-  background-color: rgb(243, 243, 224);
+  /*background-color: rgb(243, 243, 224); */
   grid-area: rightside;
   display: grid;
   grid-template-columns: 1fr;
@@ -144,7 +170,7 @@
 }
 
 .gameScoringHeader {
-  background-color: #f7f7f7;
+  /* background-color: #f7f7f7; */
   padding: 5px;
   text-align: center;
   font-weight: 600;
@@ -233,6 +259,11 @@
   width: 100%;
   height: 100%;
   cursor: pointer;
+}
+
+.greyOut {
+  background-color: rgba(50, 50, 50, 0.5);
+  z-index: 99;
 }
 
 .productsValue {
@@ -656,4 +687,95 @@
 
 .resource_card .Colour {
   display: none;
+}
+
+/* temp resource modal styling */
+.tempResourceActionBtn {
+  margin: 5px;
+}
+
+/* Icons for cards and tokens */
+.tempResourceIcon {
+  height: 44px;
+  width: 44px;
+  margin-top: 5px;
+}
+
+.playerIconsSizing {
+  height: 24px;
+  width: 24px;
+  margin: 5px;
+}
+
+/* Player scoring area styiling */
+.PlayerScoreArea {
+  background-color: rgba(0, 0, 0, 0.3);
+  margin: 5px 10px 0px 5px;
+  padding-bottom: 0px;
+  border-radius: 5px;
+  border: 1px dotted #9e9e9e;
+  height: 163px;
+}
+
+.PlayerScoreArea p {
+  margin: 0;
+}
+
+.scorePlayerHeader {
+  border-top-left-radius: 5px;
+  border-top-right-radius: 5px;
+  padding-left: 5px;
+  padding-bottom: 2px;
+}
+.scorePlayerHeader i {
+  margin-top: 2px;
+}
+.scorePlayerHeader .playerName {
+  font-size: 21px;
+  line-height: 24px;
+}
+
+.material-icons {
+  display: inline-flex;
+  vertical-align: top;
+}
+
+.scorePlayerTempResources {
+  background-color: #fafafa;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+.scorePlayerTempResources p {
+  display: inline-flex;
+  vertical-align: top;
+  font-weight: bold;
+  padding-top: 5px;
+  font-size: 1.2rem;
+}
+
+.scorePlayerPermResources {
+  background-color: #fafafa;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+.scorePlayerPermResources p {
+  display: inline-flex;
+  vertical-align: top;
+  font-weight: bold;
+  padding-top: 5px;
+  font-size: 1.2rem;
+}
+
+.scoreFinancials {
+  background-color: #eceff1;
+  border-bottom-left-radius: 5px;
+  border-bottom-right-radius: 5px;
+}
+
+.scoreFinancialsNumbers {
+  font-weight: bold;
+  padding-top: 5px;
+  font-size: 1.2rem;
 }

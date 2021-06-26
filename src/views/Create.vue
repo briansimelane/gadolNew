@@ -5,6 +5,7 @@
 
       <div class="container">
         <div class="center">
+          <br>
           <h5 class="remove-margin"><i class="material-icons space-right">build</i>Create a game room</h5>
         </div>
         
@@ -257,6 +258,78 @@ const shuffle = (array) => {
     const shuffledRedCards = shuffle(resetRedCards);
     const shuffledPurpleCards = shuffle(resetPurpleCards);
     const shuffledBlackCards = shuffle(resetBlackCards);
+    const player1Scores = {
+      "greenTemp": playerTempGreen,
+      "redTemp": playerTempRed,
+      "yellowTemp": playerTempYellow,
+      "purpleTemp": playerTempPurple,
+      "blackTemp": playerTempBlack,
+      "greenPerm": playerPermGreen,
+      "redPerm": playerPermRed,
+      "yellowPerm": playerPermYellow,
+      "purplePerm": playerPermPurple,
+      "blackPerm": playerPermBlack,
+      "cash": playerStartCash,
+      "production": playerStartProduction,
+      "value": playerStartValue,
+      "costs": playerStartCost,
+      "debtors": playerStartDebtors
+    }
+
+    const player2Scores = {
+      "greenTemp": playerTempGreen,
+      "redTemp": playerTempRed,
+      "yellowTemp": playerTempYellow,
+      "purpleTemp": playerTempPurple,
+      "blackTemp": playerTempBlack,
+      "greenPerm": playerPermGreen,
+      "redPerm": playerPermRed,
+      "yellowPerm": playerPermYellow,
+      "purplePerm": playerPermPurple,
+      "blackPerm": playerPermBlack,
+      "cash": playerStartCash,
+      "production": playerStartProduction,
+      "value": playerStartValue,
+      "costs": playerStartCost,
+      "debtors": playerStartDebtors
+    }
+
+    const player3Scores = {
+      "greenTemp": playerTempGreen,
+      "redTemp": playerTempRed,
+      "yellowTemp": playerTempYellow,
+      "purpleTemp": playerTempPurple,
+      "blackTemp": playerTempBlack,
+      "greenPerm": playerPermGreen,
+      "redPerm": playerPermRed,
+      "yellowPerm": playerPermYellow,
+      "purplePerm": playerPermPurple,
+      "blackPerm": playerPermBlack,
+      "cash": playerStartCash,
+      "production": playerStartProduction,
+      "value": playerStartValue,
+      "costs": playerStartCost,
+      "debtors": playerStartDebtors
+    }
+
+    const player4Scores = {
+      "greenTemp": playerTempGreen,
+      "redTemp": playerTempRed,
+      "yellowTemp": playerTempYellow,
+      "purpleTemp": playerTempPurple,
+      "blackTemp": playerTempBlack,
+      "greenPerm": playerPermGreen,
+      "redPerm": playerPermRed,
+      "yellowPerm": playerPermYellow,
+      "purplePerm": playerPermPurple,
+      "blackPerm": playerPermBlack,
+      "cash": playerStartCash,
+      "production": playerStartProduction,
+      "value": playerStartValue,
+      "costs": playerStartCost,
+      "debtors": playerStartDebtors
+    }
+
     const playerScoreCash = new Array(resetValues.numberOfPlayers).fill(playerStartCash);
     const playerScoreProduction = new Array(resetValues.numberOfPlayers).fill(playerStartProduction);
     const playerScoreContractValue = new Array(resetValues.numberOfPlayers).fill(playerStartValue);
@@ -272,7 +345,9 @@ const shuffle = (array) => {
     const playerScorePermYellow = new Array(resetValues.numberOfPlayers).fill(playerPermYellow);
     const playerScorePermPurple = new Array(resetValues.numberOfPlayers).fill(playerPermPurple);
     const playerScorePermBlack = new Array(resetValues.numberOfPlayers).fill(playerPermBlack);
-
+    const currentPlayer = 0;
+    const playerOrder = [];
+    const joinedPlayers = [];
             
             const roomDetails = {
               creator: user.value.uid,
@@ -285,6 +360,9 @@ const shuffle = (array) => {
 
 // variables haven't been linked
             gstate: gameState,
+            currentPlayer: currentPlayer,
+            playerOder: playerOrder,
+            joinedPlayers: joinedPlayers,
             z00contractCards: shuffledContractCards,
             z01greenCards: shuffledGreenCards,
             z02yellowCards: shuffledYellowCards,
@@ -297,21 +375,10 @@ const shuffle = (array) => {
             z09marketYellowTokens: marketTempYellow,
             z10marketPurpleTokens: marketTempPurple,
             z11marketBlackTokens: marketTempBlack,
-            z12playerCash: playerScoreCash,
-            z13playerProduction: playerScoreProduction,
-            z14playerContractValue: playerScoreContractValue,
-            z15playerContractCost: playerScoreContractCost,
-            z16playerContractDebtors: playerScoreContractDebtors,
-            z17playerTempRed: playerScoreTempRed,
-            z18playerTempGreen: playerScoreTempGreen,
-            z19playerTempYellow: playerScoreTempYellow,
-            z20playerTempPurple: playerScoreTempPurple,
-            z21playerTempBlack: playerScoreTempBlack,
-            z22playerPermRed: playerScorePermRed,
-            z23playerPermGreen: playerScorePermGreen,
-            z24playerPermYellow: playerScorePermYellow,
-            z25playerPermPurple: playerScorePermPurple,
-            z26playerPermBlack: playerScorePermBlack
+            z12Player1Scores: player1Scores,
+            z13Player2Scores: player2Scores,
+            z14Player3Scores: player3Scores,
+            z15Player4Scores: player4Scores
             }
 
             await addDoc(roomDetails)
