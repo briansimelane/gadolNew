@@ -462,7 +462,7 @@
   </div>
 
 
-<!-- Modal: Resources -->
+<!-- Modal: Permanent Resources -->
   <div id="modalResource" class="modal">
     <div class="modal-content">
       <h4 class="center">Permanent Resource Card</h4>
@@ -473,15 +473,16 @@
                 <div class="card_details_modal">
                     <div v-for="(value, index) in resourceCardID" :key="index" :class="index">
                     {{ value }}
-                    </div>
+                   </div>
+                    
                 </div>   
             </div>
 
             <hr>
             <div v-show="resourceAfford" class="center">
-              <button class="btn waves-effect waves-light green darken-3">Buy the card
-                <i class="material-icons right">send</i>
-              </button>
+                      <button class="btn waves-effect waves-light green darken-3" @click="BuyPermResource()">Buy the card
+                       <i class="material-icons right">send</i>
+                       </button>
             </div>
             <div v-show="!resourceAfford" class="center">
               <button class="btn waves-effect waves-light red darken-3 disabled">You can't afford
@@ -536,19 +537,19 @@
                 </tr>
 
                 <tr>
-                  <td class="center"><button class="btn-small waves-effect waves-light tempResourceActionBtn" @click="get2Green()">Get 2</button></td>
-                  <td class="center"><button class="btn-small waves-effect waves-light tempResourceActionBtn" @click="get2Red()">Get 2</button></td>
-                  <td class="center"><button class="btn-small waves-effect waves-light tempResourceActionBtn" @click="get2Yellow()">Get 2</button></td>
-                  <td class="center"><button class="btn-small waves-effect waves-light tempResourceActionBtn" @click="get2Purple()">Get 2</button></td>
-                  <td class="center"><button class="btn-small waves-effect waves-light tempResourceActionBtn" @click="get2Black()">Get 2</button></td>
+                  <td class="center"><button class="btn-small waves-effect waves-light tempResourceActionBtn" @click="getTwoTokens('green')">Get 2</button></td>
+                  <td class="center"><button class="btn-small waves-effect waves-light tempResourceActionBtn" @click="getTwoTokens('red')">Get 2</button></td>
+                  <td class="center"><button class="btn-small waves-effect waves-light tempResourceActionBtn" @click="getTwoTokens('yellow')">Get 2</button></td>
+                  <td class="center"><button class="btn-small waves-effect waves-light tempResourceActionBtn" @click="getTwoTokens('purple')">Get 2</button></td>
+                  <td class="center"><button class="btn-small waves-effect waves-light tempResourceActionBtn" @click="getTwoTokens('black')">Get 2</button></td>
                 </tr>
 
                 <tr>
-                  <td class="center"><button class="btn-small waves-effect waves-light cyan darken-2 tempResourceActionBtn" @click="get1Green()">Get 1</button></td>
-                  <td class="center"><button class="btn-small waves-effect waves-light cyan darken-2 tempResourceActionBtn" @click="get1Red()">Get 1</button></td>
-                  <td class="center"><button class="btn-small waves-effect waves-light cyan darken-2 tempResourceActionBtn" @click="get1Yellow()">Get 1</button></td>
-                  <td class="center"><button class="btn-small waves-effect waves-light cyan darken-2 tempResourceActionBtn" @click="get1Purple()">Get 1</button></td>
-                  <td class="center"><button class="btn-small waves-effect waves-light cyan darken-2 tempResourceActionBtn" @click="get1Black()">Get 1</button></td>
+                  <td class="center"><button class="btn-small waves-effect waves-light cyan darken-2 tempResourceActionBtn" @click="getOneToken('green')">Get 1</button></td>
+                  <td class="center"><button class="btn-small waves-effect waves-light cyan darken-2 tempResourceActionBtn" @click="getOneToken('red')">Get 1</button></td>
+                  <td class="center"><button class="btn-small waves-effect waves-light cyan darken-2 tempResourceActionBtn" @click="getOneToken('yellow')">Get 1</button></td>
+                  <td class="center"><button class="btn-small waves-effect waves-light cyan darken-2 tempResourceActionBtn" @click="getOneToken('purple')">Get 1</button></td>
+                  <td class="center"><button class="btn-small waves-effect waves-light cyan darken-2 tempResourceActionBtn" @click="getOneToken('black')">Get 1</button></td>
                 </tr>
                 
                 <tr>
@@ -609,6 +610,7 @@ import { projectAuth } from '../firebase/config'
 import { projectFirestore } from '../firebase/config'
 import NavbarInRoom from '../components/NavbarInRoom'
 import { computed, onMounted } from 'vue'
+import M from 'materialize-css'
 
 
 export default {
@@ -621,19 +623,62 @@ export default {
        
     })
 
+var ResourcesModal = document.querySelector("#modalTempResources")
+//var instance = M.Modal.getInstance(ResourcesModal);
+
 
 
     const { user } = getUser() 
     let gameData = ref(null)
+
+    // Connection to the game       
+const dbConnectionGame = projectFirestore.collection('rooms').doc(props.id)
     
     // variable to hold the contracts value to check
     const contracts = "contracts"
 
     
+  // Variables to hold all player variables and labels for the whole game
+// generic to use in code and adjust with switch
+/* labels */
+const LabelplayerBlackPerm = ref()
+const LabelplayerBlackTemp = ref()
+const LabelplayerGreenPerm = ref()
+const LabelplayerGreenTemp = ref()
+const LabelplayerYellowPerm = ref()
+const LabelplayerYellowTemp = ref()
+const LabelplayerPurplePerm = ref()
+const LabelplayerPurpleTemp = ref()
+const LabelplayerRedPerm = ref()
+const LabelplayerRedTemp = ref()
+const LabelplayerCash = ref()
+const LabelplayerCosts = ref()
+const LabelplayerDebtors = ref()
+const LabelplayerProduction = ref()
+const LabelplayerValue = ref()
+
+/* values */
+const ValueplayerBlackPerm = ref()
+const ValueplayerBlackTemp = ref()
+const ValueplayerGreenPerm = ref()
+const ValueplayerGreenTemp = ref()
+const ValueplayerYellowPerm = ref()
+const ValueplayerYellowTemp = ref()
+const ValueplayerPurplePerm = ref()
+const ValueplayerPurpleTemp = ref()
+const ValueplayerRedPerm = ref()
+const ValueplayerRedTemp = ref()
+const ValueplayerCash = ref()
+const ValueplayerCosts = ref()
+const ValueplayerDebtors = ref()
+const ValueplayerProduction = ref()
+const ValueplayerValue = ref()
+
+
   
-      
-      
-const dbConnectionGame = projectFirestore.collection('rooms').doc(props.id)
+  
+
+
 
 /* Trying using the code from the player side */
 // Keep track of User's authentication status (listen for auth status changes)
@@ -655,33 +700,167 @@ projectAuth.onAuthStateChanged(user => {
           gameData.value = results
           console.log("Game data: ", results)
           console.log("Rules: ", results.rules)
-          
- 
-        switch (gameData.value.currentPlayer) {
+        
+        // set current player  
+        currentPlayer.value = gameData.value.currentPlayer
+
+        switch (currentPlayer.value) {
             case 0:
+              // DOM ELEMENTS
               Player1DOM.value = true
               Player2DOM.value = false
               Player3DOM.value = false
               Player4DOM.value = false
+              // BACKEND ELEMENTS
+                /* Labels */
+                LabelplayerBlackPerm.value = "z12Player1Scores.blackPerm"
+                LabelplayerBlackTemp.value = "z12Player1Scores.blackTemp"
+                LabelplayerGreenPerm.value = "z12Player1Scores.greenPerm"
+                LabelplayerGreenTemp.value = "z12Player1Scores.greenTemp"
+                LabelplayerYellowPerm.value = "z12Player1Scores.yellowPerm"
+                LabelplayerYellowTemp.value = "z12Player1Scores.yellowTemp"
+                LabelplayerPurplePerm.value = "z12Player1Scores.purplePerm"
+                LabelplayerPurpleTemp.value = "z12Player1Scores.purpleTemp"
+                LabelplayerRedPerm.value = "z12Player1Scores.redPerm"
+                LabelplayerRedTemp.value = "z12Player1Scores.redTemp"
+                LabelplayerCash.value = "z12Player1Scores.cash"
+                LabelplayerCosts.value = "z12Player1Scores.costs"
+                LabelplayerDebtors.value = "z12Player1Scores.debtors"
+                LabelplayerProduction.value = "z12Player1Scores.production"
+                LabelplayerValue.value = "z12Player1Scores.value"
+                /* Values */
+                ValueplayerBlackPerm.value = gameData.value.z12Player1Scores.blackPerm
+                ValueplayerBlackTemp.value = gameData.value.z12Player1Scores.blackTemp
+                ValueplayerGreenPerm.value = gameData.value.z12Player1Scores.greenPerm
+                ValueplayerGreenTemp.value = gameData.value.z12Player1Scores.greenTemp
+                ValueplayerYellowPerm.value = gameData.value.z12Player1Scores.yellowPerm
+                ValueplayerYellowTemp.value = gameData.value.z12Player1Scores.yellowTemp
+                ValueplayerPurplePerm.value = gameData.value.z12Player1Scores.purplePerm
+                ValueplayerPurpleTemp.value = gameData.value.z12Player1Scores.purpleTemp
+                ValueplayerRedPerm.value = gameData.value.z12Player1Scores.redPerm
+                ValueplayerRedTemp.value = gameData.value.z12Player1Scores.redTemp
+                ValueplayerCash.value = gameData.value.z12Player1Scores.cash
+                ValueplayerCosts.value = gameData.value.z12Player1Scores.costs
+                ValueplayerDebtors.value = gameData.value.z12Player1Scores.debtors
+                ValueplayerProduction.value = gameData.value.z12Player1Scores.production
+                ValueplayerValue.value = gameData.value.z12Player1Scores.value
               break
             case 1:
               Player1DOM.value = false
               Player2DOM.value = true
               Player3DOM.value = false
               Player4DOM.value = false
+              // BACKEND ELEMENTS
+                /* Labels */
+                LabelplayerBlackPerm.value = "z13Player2Scores.blackPerm"
+                LabelplayerBlackTemp.value = "z13Player2Scores.blackTemp"
+                LabelplayerGreenPerm.value = "z13Player2Scores.greenPerm"
+                LabelplayerGreenTemp.value = "z13Player2Scores.greenTemp"
+                LabelplayerYellowPerm.value = "z13Player2Scores.yellowPerm"
+                LabelplayerYellowTemp.value = "z13Player2Scores.yellowTemp"
+                LabelplayerPurplePerm.value = "z13Player2Scores.purplePerm"
+                LabelplayerPurpleTemp.value = "z13Player2Scores.purpleTemp"
+                LabelplayerRedPerm.value = "z13Player2Scores.redPerm"
+                LabelplayerRedTemp.value = "z13Player2Scores.redTemp"
+                LabelplayerCash.value = "z13Player2Scores.cash"
+                LabelplayerCosts.value = "z13Player2Scores.costs"
+                LabelplayerDebtors.value = "z13Player2Scores.debtors"
+                LabelplayerProduction.value = "z13Player2Scores.production"
+                LabelplayerValue.value = "z13Player2Scores.value"
+                /* Values */
+                ValueplayerBlackPerm.value = gameData.value.z13Player2Scores.blackPerm
+                ValueplayerBlackTemp.value = gameData.value.z13Player2Scores.blackTemp
+                ValueplayerGreenPerm.value = gameData.value.z13Player2Scores.greenPerm
+                ValueplayerGreenTemp.value = gameData.value.z13Player2Scores.greenTemp
+                ValueplayerYellowPerm.value = gameData.value.z13Player2Scores.yellowPerm
+                ValueplayerYellowTemp.value = gameData.value.z13Player2Scores.yellowTemp
+                ValueplayerPurplePerm.value = gameData.value.z13Player2Scores.purplePerm
+                ValueplayerPurpleTemp.value = gameData.value.z13Player2Scores.purpleTemp
+                ValueplayerRedPerm.value = gameData.value.z13Player2Scores.redPerm
+                ValueplayerRedTemp.value = gameData.value.z13Player2Scores.redTemp
+                ValueplayerCash.value = gameData.value.z13Player2Scores.cash
+                ValueplayerCosts.value = gameData.value.z13Player2Scores.costs
+                ValueplayerDebtors.value = gameData.value.z13Player2Scores.debtors
+                ValueplayerProduction.value = gameData.value.z13Player2Scores.production
+                ValueplayerValue.value = gameData.value.z13Player2Scores.value
               break
             case 2:
               Player1DOM.value = false
               Player2DOM.value = false
               Player3DOM.value = true
               Player4DOM.value = false
+              // BACKEND ELEMENTS
+                /* Labels */
+                LabelplayerBlackPerm.value = "z14Player3Scores.blackPerm"
+                LabelplayerBlackTemp.value = "z14Player3Scores.blackTemp"
+                LabelplayerGreenPerm.value = "z14Player3Scores.greenPerm"
+                LabelplayerGreenTemp.value = "z14Player3Scores.greenTemp"
+                LabelplayerYellowPerm.value = "z14Player3Scores.yellowPerm"
+                LabelplayerYellowTemp.value = "z14Player3Scores.yellowTemp"
+                LabelplayerPurplePerm.value = "z14Player3Scores.purplePerm"
+                LabelplayerPurpleTemp.value = "z14Player3Scores.purpleTemp"
+                LabelplayerRedPerm.value = "z14Player3Scores.redPerm"
+                LabelplayerRedTemp.value = "z14Player3Scores.redTemp"
+                LabelplayerCash.value = "z14Player3Scores.cash"
+                LabelplayerCosts.value = "z14Player3Scores.costs"
+                LabelplayerDebtors.value = "z14Player3Scores.debtors"
+                LabelplayerProduction.value = "z14Player3Scores.production"
+                LabelplayerValue.value = "z14Player3Scores.value"
+                /* Values */
+                ValueplayerBlackPerm.value = gameData.value.z14Player3Scores.blackPerm
+                ValueplayerBlackTemp.value = gameData.value.z14Player3Scores.blackTemp
+                ValueplayerGreenPerm.value = gameData.value.z14Player3Scores.greenPerm
+                ValueplayerGreenTemp.value = gameData.value.z14Player3Scores.greenTemp
+                ValueplayerYellowPerm.value = gameData.value.z14Player3Scores.yellowPerm
+                ValueplayerYellowTemp.value = gameData.value.z14Player3Scores.yellowTemp
+                ValueplayerPurplePerm.value = gameData.value.z14Player3Scores.purplePerm
+                ValueplayerPurpleTemp.value = gameData.value.z14Player3Scores.purpleTemp
+                ValueplayerRedPerm.value = gameData.value.z14Player3Scores.redPerm
+                ValueplayerRedTemp.value = gameData.value.z14Player3Scores.redTemp
+                ValueplayerCash.value = gameData.value.z14Player3Scores.cash
+                ValueplayerCosts.value = gameData.value.z14Player3Scores.costs
+                ValueplayerDebtors.value = gameData.value.z14Player3Scores.debtors
+                ValueplayerProduction.value = gameData.value.z14Player3Scores.production
+                ValueplayerValue.value = gameData.value.z14Player3Scores.value
               break
             case 3:
               Player1DOM.value = false
               Player2DOM.value = false
               Player3DOM.value = false
               Player4DOM.value = true
-              
+              // BACKEND ELEMENTS
+                /* Labels */
+                LabelplayerBlackPerm.value = "z15Player4Scores.blackPerm"
+                LabelplayerBlackTemp.value = "z15Player4Scores.blackTemp"
+                LabelplayerGreenPerm.value = "z15Player4Scores.greenPerm"
+                LabelplayerGreenTemp.value = "z15Player4Scores.greenTemp"
+                LabelplayerYellowPerm.value = "z15Player4Scores.yellowPerm"
+                LabelplayerYellowTemp.value = "z15Player4Scores.yellowTemp"
+                LabelplayerPurplePerm.value = "z15Player4Scores.purplePerm"
+                LabelplayerPurpleTemp.value = "z15Player4Scores.purpleTemp"
+                LabelplayerRedPerm.value = "z15Player4Scores.redPerm"
+                LabelplayerRedTemp.value = "z15Player4Scores.redTemp"
+                LabelplayerCash.value = "z15Player4Scores.cash"
+                LabelplayerCosts.value = "z15Player4Scores.costs"
+                LabelplayerDebtors.value = "z15Player4Scores.debtors"
+                LabelplayerProduction.value = "z15Player4Scores.production"
+                LabelplayerValue.value = "z15Player4Scores.value"
+                /* Values */
+                ValueplayerBlackPerm.value = gameData.value.z15Player4Scores.blackPerm
+                ValueplayerBlackTemp.value = gameData.value.z15Player4Scores.blackTemp
+                ValueplayerGreenPerm.value = gameData.value.z15Player4Scores.greenPerm
+                ValueplayerGreenTemp.value = gameData.value.z15Player4Scores.greenTemp
+                ValueplayerYellowPerm.value = gameData.value.z15Player4Scores.yellowPerm
+                ValueplayerYellowTemp.value = gameData.value.z15Player4Scores.yellowTemp
+                ValueplayerPurplePerm.value = gameData.value.z15Player4Scores.purplePerm
+                ValueplayerPurpleTemp.value = gameData.value.z15Player4Scores.purpleTemp
+                ValueplayerRedPerm.value = gameData.value.z15Player4Scores.redPerm
+                ValueplayerRedTemp.value = gameData.value.z15Player4Scores.redTemp
+                ValueplayerCash.value = gameData.value.z15Player4Scores.cash
+                ValueplayerCosts.value = gameData.value.z15Player4Scores.costs
+                ValueplayerDebtors.value = gameData.value.z15Player4Scores.debtors
+                ValueplayerProduction.value = gameData.value.z15Player4Scores.production
+                ValueplayerValue.value = gameData.value.z15Player4Scores.value
               
           }
          
@@ -704,156 +883,288 @@ const contractCardID = ref()
 const contractAfford = ref()
 const resourceCardID = ref()
 const resourceAfford = ref()
+const lastClickedResourceCard = ref()
+const lastClickedResourceCardsArray = ref()
 const resourceCardBackground = ref()
 const Player1DOM = ref(false)
 const Player2DOM = ref(false)
 const Player3DOM = ref(false)
 const Player4DOM = ref(false)
 
-
-// behind the scenes script for game state
-//const currentPlayer = gameData.value.currentPlayer
-
-const nextPlayer = () => {
-  
-  if(gameData.value.currentPlayer < gameData.value.maxnumberofplayers - 1 ) {
-    dbConnectionGame.update({
-      currentPlayer: gameData.value.currentPlayer + 1
-
-    })
-  } else {
-    dbConnectionGame.update({
-    currentPlayer: 0
-  })
-  }
-  
-  switch (gameData.value.currentPlayer) {
-            case 0:
-              Player1DOM.value = true
-              Player2DOM.value = false
-              Player3DOM.value = false
-              Player4DOM.value = false
-              break
-            case 1:
-              Player1DOM.value = false
-              Player2DOM.value = true
-              Player3DOM.value = false
-              Player4DOM.value = false
-              break
-            case 2:
-              Player1DOM.value = false
-              Player2DOM.value = false
-              Player3DOM.value = true
-              Player4DOM.value = false
-              break
-            case 3:
-              Player1DOM.value = false
-              Player2DOM.value = false
-              Player3DOM.value = false
-              Player4DOM.value = true
-              
-              
-          }
+const currentPlayer = ref()
 
 
-
-console.log('Current player: ', gameData.value.currentPlayer)
-
-}
 /// PLAYER ACTIONS SCRIPTS
 
 /*--- Rules constants used in calculations --*/
-
+const minTokensToTakeTwo = ref(4)
 
 /* ---- Get TWO tokens ---- */
-const get2Green = () => {
-  //If Player 1
-    if(gameData.value.currentPlayer === 0 && gameData.value.z08marketGreenTokens >= 4 && gameData.value.z12Player1Scores.cash >= 2) {
-      dbConnectionGame.update({
-        z08marketGreenTokens:  gameData.value.z08marketGreenTokens - 2,
-        "z12Player1Scores.greenTemp": gameData.value.z12Player1Scores.greenTemp + 2,
-        "z12Player1Scores.cash": gameData.value.z12Player1Scores.cash - 2 
-      })
-      
-      M.toast({html: '2 Green tokens bought by Player 1'})
-    }
-    //If Player 2
-    else if(gameData.value.currentPlayer === 1 && gameData.value.z08marketGreenTokens >= 4 && gameData.value.z13Player2Scores.cash >= 2) {
-      dbConnectionGame.update({
-        z08marketGreenTokens:  gameData.value.z08marketGreenTokens - 2,
-        "z13Player2Scores.greenTemp": gameData.value.z13Player2Scores.greenTemp + 2,
-        "z13Player2Scores.cash": gameData.value.z13Player2Scores.cash - 2      
-      })
-      
-      
-      M.toast({html: '2 Green tokens bought by Player 2'})
-    }
-    //If Player 3
-    else if(gameData.value.currentPlayer === 2 && gameData.value.z08marketGreenTokens >= 4 && gameData.value.z14Player3Scores.cash >= 2) {
-       M.toast({html: '2 Green tokens bought by Player 3'})
-       
-
-      dbConnectionGame.update({
-        z08marketGreenTokens:  gameData.value.z08marketGreenTokens - 2,
-        "z14Player3Scores.greenTemp": gameData.value.z14Player3Scores.greenTemp + 2,
-        "z14Player3Scores.cash": gameData.value.z14Player3Scores.cash - 2      
-      })
-
-      
-    }
-    //If Player 4
-    else if(gameData.value.currentPlayer === 3 && gameData.value.z08marketGreenTokens >= 4 && gameData.value.z15Player4Scores.cash >= 2) {
-      dbConnectionGame.update({
-        z08marketGreenTokens:  gameData.value.z08marketGreenTokens - 2,
-        "z15Player4Scores.greenTemp": gameData.value.z15Player4Scores.greenTemp + 2,
-        "z15Player4Scores.cash": gameData.value.z15Player4Scores.cash - 2      
-      })
-      
-      M.toast({html: '2 Green tokens bought by Player 4'})
-    }
-
-    else {
-      M.toast({html: 'Not enough tokens for this action'})
-     }
-  
-  console.log('Get 2 green triggered - for player ', gameData.value.currentPlayer)
+const getTwoTokens = (colour) => {
+  if (colour === "green" && gameData.value.z08marketGreenTokens >= 4) {
+            if(ValueplayerCash.value >= 2) {
+              dbConnectionGame.update({
+                z08marketGreenTokens:  gameData.value.z08marketGreenTokens - 2,
+                [LabelplayerGreenTemp.value]: ValueplayerGreenTemp.value + 2,
+                [LabelplayerCash.value]: ValueplayerCash.value - 2 
+              })
+              
+              M.toast({html: `2 Green tokens bought by Player ${currentPlayer.value+1}`})
+              nextPlayer()  
+            }
+            else {
+              M.toast({html: 'You don\'t have enough cash'})
+            }
+            console.log('get two '+ colour + " tokens --- script triggered")
+        } 
+  else if (colour === "red" && gameData.value.z07marketRedTokens >= minTokensToTakeTwo.value) {
+            if(ValueplayerCash.value >= 2) {
+              dbConnectionGame.update({
+                z07marketRedTokens:  gameData.value.z07marketRedTokens - 2,
+                [LabelplayerRedTemp.value]: ValueplayerRedTemp.value + 2,
+                [LabelplayerCash.value]: ValueplayerCash.value - 2 
+              })
+              
+              M.toast({html: `2 ${colour} tokens bought by Player ${currentPlayer.value+1}`})
+              nextPlayer()  
+            }
+            else {
+              M.toast({html: 'You don\'t have enough cash'})
+            }
+            console.log('get two '+ colour + " tokens --- script triggered")
+        } 
+  else if (colour === "yellow" && gameData.value.z09marketYellowTokens >= 4) {
+            if(ValueplayerCash.value >= 2) {
+              dbConnectionGame.update({
+                z09marketYellowTokens:  gameData.value.z09marketYellowTokens - 2,
+                [LabelplayerYellowTemp.value]: ValueplayerYellowTemp.value + 2,
+                [LabelplayerCash.value]: ValueplayerCash.value - 2 
+              })
+              
+              M.toast({html: `2 ${colour} tokens bought by Player ${currentPlayer.value+1}`})
+              nextPlayer()  
+            }
+            else {
+              M.toast({html: 'You don\'t have enough cash'})
+            }
+            console.log('get two '+ colour + " tokens --- script triggered")
+        } 
+  else if (colour === "purple" && gameData.value.z10marketPurpleTokens >= 4) {
+            if(ValueplayerCash.value >= 2) {
+              dbConnectionGame.update({
+                z10marketPurpleTokens:  gameData.value.z10marketPurpleTokens - 2,
+                [LabelplayerPurpleTemp.value]: ValueplayerPurpleTemp.value + 2,
+                [LabelplayerCash.value]: ValueplayerCash.value - 2 
+              })
+              
+              M.toast({html: `2 ${colour} tokens bought by Player ${currentPlayer.value+1}`})
+              nextPlayer()  
+            }
+            else {
+              M.toast({html: 'You don\'t have enough cash'})
+            }
+            console.log('get two '+ colour + " tokens --- script triggered")
+        }
+  else if (colour === "black" && gameData.value.z11marketBlackTokens >= 4) {
+            if(ValueplayerCash.value >= 2) {
+              dbConnectionGame.update({
+                z11marketBlackTokens:  gameData.value.z11marketBlackTokens - 2,
+                [LabelplayerBlackTemp.value]: ValueplayerBlackTemp.value + 2,
+                [LabelplayerCash.value]: ValueplayerCash.value - 2 
+              })
+              
+              M.toast({html: `2 ${colour} tokens bought by Player ${currentPlayer.value+1}`})
+              nextPlayer()  
+            }
+            else {
+              M.toast({html: 'You don\'t have enough cash'})
+            }
+            console.log('get two '+ colour + " tokens --- script triggered")
+        }
 }
 
-const get2Red = () => {
-  console.log('Get 2 red triggered - for player ', gameData.value.currentPlayer)
+/* --- Get ONE token --- */
+const getOneToken = (colour) => {
+  if (colour === "green" && gameData.value.z08marketGreenTokens >= 1) {
+            if(ValueplayerCash.value >= 1) {
+              dbConnectionGame.update({
+                z08marketGreenTokens:  gameData.value.z08marketGreenTokens - 1,
+                [LabelplayerGreenTemp.value]: ValueplayerGreenTemp.value + 1,
+                [LabelplayerCash.value]: ValueplayerCash.value - 1 
+              })
+              
+              M.toast({html: `1 ${colour}  token bought by Player ${currentPlayer.value+1}`})
+              nextPlayer()  
+            }
+            else {
+              M.toast({html: 'You don\'t have enough cash'})
+            }
+            console.log('get two '+ colour + " tokens --- script triggered")
+        } 
+  else if (colour === "red" && gameData.value.z07marketRedTokens >= 1) {
+            if(ValueplayerCash.value >= 1) {
+              dbConnectionGame.update({
+                z07marketRedTokens:  gameData.value.z07marketRedTokens - 1,
+                [LabelplayerRedTemp.value]: ValueplayerRedTemp.value + 1,
+                [LabelplayerCash.value]: ValueplayerCash.value - 1 
+              })
+              
+              M.toast({html: `1 ${colour} token bought by Player ${currentPlayer.value+1}`})
+              nextPlayer()  
+            }
+            else {
+              M.toast({html: 'You don\'t have enough cash'})
+            }
+            console.log('get two '+ colour + " tokens --- script triggered")
+        } 
+  else if (colour === "yellow" && gameData.value.z09marketYellowTokens >= 1) {
+            if(ValueplayerCash.value >= 1) {
+              dbConnectionGame.update({
+                z09marketYellowTokens:  gameData.value.z09marketYellowTokens - 1,
+                [LabelplayerYellowTemp.value]: ValueplayerYellowTemp.value + 1,
+                [LabelplayerCash.value]: ValueplayerCash.value - 1 
+              })
+              
+              M.toast({html: `1 ${colour} token bought by Player ${currentPlayer.value+1}`})
+              nextPlayer()  
+            }
+            else {
+              M.toast({html: 'You don\'t have enough cash'})
+            }
+            console.log('get two '+ colour + " tokens --- script triggered")
+        } 
+  else if (colour === "purple" && gameData.value.z10marketPurpleTokens >= 1) {
+            if(ValueplayerCash.value >= 1) {
+              dbConnectionGame.update({
+                z10marketPurpleTokens:  gameData.value.z10marketPurpleTokens - 1,
+                [LabelplayerPurpleTemp.value]: ValueplayerPurpleTemp.value + 1,
+                [LabelplayerCash.value]: ValueplayerCash.value - 1 
+              })
+              
+              M.toast({html: `1 ${colour} token bought by Player ${currentPlayer.value+1}`})
+              nextPlayer()  
+            }
+            else {
+              M.toast({html: 'You don\'t have enough cash'})
+            }
+            console.log('get two '+ colour + " tokens --- script triggered")
+        }
+  else if (colour === "black" && gameData.value.z11marketBlackTokens >= 1) {
+            if(ValueplayerCash.value >= 1) {
+              dbConnectionGame.update({
+                z11marketBlackTokens:  gameData.value.z11marketBlackTokens - 1,
+                [LabelplayerBlackTemp.value]: ValueplayerBlackTemp.value + 1,
+                [LabelplayerCash.value]: ValueplayerCash.value - 1 
+              })
+              
+              M.toast({html: `1 ${colour} token bought by Player ${currentPlayer.value+1}`})
+              nextPlayer()  
+            }
+            else {
+              M.toast({html: 'You don\'t have enough cash'})
+            }
+            console.log('get two '+ colour + " tokens --- script triggered")
+        }
 }
 
-const get2Yellow = () => {
-  console.log('Get 2 yellow triggered - for player ', gameData.value.currentPlayer)
-}
+/* --- Buy Permanent Resource -- */
+const BuyPermResource = () => {
+  // Get last clicked card Index from the Array
+  const index = lastClickedResourceCardsArray.value.findIndex(function(cards, index) {
+    return cards.Ref == lastClickedResourceCard.value.Ref 
+  })
 
-const get2Purple = () => {
-  console.log('Get 2 purple triggered - for player ', gameData.value.currentPlayer)
-}
+  // Can the player afford this card
+  if(
+    lastClickedResourceCard.value.CostGreen <= ValueplayerGreenTemp.value + ValueplayerGreenPerm.value &&
+    lastClickedResourceCard.value.CostRed <= ValueplayerRedTemp.value + ValueplayerRedPerm.value &&  
+    lastClickedResourceCard.value.CostYellow <= ValueplayerYellowTemp.value + ValueplayerYellowPerm.value &&  
+    lastClickedResourceCard.value.CostPurple <= ValueplayerPurpleTemp.value + ValueplayerPurplePerm.value &&
+    lastClickedResourceCard.value.CostBlack <= ValueplayerBlackTemp.value + ValueplayerBlackPerm.value
+      ) {
+        // Player has enough resources
 
-const get2Black = () => {
-  console.log('Get 2 black triggered - for player ', gameData.value.currentPlayer)
-}
+        let greenTokensAdjust = Math.max(0, lastClickedResourceCard.value.CostGreen - ValueplayerGreenPerm.value )
+        let redTokensAdjust = Math.max(0, lastClickedResourceCard.value.CostRed - ValueplayerRedPerm.value )
+        let yellowTokensAdjust = Math.max(0, lastClickedResourceCard.value.CostYellow - ValueplayerYellowPerm.value )
+        let purpleTokensAdjust = Math.max(0, lastClickedResourceCard.value.CostPurple - ValueplayerPurplePerm.value )
+        let blackTokensAdjust = Math.max(0, lastClickedResourceCard.value.CostBlack - ValueplayerBlackPerm.value )
 
-/* ---- Get ONE tokens ---- */
-const get1Green = () => {
-  console.log('Get 1 green triggered - for player ', gameData.value.currentPlayer)
-}
+        let cashAdjustment = greenTokensAdjust + redTokensAdjust + yellowTokensAdjust + purpleTokensAdjust + blackTokensAdjust
 
-const get1Red = () => {
-  console.log('Get 1 red triggered - for player ', gameData.value.currentPlayer)
-}
+        let permCardColour = lastClickedResourceCard.value.Colour
+        let cardProduction = lastClickedResourceCard.value.Production
+        const CardLabel = ref()
+        const CardValue = ref()
+        
 
-const get1Yellow = () => {
-  console.log('Get 1 yellow triggered - for player ', gameData.value.currentPlayer)
-}
+        switch (permCardColour) {
+          case 'Green':
+            CardLabel.value = LabelplayerGreenPerm.value
+            CardValue.value = ValueplayerGreenPerm.value
+            break
+          case 'Red':
+            CardLabel.value = LabelplayerRedPerm.value
+            CardValue.value = ValueplayerRedPerm.value
+            break
+          case 'Yellow':
+            CardLabel.value = LabelplayerYellowPerm.value
+            CardValue.value = ValueplayerYellowPerm.value
+            break
+          case 'Purple':
+            CardLabel.value = LabelplayerPurplePerm.value
+            CardValue.value = ValueplayerPurplePerm.value
+            break
+          case 'Black':
+            CardLabel.value = LabelplayerBlackPerm.value
+            CardValue.value = ValueplayerBlackPerm.value
+            
+        }
 
-const get1Purple = () => {
-  console.log('Get 1 purple triggered - for player ', gameData.value.currentPlayer)
-}
+         /* Update purchagse in Firebase */
+        dbConnectionGame.update({
+          // Put tokens back into the market
+                z08marketGreenTokens: gameData.value.z08marketGreenTokens + greenTokensAdjust,
+                z07marketRedTokens:  gameData.value.z07marketRedTokens + redTokensAdjust,
+                z09marketYellowTokens:  gameData.value.z09marketYellowTokens + yellowTokensAdjust,
+                z10marketPurpleTokens:  gameData.value.z10marketPurpleTokens + purpleTokensAdjust,
+                z11marketBlackTokens:  gameData.value.z11marketBlackTokens + blackTokensAdjust,
+        // Update player tokens
+                [LabelplayerGreenTemp.value]: ValueplayerGreenTemp.value - greenTokensAdjust,
+                [LabelplayerRedTemp.value]: ValueplayerRedTemp.value - redTokensAdjust,
+                [LabelplayerYellowTemp.value]: ValueplayerYellowTemp.value - yellowTokensAdjust,
+                [LabelplayerPurpleTemp.value]: ValueplayerPurpleTemp.value - purpleTokensAdjust,
+                [LabelplayerBlackTemp.value]: ValueplayerBlackTemp.value - blackTokensAdjust,
+        // Update player cash
+                [LabelplayerCash.value]: ValueplayerCash.value + cashAdjustment,
+        // Update permanent resources elements
+                [CardLabel.value]: CardValue.value + 1,
+                [LabelplayerProduction.value]: ValueplayerProduction.value + cardProduction
 
-const get1Black = () => {
-  console.log('Get 1 black triggered - for player ', gameData.value.currentPlayer)
+        // Delete card from array  
+                //[CardLabel.value.index]: projectFirestore.FieldValue.delete()
+              })
+        
+      // Work around to delete a card
+      const cardsArray = Array(lastClickedResourceCardsArray)
+      console.log('Cards array :', cardsArray)
+
+
+        M.toast({html: `You can afford this card`})
+        console.log('Will deduct ', greenTokensAdjust ,' from Green tokens' )
+        console.log('Will deduct ', redTokensAdjust ,' from Red tokens' )
+        console.log('Will deduct ', yellowTokensAdjust ,' from Yellow tokens' )
+        console.log('Will deduct ', purpleTokensAdjust ,' from Purple tokens' )
+        console.log('Will deduct ', blackTokensAdjust ,' from Black tokens' )
+        
+      } 
+      else {
+        //Player can't afford the card
+          M.toast({html: `You do not have enough resources`})
+        }
+
+  console.log('Index of clicked card: ', index)
+  console.log("Indexed object chosen: ", lastClickedResourceCardsArray.value[index].Ref)
 }
 
 
@@ -868,36 +1179,219 @@ const get1Black = () => {
       const handleResourceCard = (id) => {
         resourceCardID.value = id
         resourceAfford.value = true
+        lastClickedResourceCard.value = resourceCardID.value
         
-
         // find which image must
         switch (resourceCardID.value.Colour) {
             case "Red":
               resourceCardBackground.value = "redResource"
+              lastClickedResourceCardsArray.value = gameData.value.z03redCards
               break
             case "Green":
               resourceCardBackground.value = "greenResource"
+              lastClickedResourceCardsArray.value = gameData.value.z01greenCards
               break
             case "Purple":
               resourceCardBackground.value = "purpleResource"
+              lastClickedResourceCardsArray.value = gameData.value.z04purpleCards
               break
             case "Yellow":
               resourceCardBackground.value = "yellowResource"
+              lastClickedResourceCardsArray.value = gameData.value.z02yellowCards
               break
             case "Black":
               resourceCardBackground.value = "blackResource"
+              lastClickedResourceCardsArray.value = gameData.value.z05blackCards
               
           }
 
-        console.log('Resource card clicked', resourceCardID.value.Ref )    
+        console.log('Resource card clicked', resourceCardID.value.Ref )   
+        
       }
+
+
+// Testing scripts
+function nextPlayer() {
+  // Next player advances
+  if(currentPlayer.value < gameData.value.maxnumberofplayers - 1 ) {
+    dbConnectionGame.update({
+      currentPlayer: currentPlayer.value + 1
+    })
+  } else {
+    dbConnectionGame.update({
+    currentPlayer: 0
+  })
+  }
+  // Updated DOM variables to show which player is action in the DOM
+   switch (currentPlayer.value) {
+            case 0:
+              // DOM ELEMENTS
+              Player1DOM.value = true
+              Player2DOM.value = false
+              Player3DOM.value = false
+              Player4DOM.value = false
+              // BACKEND ELEMENTS
+                /* Labels */
+                LabelplayerBlackPerm.value = "z12Player1Scores.blackPerm"
+                LabelplayerBlackTemp.value = "z12Player1Scores.blackTemp"
+                LabelplayerGreenPerm.value = "z12Player1Scores.greenPerm"
+                LabelplayerGreenTemp.value = "z12Player1Scores.greenTemp"
+                LabelplayerYellowPerm.value = "z12Player1Scores.yellowPerm"
+                LabelplayerYellowTemp.value = "z12Player1Scores.yellowTemp"
+                LabelplayerPurplePerm.value = "z12Player1Scores.purplePerm"
+                LabelplayerPurpleTemp.value = "z12Player1Scores.purpleTemp"
+                LabelplayerRedPerm.value = "z12Player1Scores.redPerm"
+                LabelplayerRedTemp.value = "z12Player1Scores.redTemp"
+                LabelplayerCash.value = "z12Player1Scores.cash"
+                LabelplayerCosts.value = "z12Player1Scores.costs"
+                LabelplayerDebtors.value = "z12Player1Scores.debtors"
+                LabelplayerProduction.value = "z12Player1Scores.production"
+                LabelplayerValue.value = "z12Player1Scores.value"
+                /* Values */
+                ValueplayerBlackPerm.value = gameData.value.z12Player1Scores.blackPerm
+                ValueplayerBlackTemp.value = gameData.value.z12Player1Scores.blackTemp
+                ValueplayerGreenPerm.value = gameData.value.z12Player1Scores.greenPerm
+                ValueplayerGreenTemp.value = gameData.value.z12Player1Scores.greenTemp
+                ValueplayerYellowPerm.value = gameData.value.z12Player1Scores.yellowPerm
+                ValueplayerYellowTemp.value = gameData.value.z12Player1Scores.yellowTemp
+                ValueplayerPurplePerm.value = gameData.value.z12Player1Scores.purplePerm
+                ValueplayerPurpleTemp.value = gameData.value.z12Player1Scores.purpleTemp
+                ValueplayerRedPerm.value = gameData.value.z12Player1Scores.redPerm
+                ValueplayerRedTemp.value = gameData.value.z12Player1Scores.redTemp
+                ValueplayerCash.value = gameData.value.z12Player1Scores.cash
+                ValueplayerCosts.value = gameData.value.z12Player1Scores.costs
+                ValueplayerDebtors.value = gameData.value.z12Player1Scores.debtors
+                ValueplayerProduction.value = gameData.value.z12Player1Scores.production
+                ValueplayerValue.value = gameData.value.z12Player1Scores.value
+              break
+            case 1:
+              Player1DOM.value = false
+              Player2DOM.value = true
+              Player3DOM.value = false
+              Player4DOM.value = false
+              // BACKEND ELEMENTS
+                /* Labels */
+                LabelplayerBlackPerm.value = "z13Player2Scores.blackPerm"
+                LabelplayerBlackTemp.value = "z13Player2Scores.blackTemp"
+                LabelplayerGreenPerm.value = "z13Player2Scores.greenPerm"
+                LabelplayerGreenTemp.value = "z13Player2Scores.greenTemp"
+                LabelplayerYellowPerm.value = "z13Player2Scores.yellowPerm"
+                LabelplayerYellowTemp.value = "z13Player2Scores.yellowTemp"
+                LabelplayerPurplePerm.value = "z13Player2Scores.purplePerm"
+                LabelplayerPurpleTemp.value = "z13Player2Scores.purpleTemp"
+                LabelplayerRedPerm.value = "z13Player2Scores.redPerm"
+                LabelplayerRedTemp.value = "z13Player2Scores.redTemp"
+                LabelplayerCash.value = "z13Player2Scores.cash"
+                LabelplayerCosts.value = "z13Player2Scores.costs"
+                LabelplayerDebtors.value = "z13Player2Scores.debtors"
+                LabelplayerProduction.value = "z13Player2Scores.production"
+                LabelplayerValue.value = "z13Player2Scores.value"
+                /* Values */
+                ValueplayerBlackPerm.value = gameData.value.z13Player2Scores.blackPerm
+                ValueplayerBlackTemp.value = gameData.value.z13Player2Scores.blackTemp
+                ValueplayerGreenPerm.value = gameData.value.z13Player2Scores.greenPerm
+                ValueplayerGreenTemp.value = gameData.value.z13Player2Scores.greenTemp
+                ValueplayerYellowPerm.value = gameData.value.z13Player2Scores.yellowPerm
+                ValueplayerYellowTemp.value = gameData.value.z13Player2Scores.yellowTemp
+                ValueplayerPurplePerm.value = gameData.value.z13Player2Scores.purplePerm
+                ValueplayerPurpleTemp.value = gameData.value.z13Player2Scores.purpleTemp
+                ValueplayerRedPerm.value = gameData.value.z13Player2Scores.redPerm
+                ValueplayerRedTemp.value = gameData.value.z13Player2Scores.redTemp
+                ValueplayerCash.value = gameData.value.z13Player2Scores.cash
+                ValueplayerCosts.value = gameData.value.z13Player2Scores.costs
+                ValueplayerDebtors.value = gameData.value.z13Player2Scores.debtors
+                ValueplayerProduction.value = gameData.value.z13Player2Scores.production
+                ValueplayerValue.value = gameData.value.z13Player2Scores.value
+              break
+            case 2:
+              Player1DOM.value = false
+              Player2DOM.value = false
+              Player3DOM.value = true
+              Player4DOM.value = false
+              // BACKEND ELEMENTS
+                /* Labels */
+                LabelplayerBlackPerm.value = "z14Player3Scores.blackPerm"
+                LabelplayerBlackTemp.value = "z14Player3Scores.blackTemp"
+                LabelplayerGreenPerm.value = "z14Player3Scores.greenPerm"
+                LabelplayerGreenTemp.value = "z14Player3Scores.greenTemp"
+                LabelplayerYellowPerm.value = "z14Player3Scores.yellowPerm"
+                LabelplayerYellowTemp.value = "z14Player3Scores.yellowTemp"
+                LabelplayerPurplePerm.value = "z14Player3Scores.purplePerm"
+                LabelplayerPurpleTemp.value = "z14Player3Scores.purpleTemp"
+                LabelplayerRedPerm.value = "z14Player3Scores.redPerm"
+                LabelplayerRedTemp.value = "z14Player3Scores.redTemp"
+                LabelplayerCash.value = "z14Player3Scores.cash"
+                LabelplayerCosts.value = "z14Player3Scores.costs"
+                LabelplayerDebtors.value = "z14Player3Scores.debtors"
+                LabelplayerProduction.value = "z14Player3Scores.production"
+                LabelplayerValue.value = "z14Player3Scores.value"
+                /* Values */
+                ValueplayerBlackPerm.value = gameData.value.z14Player3Scores.blackPerm
+                ValueplayerBlackTemp.value = gameData.value.z14Player3Scores.blackTemp
+                ValueplayerGreenPerm.value = gameData.value.z14Player3Scores.greenPerm
+                ValueplayerGreenTemp.value = gameData.value.z14Player3Scores.greenTemp
+                ValueplayerYellowPerm.value = gameData.value.z14Player3Scores.yellowPerm
+                ValueplayerYellowTemp.value = gameData.value.z14Player3Scores.yellowTemp
+                ValueplayerPurplePerm.value = gameData.value.z14Player3Scores.purplePerm
+                ValueplayerPurpleTemp.value = gameData.value.z14Player3Scores.purpleTemp
+                ValueplayerRedPerm.value = gameData.value.z14Player3Scores.redPerm
+                ValueplayerRedTemp.value = gameData.value.z14Player3Scores.redTemp
+                ValueplayerCash.value = gameData.value.z14Player3Scores.cash
+                ValueplayerCosts.value = gameData.value.z14Player3Scores.costs
+                ValueplayerDebtors.value = gameData.value.z14Player3Scores.debtors
+                ValueplayerProduction.value = gameData.value.z14Player3Scores.production
+                ValueplayerValue.value = gameData.value.z14Player3Scores.value
+              break
+            case 3:
+              Player1DOM.value = false
+              Player2DOM.value = false
+              Player3DOM.value = false
+              Player4DOM.value = true
+              // BACKEND ELEMENTS
+                /* Labels */
+                LabelplayerBlackPerm.value = "z15Player4Scores.blackPerm"
+                LabelplayerBlackTemp.value = "z15Player4Scores.blackTemp"
+                LabelplayerGreenPerm.value = "z15Player4Scores.greenPerm"
+                LabelplayerGreenTemp.value = "z15Player4Scores.greenTemp"
+                LabelplayerYellowPerm.value = "z15Player4Scores.yellowPerm"
+                LabelplayerYellowTemp.value = "z15Player4Scores.yellowTemp"
+                LabelplayerPurplePerm.value = "z15Player4Scores.purplePerm"
+                LabelplayerPurpleTemp.value = "z15Player4Scores.purpleTemp"
+                LabelplayerRedPerm.value = "z15Player4Scores.redPerm"
+                LabelplayerRedTemp.value = "z15Player4Scores.redTemp"
+                LabelplayerCash.value = "z15Player4Scores.cash"
+                LabelplayerCosts.value = "z15Player4Scores.costs"
+                LabelplayerDebtors.value = "z15Player4Scores.debtors"
+                LabelplayerProduction.value = "z15Player4Scores.production"
+                LabelplayerValue.value = "z15Player4Scores.value"
+                /* Values */
+                ValueplayerBlackPerm.value = gameData.value.z15Player4Scores.blackPerm
+                ValueplayerBlackTemp.value = gameData.value.z15Player4Scores.blackTemp
+                ValueplayerGreenPerm.value = gameData.value.z15Player4Scores.greenPerm
+                ValueplayerGreenTemp.value = gameData.value.z15Player4Scores.greenTemp
+                ValueplayerYellowPerm.value = gameData.value.z15Player4Scores.yellowPerm
+                ValueplayerYellowTemp.value = gameData.value.z15Player4Scores.yellowTemp
+                ValueplayerPurplePerm.value = gameData.value.z15Player4Scores.purplePerm
+                ValueplayerPurpleTemp.value = gameData.value.z15Player4Scores.purpleTemp
+                ValueplayerRedPerm.value = gameData.value.z15Player4Scores.redPerm
+                ValueplayerRedTemp.value = gameData.value.z15Player4Scores.redTemp
+                ValueplayerCash.value = gameData.value.z15Player4Scores.cash
+                ValueplayerCosts.value = gameData.value.z15Player4Scores.costs
+                ValueplayerDebtors.value = gameData.value.z15Player4Scores.debtors
+                ValueplayerProduction.value = gameData.value.z15Player4Scores.production
+                ValueplayerValue.value = gameData.value.z15Player4Scores.value
+              
+          }
+
+  // Script end
+  console.log('Test script run')
+}
 
 
         return { user, gameData, contracts, handleContractCard, contractCardID,
                   contractAfford, resourceCardID, resourceAfford, handleResourceCard,
                   resourceCardBackground, nextPlayer, Player1DOM, Player2DOM, Player3DOM, Player4DOM,
-                  get2Green, get2Red, get2Yellow, get2Purple, get2Black,
-                  get1Green, get1Red, get1Yellow, get1Purple, get1Black  
+                  getTwoTokens, getOneToken, BuyPermResource
         }
   }
 }
