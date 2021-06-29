@@ -198,6 +198,7 @@
           <table>
             <tr>
               <td><button class="btn waves-effect waves-light" @click="nextPlayer()">Next player</button></td>
+              <td><button class="btn waves-effect waves-light" @click="testFunction()">Test fuction</button></td>
             </tr>
           </table>
 
@@ -428,7 +429,7 @@
 
             <hr>
             <div v-show="contractAfford">
-              <button class="btn waves-effect waves-light green darken-3">Complete the contract
+              <button class="btn waves-effect waves-light green darken-3" @click="BuyContract()">Complete the contract
                 <i class="material-icons right">send</i>
               </button>
             </div>
@@ -885,6 +886,9 @@ const resourceCardID = ref()
 const resourceAfford = ref()
 const lastClickedResourceCard = ref()
 const lastClickedResourceCardsArray = ref()
+const lastClickedContractCard = ref()
+const lastClickedContractCardsArray = ref()
+const AdjustedlastClickedContractCardsArray = ref()
 const resourceCardBackground = ref()
 const Player1DOM = ref(false)
 const Player2DOM = ref(false)
@@ -1167,12 +1171,72 @@ const BuyPermResource = () => {
   console.log("Indexed object chosen: ", lastClickedResourceCardsArray.value[index].Ref)
 }
 
+/* --- Buy Permanent Resource -- */
+const BuyContract = () => {
+  // Get last clicked card Index from the Array
+  const index = lastClickedContractCardsArray.value.findIndex(function(cards, index) {
+    return cards.Ref == lastClickedContractCard.value.Ref 
+  })
+
+  // Can the player afford this card
+  if(
+    lastClickedContractCard.value.CostGreen <= ValueplayerGreenPerm.value &&
+    lastClickedContractCard.value.CostRed <= ValueplayerRedPerm.value &&  
+    lastClickedContractCard.value.CostYellow <= ValueplayerYellowPerm.value &&  
+    lastClickedContractCard.value.CostPurple <= ValueplayerPurplePerm.value &&
+    lastClickedContractCard.value.CostBlack <= ValueplayerBlackPerm.value &&
+    lastClickedContractCard.value.Production <= ValueplayerProduction.value
+      ) {
+                
+        // Player has enough resources
+
+         /* Update purchagse in Firebase */
+        dbConnectionGame.update({         
+        // Update player  values
+                [LabelplayerValue.value]: ValueplayerValue.value + lastClickedContractCard.value.Value,
+                [LabelplayerProduction.value]: ValueplayerProduction.value - lastClickedContractCard.value.Production,
+                [LabelplayerCash.value]: ValueplayerCash.value + lastClickedContractCard.value.Cash,
+                [LabelplayerDebtors.value]: ValueplayerDebtors.value + lastClickedContractCard.value.Debtors,
+                // Adjust player resources
+                [LabelplayerGreenPerm.value]: ValueplayerGreenPerm.value - lastClickedContractCard.value.CostGreen,
+                [LabelplayerRedPerm.value]: ValueplayerRedPerm.value - lastClickedContractCard.value.CostRed,
+                [LabelplayerYellowPerm.value]: ValueplayerYellowPerm.value - lastClickedContractCard.value.CostYellow,
+                [LabelplayerPurplePerm.value]: ValueplayerPurplePerm.value - lastClickedContractCard.value.CostPurple,
+                [LabelplayerBlackPerm.value]: ValueplayerBlackPerm.value - lastClickedContractCard.value.CostBlack
+              })
+        
+      // Work around to delete a card
+      const cardsArray = lastClickedContractCardsArray.value
+      cardsArray.splice(index, 1)
+
+      dbConnectionGame.update({ 
+        z00contractCards: cardsArray
+      })
+
+        M.toast({html: `You fulfilled a Contract`})
+             
+      } 
+      else {
+        //Player can't afford the card
+          M.toast({html: `You do not have enough resources`})
+        }
+
+  console.log('Index of clicked card: ', index)
+  console.log("Indexed object chosen: ", lastClickedContractCardsArray.value[index].Ref)
+}
+
+
+
+
 
 
   /* Trigger Modals for cards */
       const handleContractCard = (id) => {
         contractCardID.value = id
-        contractAfford.value = false
+        contractAfford.value = true
+        lastClickedContractCard.value = contractCardID.value
+        lastClickedContractCardsArray.value = gameData.value.z00contractCards
+        
         console.log('Contract card clicked', contractCardID.value.Ref )    
       }
 
@@ -1384,14 +1448,33 @@ function nextPlayer() {
           }
 
   // Script end
-  console.log('Test script run')
+  console.log('Next player script run')
+}
+
+const testFunction = () => {
+
+  console.log('initial Array:')
+  console.log(lastClickedContractCardsArray.value)
+
+ AdjustedlastClickedContractCardsArray.value = lastClickedContractCardsArray.value
+ 
+
+  console.log('Before splicing Array:')
+  console.log(AdjustedlastClickedContractCardsArray.value) 
+
+  console.log('splicing')
+  AdjustedlastClickedContractCardsArray.value.splice(0,1)
+
+  console.log('Spliced Array:')
+  console.log(AdjustedlastClickedContractCardsArray.value) 
+
 }
 
 
         return { user, gameData, contracts, handleContractCard, contractCardID,
                   contractAfford, resourceCardID, resourceAfford, handleResourceCard,
                   resourceCardBackground, nextPlayer, Player1DOM, Player2DOM, Player3DOM, Player4DOM,
-                  getTwoTokens, getOneToken, BuyPermResource
+                  getTwoTokens, getOneToken, BuyPermResource, BuyContract, testFunction
         }
   }
 }
