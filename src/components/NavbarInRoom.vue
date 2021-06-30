@@ -1,6 +1,6 @@
 <template>
     <nav class="">
-        <div class="nav-wrapper purple darken-4 padding-left ">
+        <div class="nav-wrapper green darken-3 padding-left ">
         <router-link to="/" class="brand-logo left">Gadol Online</router-link>
         <ul id="nav-mobile" class="right hide-on-med-and-down">
         <li class="padding-right">You are logged in as: {{ user.displayName }} </li>

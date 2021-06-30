@@ -1,4 +1,29 @@
 /* Main Styles across the pages */
+.Mymodal {
+  background-color: #ffffff;
+  position: fixed;
+  top: 17%;
+  left: 17%;
+  z-index: 99;
+  border-radius: 10px;
+  /*border: 3px solid grey; */
+  animation-name: fadeInAnimation;
+  animation-duration: 2s;
+  transition: opacity 0.25s ease-in-out;
+  -moz-transition: opacity 0.25s ease-in-out;
+  -webkit-transition: opacity 0.25s ease-in-out;
+}
+
+/* The animation code */
+@keyframes fadeInAnimation {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
 .space-right {
   margin-right: 10px;
 }
@@ -51,6 +76,11 @@ td {
   border: none;
 }
 /* Layout */
+
+.gameRoomBg {
+  /*background-image: url(../assets/img/tableBG.png);*/
+  background-color: #1b5e20;
+}
 .gameArea {
   display: grid;
   grid-template-columns: 1fr 1fr 1.2fr 1fr;
@@ -67,6 +97,7 @@ td {
   padding: 5px;
   text-align: center;
   font-weight: 600;
+  border-radius: 5px;
 }
 
 .gameAreaLeft {
@@ -74,15 +105,15 @@ td {
   padding-top: 5px;
   margin-top: 0px;
   grid-area: mainarea;
-  background: #ffffff; /*rgb(19, 46, 31);*/
+  /*background: #ffffff; rgb(19, 46, 31);*/
   display: grid;
   grid-template-columns: 1fr 1.2fr 0.8fr 1fr;
   grid-template-rows: auto auto auto auto auto;
   grid-template-areas:
-    "onTableContracts onTableContracts tempResources tempResources"
-    "onTableRow1 onTableRow1 tempActionsTestArea tempActionsTestArea"
-    "onTableRow2 onTableRow2 onTableRow2 onTableRow2"
-    "onTableRow3 onTableRow3 onTableRow3 onTableRow3"
+    "onTableContracts onTableContracts onTableContracts onTableContracts"
+    "onTableRow1 onTableRow1 tempResources tempResources"
+    "onTableRow2 onTableRow2 tempLastActionsArea tempLastActionsArea"
+    "onTableRow3 onTableRow3 tempLastActionsArea tempLastActionsArea"
     "upComingCards upComingCards upComingCards upComingCards";
   align-content: start;
   justify-content: start;
@@ -98,7 +129,16 @@ td {
 }
 
 .tempActionsTestArea {
-  grid-area: tempActionsTestArea;
+  display: flex;
+  flex-wrap: wrap;
+  padding: 5px;
+  border: 1px solid grey;
+  border-radius: 10px;
+  margin: 5px;
+}
+
+.tempLastActionsArea {
+  grid-area: tempLastActionsArea;
   display: flex;
   flex-wrap: wrap;
   padding: 5px;
@@ -162,9 +202,8 @@ td {
   grid-area: rightside;
   display: grid;
   grid-template-columns: 1fr;
-  grid-template-rows: 30px auto auto;
+  grid-template-rows: auto auto;
   grid-template-areas:
-    "scoreheader"
     "scoring"
     "chat";
 }
@@ -262,7 +301,7 @@ td {
 }
 
 .greyOut {
-  background-color: rgba(50, 50, 50, 0.5);
+  background-color: rgba(50, 50, 50, 0.6);
   z-index: 99;
 }
 

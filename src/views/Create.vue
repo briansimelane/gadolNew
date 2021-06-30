@@ -26,14 +26,14 @@
               <div class="card-stacked">
                 <div class="card-content">
                   
-                    <form class="col s12">
+                    <form class="col s12" @submit.prevent="createRoom()">
                             <div class="row">
                               <div class="input-field col s12 m6">
-                                <input id="room_name" type="text" class="validate" v-model="roomName">
+                                <input id="room_name" type="text" class="validate" v-model="roomName" required>
                                 <label for="room_name">Give the room a name</label>
                               </div>
                               <div class="input-field col s12 m6">
-                                <select v-model="numberPlayers">
+                                <select v-model="numberPlayers" required>
                                   <option value="2" disabled selected>Choose your option</option>
                                   <option value="2">2 players</option>
                                   <option value="3">3 players</option>
@@ -43,7 +43,7 @@
                               </div>
                             </div>
                             
-                            <div class="row margin-bottom">
+                        <!--    <div class="row margin-bottom">
                               <div class="col s12">
                                 <span>Please enable options you would like to add:</span>
                               </div>
@@ -61,6 +61,8 @@
                                 </label>
                               </div>
                             </div>
+                            -->
+
                             <div class="row">
                               <div class="col s12 remove-margin">
                                 <span>Which rules would you like to play with?</span>
@@ -68,8 +70,8 @@
                             
                             
                               <div class="col s12">
-                                <select v-model="gameWinCondition">
-                                  <option value="points" disabled selected>Choose your option</option>
+                                <select v-model="gameWinCondition" required>
+                                  <option value="contracts" disabled selected>Choose your option</option>
                                   <option value="points">1st to 15 points (No contract fulfilment) </option>
                                   <option value="contracts">Highest value (Game ends with a contract fulfilment)</option>
                                 </select>
@@ -84,7 +86,7 @@
                             <div class="row">
                               <div class="col s12 space-allaround"></div>
                               <div class="col s12 m12 center">
-                                <a class="waves-effect waves-light btn amber accent-4 black-text" @click="createRoom"><i class="material-icons left">build</i>Create a room</a>
+                                <button type="submit" class="waves-effect waves-light btn amber accent-4 black-text"><i class="material-icons left">build</i>Create a room</button>
                                 <div class="center space-allaround"><span>If you would like to join a room instead, click <router-link to="/join">here</router-link>.</span></div>
                               </div>
                             </div>

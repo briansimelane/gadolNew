@@ -36,7 +36,7 @@
                     <tr>
                         <th>Room name</th>
                         <th class="center">Player count</th>
-                        <th class="center">Timed game?</th>
+                        <th class="center">Rules</th>
                         <th>Actions</th>
                     </tr>
                   </thead>
@@ -44,7 +44,7 @@
                     <tr v-for="room in roomsData" :key="room.id">
                       <td>{{ room.name }}</td>
                       <td class="center">{{ room.numPlayers }}</td>
-                      <td class="center">{{ room.timed }}</td>
+                      <td class="center">{{ room.rules }}</td>
                       <td><button class="btn space-allaround green darken-3" @click="joinRoom(room.id)" >Join</button>
                         <button class="btn red darken-4" @click="deleteRoom(room.id)">Delete</button></td>
                     </tr>

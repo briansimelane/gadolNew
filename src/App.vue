@@ -8,9 +8,10 @@
 <script>
 
 export default {
- setup() {
 
- 
+
+mounted () {
+    M.AutoInit()
   }
 }
 </script>

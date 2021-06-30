@@ -1,11 +1,11 @@
 <template>
-  <div class="container-fluid">
+  <div class="container-fluid gameRoomBg">
     
       <NavbarInRoom />
 
       <div class="container-fluid">
         <div class="col s12 space-left margin-bottom-small center">
-          <h6> Welcome to <span style="font-weight: bold;">{{ gameData.name}}</span> - - - Game Room ID: <span class="red-text grey lighten-3 hoverable">{{id}}</span> <span style="font-style: italic;">(Share this ID with other players for them to join)</span></h6>
+          <h6 class="white-text"> Welcome to <span style="font-weight: bold;">{{ gameData.name}}</span> - - - Game Room ID: <span class="red-text grey lighten-3 hoverable">{{id}}</span> <span style="font-style: italic;">(Share this ID with other players for them to join)</span></h6>
         </div>
         
 
@@ -20,8 +20,9 @@
         <div class="gameAreaLeft">
         
           <div class="onTableContracts" v-if=" contracts === gameData.rules" >
+            <h5 class="white-text"><i class="material-icons right">send</i>Contract Cards</h5>
             
-            <div class="contract_card hoverable modal-trigger" href="#modalContract" v-for="contract in gameData.z00contractCards.slice(0,4)" :key="gameData.z00contractCards.index" >
+            <div class="contract_card hoverable" v-for="contract in gameData.z00contractCards.slice(0,4)" :key="gameData.z00contractCards.index" >
               <div class="contract_details" @click="handleContractCard(contract)">
                 <div class="contractValue">{{ contract.Value }}</div>
                 <div class="contractCash">{{ contract.Cash }}</div>
@@ -37,7 +38,7 @@
           </div>
 
         <div class="onTableRow1">
-          <div class="resource_card greenResource hoverable  modal-trigger" href="#modalResource" v-for="greenCard in gameData.z01greenCards.slice(0,2)" :key="gameData.z01greenCards.index" >
+          <div class="resource_card greenResource hoverable" v-for="greenCard in gameData.z01greenCards.slice(0,2)" :key="gameData.z01greenCards.index" >
               <div class="card_details" @click="handleResourceCard(greenCard)">
                 <div class="productsValue">{{ greenCard.Production }}</div>
                 <div class="redCost">{{ greenCard.CostRed }}</div>
@@ -49,7 +50,7 @@
               </div>
           </div>
 
-          <div class="resource_card yellowResource hoverable modal-trigger" href="#modalResource" v-for="yellowCard in gameData.z02yellowCards.slice(0,2)" :key="gameData.z02yellowCards.index" >
+          <div class="resource_card yellowResource hoverable" v-for="yellowCard in gameData.z02yellowCards.slice(0,2)" :key="gameData.z02yellowCards.index" >
               <div class="card_details" @click="handleResourceCard(yellowCard)">
                 <div class="productsValue">{{ yellowCard.Production }}</div>
                 <div class="redCost">{{ yellowCard.CostRed }}</div>
@@ -64,7 +65,7 @@
         </div>
 
         <div class="onTableRow2">
-          <div class="resource_card redResource hoverable modal-trigger" href="#modalResource" v-for="redCard in gameData.z03redCards.slice(0,2)" :key="gameData.z03redCards.index" >
+          <div class="resource_card redResource hoverable" v-for="redCard in gameData.z03redCards.slice(0,2)" :key="gameData.z03redCards.index" >
               <div class="card_details" @click="handleResourceCard(redCard)">
                 <div class="productsValue">{{ redCard.Production }}</div>
                 <div class="redCost">{{ redCard.CostRed }}</div>
@@ -75,7 +76,7 @@
               </div>
           </div>
 
-          <div class="resource_card purpleResource hoverable modal-trigger" href="#modalResource" v-for="purpleCard in gameData.z04purpleCards.slice(0,2)" :key="gameData.z04purpleCards.index" >
+          <div class="resource_card purpleResource hoverable" v-for="purpleCard in gameData.z04purpleCards.slice(0,2)" :key="gameData.z04purpleCards.index" >
               <div class="card_details" @click="handleResourceCard(purpleCard)">
                 <div class="productsValue">{{ purpleCard.Production }}</div>
                 <div class="redCost">{{ purpleCard.CostRed }}</div>
@@ -88,7 +89,7 @@
         </div>
 
         <div class="onTableRow3">
-          <div class="resource_card blackResource hoverable modal-trigger" href="#modalResource" v-for="blackCard in gameData.z05blackCards.slice(0,2)" :key="gameData.z05blackCards.index" >
+          <div class="resource_card blackResource hoverable" v-for="blackCard in gameData.z05blackCards.slice(0,2)" :key="gameData.z05blackCards.index" >
               <div class="card_details" @click="handleResourceCard(blackCard)">
                 <div class="productsValue">{{ blackCard.Production }}</div>
                 <div class="redCost">{{ blackCard.CostRed }}</div>
@@ -103,7 +104,7 @@
 
 
         <div class="upComingCards">
-          <h5><i class="material-icons right">send</i>Upcoming cards</h5>
+          <h5 class="white-text"><i class="material-icons right">send</i>Upcoming cards</h5>
           
           <div class="resource_card greenResource" v-for="greenCard in gameData.z01greenCards.slice(2,3)" :key="gameData.z01greenCards.index" >
               <div class="card_details greyOut">
@@ -165,10 +166,10 @@
         </div>
 
         <div class="tempResources">
-          <h6 class="center cyan darken-3 white-text">Temporary resources market</h6>
+          <h6 class="center white-text">Temporary resources market</h6>
            <table>
               <tbody>
-                <tr class="boldTempResources">
+                <tr class="boldTempResources white-text">
                   <td class="center">{{ gameData.z08marketGreenTokens }}</td>
                   <td class="center">{{ gameData.z07marketRedTokens }}</td>
                   <td class="center">{{ gameData.z09marketYellowTokens }}</td>
@@ -186,31 +187,27 @@
               </tbody>
             </table>
             <div class="center space-allaround">
-              <button class="btn waves-effect waves-light cyan darken-3 modal-trigger" href="#modalTempResources">Acquire resources</button>
+              <button class="btn waves-effect waves-light cyan darken-3"  @click="ModalTempResources = !ModalTempResources">Acquire resources</button>
             </div>
             
         </div>
 
         <!-- Test area for actions - Area to be removed -->
-        <div class="tempActionsTestArea">
+        <div class="tempLastActionsArea white-text">
           Actions test area: to be removed
           
           <table>
             <tr>
               <td><button class="btn waves-effect waves-light" @click="nextPlayer()">Next player</button></td>
-              <td><button class="btn waves-effect waves-light" @click="testFunction()">Test fuction</button></td>
+              <td><button class="btn waves-effect waves-light" @click="testModal = !testModal">Test fuction</button></td>
             </tr>
-          </table>
-
-          
-            
-          
+          </table>    
           
         </div>
 
         </div>
         <div class="gameAreaRight">
-          <span class="gameScoringHeader">Score Area</span>
+         <!-- <span class="gameScoringHeader white-text">Score Area</span> -->
 
           <div class="gameScoring">
             
@@ -405,20 +402,36 @@
           </div>
 
           <div class="gameChat">
-            gameChat
+            <!-- Test area for actions - Area to be removed -->
+              <div class="tempActionsTestArea white-text">
+                Actions test area: to be removed
+                
+                <table>
+                  <tr>
+                    <td><button class="btn waves-effect waves-light" @click="nextPlayer()">Next player</button></td>
+                    <td><button class="btn waves-effect waves-light" @click="testModal = !testModal">Test fuction</button></td>
+                  </tr>
+                </table>    
+                
+              </div>
           </div>
+
         </div>
       </div>
 
 
 
   <!-- Modal: Contracts -->
-  <div id="modalContract" class="modal">
+<teleport to='#modals'>
+  <div id="modalContract" v-if="ModalContracts">
     <div class="modal-content">
-      <h4 class="center">Contract Card</h4>
+      
 
       <div class="row">
         <div class="col s5 center">
+          <br>
+          <br>
+
             <div class="contract_card">
                 <div class="contract_details_modal">
                     <div v-for="(value, index) in contractCardID" :key="index" :class="index">
@@ -427,22 +440,16 @@
                 </div>   
             </div>
 
-            <hr>
             <div v-show="contractAfford">
               <button class="btn waves-effect waves-light green darken-3" @click="BuyContract()">Complete the contract
                 <i class="material-icons right">send</i>
               </button>
             </div>
-            <div v-show="!contractAfford">
-              <button class="btn waves-effect waves-light red darken-3 disabled">You can't afford
-                <i class="material-icons right">send</i>
-              </button>
-            </div>
-
-
         </div>
 
         <div class="col s7">
+          <h4 class="center">Contract Card</h4>
+
           <div>
             <ul class="center">
               <li>A Contract card can only be fulfilled if you have permanent resources (cards) not temporary resources (tokens).</li>
@@ -457,14 +464,17 @@
       <hr>
       
     </div>
-    <div class="modal-footer">
-      <a  class="modal-close waves-effect waves-green btn-flat">Close</a>
+    <div class="center">
+      <button class="btn waves-effect waves-light red darken-3" @click="ModalContracts = !ModalContracts">Close
+      </button>
     </div>
+    <hr>
   </div>
-
+</teleport>
 
 <!-- Modal: Permanent Resources -->
-  <div id="modalResource" class="modal">
+<teleport to='#modals'>
+  <div id="modalResource" v-if="ModalPermResources">
     <div class="modal-content">
       <h4 class="center">Permanent Resource Card</h4>
 
@@ -479,18 +489,12 @@
                 </div>   
             </div>
 
-            <hr>
             <div v-show="resourceAfford" class="center">
                       <button class="btn waves-effect waves-light green darken-3" @click="BuyPermResource()">Buy the card
                        <i class="material-icons right">send</i>
                        </button>
             </div>
-            <div v-show="!resourceAfford" class="center">
-              <button class="btn waves-effect waves-light red darken-3 disabled">You can't afford
-                <i class="material-icons right">send</i>
-              </button>
-            </div>
-
+            
         </div>
 
         <div class="col s8">
@@ -508,96 +512,92 @@
       <hr>
       
     </div>
-    <div class="modal-footer">
-      <a  class="modal-close waves-effect waves-green btn-flat">Close</a>
+    <div class="center">
+      <button class="btn waves-effect waves-light red darken-3" @click="ModalPermResources = !ModalPermResources">Close
+      </button>
     </div>
+    
+    <hr>
   </div>
+</teleport>
 
   <!-- Modal: TempResources -->
-  <div id="modalTempResources" class="modal">
-    <div class="modal-content">
-      <h4 class="center">Acquire temporary resources</h4>
+    <teleport to='#modals' >
+      <div id="modalTempResources" v-if="ModalTempResources">
+        <div class="modal-content">
+          <h4 class="center">Acquire temporary resources</h4>
 
-      <div class="row">
-        <div class="col s8">
-            <table>
-              <tbody>
-                <tr class="boldTempResources">
-                  <td class="center">{{ gameData.z08marketGreenTokens }}</td>
-                  <td class="center">{{ gameData.z07marketRedTokens }}</td>
-                  <td class="center">{{ gameData.z09marketYellowTokens }}</td>
-                  <td class="center">{{ gameData.z10marketPurpleTokens }}</td>
-                  <td class="center">{{ gameData.z11marketBlackTokens }}</td>
-                </tr>
-                <tr>
-                  <td class="center"><img src="../assets/img/greenToken.png" class="tempResourceIcon"/> </td>
-                  <td class="center"><img src="../assets/img/redToken.png" class="tempResourceIcon" /></td>
-                  <td class="center"><img src="../assets/img/yellowToken.png" class="tempResourceIcon"/></td>
-                  <td class="center"><img src="../assets/img/purpleToken.png" class="tempResourceIcon" /></td>
-                  <td class="center"><img src="../assets/img/blackToken.png" class="tempResourceIcon" /></td>
-                </tr>
+          <div class="row">
+            <div class="col s7">
+                <table>
+                  <tbody>
+                    <tr class="boldTempResources">
+                      <td class="center">{{ gameData.z08marketGreenTokens }}</td>
+                      <td class="center">{{ gameData.z07marketRedTokens }}</td>
+                      <td class="center">{{ gameData.z09marketYellowTokens }}</td>
+                      <td class="center">{{ gameData.z10marketPurpleTokens }}</td>
+                      <td class="center">{{ gameData.z11marketBlackTokens }}</td>
+                    </tr>
+                    <tr>
+                      <td class="center"><img src="../assets/img/greenToken.png" class="tempResourceIcon"/> </td>
+                      <td class="center"><img src="../assets/img/redToken.png" class="tempResourceIcon" /></td>
+                      <td class="center"><img src="../assets/img/yellowToken.png" class="tempResourceIcon"/></td>
+                      <td class="center"><img src="../assets/img/purpleToken.png" class="tempResourceIcon" /></td>
+                      <td class="center"><img src="../assets/img/blackToken.png" class="tempResourceIcon" /></td>
+                    </tr>
 
-                <tr>
-                  <td class="center"><button class="btn-small waves-effect waves-light tempResourceActionBtn" @click="getTwoTokens('green')">Get 2</button></td>
-                  <td class="center"><button class="btn-small waves-effect waves-light tempResourceActionBtn" @click="getTwoTokens('red')">Get 2</button></td>
-                  <td class="center"><button class="btn-small waves-effect waves-light tempResourceActionBtn" @click="getTwoTokens('yellow')">Get 2</button></td>
-                  <td class="center"><button class="btn-small waves-effect waves-light tempResourceActionBtn" @click="getTwoTokens('purple')">Get 2</button></td>
-                  <td class="center"><button class="btn-small waves-effect waves-light tempResourceActionBtn" @click="getTwoTokens('black')">Get 2</button></td>
-                </tr>
+                    <tr>
+                      <td class="center"><button class="btn-small waves-effect waves-light tempResourceActionBtn" @click="getTwoTokens('green')">Get 2</button></td>
+                      <td class="center"><button class="btn-small waves-effect waves-light tempResourceActionBtn" @click="getTwoTokens('red')">Get 2</button></td>
+                      <td class="center"><button class="btn-small waves-effect waves-light tempResourceActionBtn" @click="getTwoTokens('yellow')">Get 2</button></td>
+                      <td class="center"><button class="btn-small waves-effect waves-light tempResourceActionBtn" @click="getTwoTokens('purple')">Get 2</button></td>
+                      <td class="center"><button class="btn-small waves-effect waves-light tempResourceActionBtn" @click="getTwoTokens('black')">Get 2</button></td>
+                    </tr>
 
-                <tr>
-                  <td class="center"><button class="btn-small waves-effect waves-light cyan darken-2 tempResourceActionBtn" @click="getOneToken('green')">Get 1</button></td>
-                  <td class="center"><button class="btn-small waves-effect waves-light cyan darken-2 tempResourceActionBtn" @click="getOneToken('red')">Get 1</button></td>
-                  <td class="center"><button class="btn-small waves-effect waves-light cyan darken-2 tempResourceActionBtn" @click="getOneToken('yellow')">Get 1</button></td>
-                  <td class="center"><button class="btn-small waves-effect waves-light cyan darken-2 tempResourceActionBtn" @click="getOneToken('purple')">Get 1</button></td>
-                  <td class="center"><button class="btn-small waves-effect waves-light cyan darken-2 tempResourceActionBtn" @click="getOneToken('black')">Get 1</button></td>
-                </tr>
+                    <tr>
+                      <td class="center"><button class="btn-small waves-effect waves-light cyan darken-2 tempResourceActionBtn" @click="getOneToken('green')">Get 1</button></td>
+                      <td class="center"><button class="btn-small waves-effect waves-light cyan darken-2 tempResourceActionBtn" @click="getOneToken('red')">Get 1</button></td>
+                      <td class="center"><button class="btn-small waves-effect waves-light cyan darken-2 tempResourceActionBtn" @click="getOneToken('yellow')">Get 1</button></td>
+                      <td class="center"><button class="btn-small waves-effect waves-light cyan darken-2 tempResourceActionBtn" @click="getOneToken('purple')">Get 1</button></td>
+                      <td class="center"><button class="btn-small waves-effect waves-light cyan darken-2 tempResourceActionBtn" @click="getOneToken('black')">Get 1</button></td>
+                    </tr>
+                    
+                    <tr>
+                      <td colspan="5"><p class="green-text center">Make your selection</p></td>
+                    </tr>
+                  </tbody>
+                </table>
+
+                <br>
                 
-                <tr>
-                  <td colspan="5"><p class="green-text center">Make your selection</p></td>
-                </tr>
-              </tbody>
-            </table>
+                <div class="center">
+                  <button class="btn waves-effect waves-light red darken-3" @click="ModalTempResources = !ModalTempResources">Close
+                  </button>
+                </div>
 
-            <br>
-            
-            <div class="center">
-              <button class="btn waves-effect waves-light green darken-3">Complete your purchase
-                <i class="material-icons right">send</i>
-              </button>
-            </div>
-            <br>
-            <div class="center">
-              <button class="btn waves-effect waves-light red darken-3">Restart choice
-                <i class="material-icons right">send</i>
-              </button>
             </div>
 
-        </div>
-
-        <div class="col s4">
-          <div>
-            <ul class="center">
-              <li>You can acquire 2 tokens of the same colour (If there are at least 4 available)</li>
-              <br>
-              <li>OR</li>
-              <br>
-              <li>You can aquire 3 different colour tokens (1 each)</li>
-            </ul>
-            
+            <div class="col s5">
+              <div>
+                <ul class="center">
+                  <li>You can acquire 2 tokens of the same colour <br>
+                  (If there are at least 4 available)</li>
+                  <br>
+                  <li>OR</li>
+                  <br>
+                  <li>You can aquire 3 different colour tokens <br>
+                  (1 each)</li>
+                </ul>
+                
+              </div>
+            </div>
           </div>
+          
+          
         </div>
+        
       </div>
-      
-      
-    </div>
-    <div class="modal-footer">
-      <a  class="modal-close waves-effect waves-green btn-flat">Close</a>
-    </div>
-  </div>
-
-
-
+    </teleport>
 
 
 
@@ -611,7 +611,7 @@ import { projectAuth } from '../firebase/config'
 import { projectFirestore } from '../firebase/config'
 import NavbarInRoom from '../components/NavbarInRoom'
 import { computed, onMounted } from 'vue'
-import M from 'materialize-css'
+
 
 
 export default {
@@ -622,15 +622,15 @@ export default {
     onMounted(() => {
       M.AutoInit()
        
-    })
-
-var ResourcesModal = document.querySelector("#modalTempResources")
-//var instance = M.Modal.getInstance(ResourcesModal);
-
+    }) 
 
 
     const { user } = getUser() 
     let gameData = ref(null)
+
+    const ModalTempResources = ref(false)
+    const ModalPermResources = ref(false)
+    const ModalContracts = ref(false)
 
     // Connection to the game       
 const dbConnectionGame = projectFirestore.collection('rooms').doc(props.id)
@@ -677,8 +677,6 @@ const ValueplayerValue = ref()
 
 
   
-  
-
 
 
 /* Trying using the code from the player side */
@@ -886,9 +884,11 @@ const resourceCardID = ref()
 const resourceAfford = ref()
 const lastClickedResourceCard = ref()
 const lastClickedResourceCardsArray = ref()
+const lastClickedResourceCardArrayLabel = ref()
+
 const lastClickedContractCard = ref()
 const lastClickedContractCardsArray = ref()
-const AdjustedlastClickedContractCardsArray = ref()
+
 const resourceCardBackground = ref()
 const Player1DOM = ref(false)
 const Player2DOM = ref(false)
@@ -913,7 +913,11 @@ const getTwoTokens = (colour) => {
                 [LabelplayerCash.value]: ValueplayerCash.value - 2 
               })
               
-              M.toast({html: `2 Green tokens bought by Player ${currentPlayer.value+1}`})
+              M.toast({html: `You bought 2 ${colour} tokens`})
+              
+              // close modal
+              ModalTempResources.value = false
+              
               nextPlayer()  
             }
             else {
@@ -929,7 +933,11 @@ const getTwoTokens = (colour) => {
                 [LabelplayerCash.value]: ValueplayerCash.value - 2 
               })
               
-              M.toast({html: `2 ${colour} tokens bought by Player ${currentPlayer.value+1}`})
+              M.toast({html: `You bought 2 ${colour} tokens`})
+
+              // close modal
+              ModalTempResources.value = false
+              
               nextPlayer()  
             }
             else {
@@ -945,7 +953,11 @@ const getTwoTokens = (colour) => {
                 [LabelplayerCash.value]: ValueplayerCash.value - 2 
               })
               
-              M.toast({html: `2 ${colour} tokens bought by Player ${currentPlayer.value+1}`})
+              M.toast({html: `You bought 2 ${colour} tokens`})
+
+              // close modal
+              ModalTempResources.value = false
+              
               nextPlayer()  
             }
             else {
@@ -961,7 +973,11 @@ const getTwoTokens = (colour) => {
                 [LabelplayerCash.value]: ValueplayerCash.value - 2 
               })
               
-              M.toast({html: `2 ${colour} tokens bought by Player ${currentPlayer.value+1}`})
+              M.toast({html: `You bought 2 ${colour} tokens`})
+
+              // close modal
+              ModalTempResources.value = false
+              
               nextPlayer()  
             }
             else {
@@ -977,7 +993,11 @@ const getTwoTokens = (colour) => {
                 [LabelplayerCash.value]: ValueplayerCash.value - 2 
               })
               
-              M.toast({html: `2 ${colour} tokens bought by Player ${currentPlayer.value+1}`})
+              M.toast({html: `You bought 2 ${colour} tokens`})
+
+              // close modal
+              ModalTempResources.value = false
+              
               nextPlayer()  
             }
             else {
@@ -1121,8 +1141,7 @@ const BuyPermResource = () => {
             break
           case 'Black':
             CardLabel.value = LabelplayerBlackPerm.value
-            CardValue.value = ValueplayerBlackPerm.value
-            
+            CardValue.value = ValueplayerBlackPerm.value           
         }
 
          /* Update purchagse in Firebase */
@@ -1145,17 +1164,27 @@ const BuyPermResource = () => {
                 [CardLabel.value]: CardValue.value + 1,
                 [LabelplayerProduction.value]: ValueplayerProduction.value + cardProduction
 
-        // Delete card from array  
-                //[CardLabel.value.index]: projectFirestore.FieldValue.delete()
               })
         
-      // Work around to delete a card
-      const cardsArray = Array(lastClickedResourceCardsArray)
-      console.log('Cards array :', cardsArray)
 
+// Work around to delete a card
+      const cardsArrayResource = lastClickedResourceCardsArray.value
+      cardsArrayResource.splice(index, 1)
+      
+            // update Database with new array
+            dbConnectionGame.update({ 
+              [lastClickedResourceCardArrayLabel.value]: cardsArrayResource
+            })
 
-        M.toast({html: `You can afford this card`})
-        console.log('Will deduct ', greenTokensAdjust ,' from Green tokens' )
+      // Close modal 
+      ModalPermResources.value = !ModalPermResources.value
+
+        M.toast({html: `You have bought a ${permCardColour} permanent resource`})
+      
+      // Advance player
+      nextPlayer()
+
+        console.log('Permanent resource card bought' )
         console.log('Will deduct ', redTokensAdjust ,' from Red tokens' )
         console.log('Will deduct ', yellowTokensAdjust ,' from Yellow tokens' )
         console.log('Will deduct ', purpleTokensAdjust ,' from Purple tokens' )
@@ -1173,10 +1202,10 @@ const BuyPermResource = () => {
 
 /* --- Buy Permanent Resource -- */
 const BuyContract = () => {
-  // Get last clicked card Index from the Array
-  const index = lastClickedContractCardsArray.value.findIndex(function(cards, index) {
-    return cards.Ref == lastClickedContractCard.value.Ref 
-  })
+    // Get last clicked card Index from the Array
+    const index = lastClickedContractCardsArray.value.findIndex(function(cards, index) {
+      return cards.Ref == lastClickedContractCard.value.Ref 
+    })
 
   // Can the player afford this card
   if(
@@ -1202,18 +1231,26 @@ const BuyContract = () => {
                 [LabelplayerRedPerm.value]: ValueplayerRedPerm.value - lastClickedContractCard.value.CostRed,
                 [LabelplayerYellowPerm.value]: ValueplayerYellowPerm.value - lastClickedContractCard.value.CostYellow,
                 [LabelplayerPurplePerm.value]: ValueplayerPurplePerm.value - lastClickedContractCard.value.CostPurple,
-                [LabelplayerBlackPerm.value]: ValueplayerBlackPerm.value - lastClickedContractCard.value.CostBlack
+                [LabelplayerBlackPerm.value]: ValueplayerBlackPerm.value - lastClickedContractCard.value.CostBlack,
+                // Adjust costs in the background
+                [LabelplayerCosts.value]: ValueplayerCosts.value + lastClickedContractCard.value.Production +  lastClickedContractCard.value.CostGreen
+                + lastClickedContractCard.value.CostRed + lastClickedContractCard.value.CostYellow + lastClickedContractCard.value.CostPurple +
+                lastClickedContractCard.value.CostBlack
               })
         
       // Work around to delete a card
       const cardsArray = lastClickedContractCardsArray.value
       cardsArray.splice(index, 1)
+      
+            // update Database with new array
+            dbConnectionGame.update({ 
+              z00contractCards: cardsArray
+            })
 
-      dbConnectionGame.update({ 
-        z00contractCards: cardsArray
-      })
+      //Open contracts Modal
+        ModalContracts.value = !ModalContracts.value
 
-        M.toast({html: `You fulfilled a Contract`})
+        M.toast({html: `You completed a Contract`})
              
       } 
       else {
@@ -1221,13 +1258,8 @@ const BuyContract = () => {
           M.toast({html: `You do not have enough resources`})
         }
 
-  console.log('Index of clicked card: ', index)
-  console.log("Indexed object chosen: ", lastClickedContractCardsArray.value[index].Ref)
+console.log('Contract card function triggered.')
 }
-
-
-
-
 
 
   /* Trigger Modals for cards */
@@ -1237,6 +1269,9 @@ const BuyContract = () => {
         lastClickedContractCard.value = contractCardID.value
         lastClickedContractCardsArray.value = gameData.value.z00contractCards
         
+        //Open contracts Modal
+        ModalContracts.value = !ModalContracts.value
+
         console.log('Contract card clicked', contractCardID.value.Ref )    
       }
 
@@ -1249,25 +1284,32 @@ const BuyContract = () => {
         switch (resourceCardID.value.Colour) {
             case "Red":
               resourceCardBackground.value = "redResource"
+              lastClickedResourceCardArrayLabel.value = "z03redCards"
               lastClickedResourceCardsArray.value = gameData.value.z03redCards
               break
             case "Green":
               resourceCardBackground.value = "greenResource"
+              lastClickedResourceCardArrayLabel.value = "z01greenCards"
               lastClickedResourceCardsArray.value = gameData.value.z01greenCards
               break
             case "Purple":
               resourceCardBackground.value = "purpleResource"
+              lastClickedResourceCardArrayLabel.value = "z04purpleCards"
               lastClickedResourceCardsArray.value = gameData.value.z04purpleCards
               break
             case "Yellow":
               resourceCardBackground.value = "yellowResource"
+              lastClickedResourceCardArrayLabel.value = "z02yellowCards"
               lastClickedResourceCardsArray.value = gameData.value.z02yellowCards
               break
             case "Black":
               resourceCardBackground.value = "blackResource"
+              lastClickedResourceCardArrayLabel.value = "z05blackCards"
               lastClickedResourceCardsArray.value = gameData.value.z05blackCards
               
           }
+
+        ModalPermResources.value = !ModalPermResources.value
 
         console.log('Resource card clicked', resourceCardID.value.Ref )   
         
@@ -1277,7 +1319,7 @@ const BuyContract = () => {
 // Testing scripts
 function nextPlayer() {
   // Next player advances
-  if(currentPlayer.value < gameData.value.maxnumberofplayers - 1 ) {
+  if(currentPlayer.value < gameData.value.numPlayers - 1 ) {
     dbConnectionGame.update({
       currentPlayer: currentPlayer.value + 1
     })
@@ -1453,20 +1495,9 @@ function nextPlayer() {
 
 const testFunction = () => {
 
-  console.log('initial Array:')
-  console.log(lastClickedContractCardsArray.value)
+  
 
- AdjustedlastClickedContractCardsArray.value = lastClickedContractCardsArray.value
- 
-
-  console.log('Before splicing Array:')
-  console.log(AdjustedlastClickedContractCardsArray.value) 
-
-  console.log('splicing')
-  AdjustedlastClickedContractCardsArray.value.splice(0,1)
-
-  console.log('Spliced Array:')
-  console.log(AdjustedlastClickedContractCardsArray.value) 
+  console.log('Test function')
 
 }
 
@@ -1474,7 +1505,8 @@ const testFunction = () => {
         return { user, gameData, contracts, handleContractCard, contractCardID,
                   contractAfford, resourceCardID, resourceAfford, handleResourceCard,
                   resourceCardBackground, nextPlayer, Player1DOM, Player2DOM, Player3DOM, Player4DOM,
-                  getTwoTokens, getOneToken, BuyPermResource, BuyContract, testFunction
+                  getTwoTokens, getOneToken, BuyPermResource, BuyContract, testFunction, ModalTempResources,
+                  ModalPermResources, ModalContracts
         }
   }
 }
