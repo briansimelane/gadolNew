@@ -816,3 +816,103 @@ td {
   padding-top: 5px;
   font-size: 1.2rem;
 }
+
+/* Media queries */
+/* --- Mobile devices --- */
+@media only screen and (max-width: 420px) {
+  .pageHeadingSmall > h6 {
+    font-size: 1rem;
+    margin-left: 2px;
+    line-height: normal;
+  }
+
+  .gameArea {
+    display: grid;
+    grid-template-columns: 1fr;
+    grid-template-rows: 30px auto auto;
+    grid-template-areas:
+      "notifications"
+      "mainarea"
+      "rightside";
+    align-content: start;
+  }
+
+  .gameAreaLeft {
+    padding-left: 5px;
+    padding-top: 5px;
+    margin-top: 0px;
+    grid-area: mainarea;
+    display: grid;
+    grid-template-columns: 1fr;
+    grid-template-rows: auto auto auto auto auto auto auto;
+    grid-template-areas:
+      "tempLastActionsArea"
+      "onTableContracts"
+      "tempResources"
+      "onTableRow1"
+      "onTableRow2"
+      "onTableRow3"
+      "upComingCards";
+    align-content: start;
+    justify-content: start;
+  }
+
+  .contract_card {
+    width: 93px;
+    height: 120px;
+  }
+
+  .contract_details {
+    font-weight: 600;
+    font-size: 14px;
+  }
+
+  .contractValue {
+    top: -6px;
+    right: 39px;
+    font-size: 24px;
+  }
+
+  .contractCash {
+    top: 30px;
+    right: 25px;
+    font-size: 11px;
+  }
+
+  .contractDebtors {
+    top: 42px;
+    right: 25px;
+    font-size: 11px;
+  }
+
+  .redValue {
+    top: 57px;
+    right: 24px;
+  }
+
+  .greenValue {
+    top: 75px;
+    right: 37px;
+  }
+
+  .yellowValue {
+    top: 93px;
+    right: 37px;
+  }
+
+  .purpleValue {
+    top: 75px;
+    right: 9px;
+  }
+
+  .blackValue {
+    top: 93px;
+    right: 9px;
+  }
+
+  .productValue {
+    top: 52px;
+    right: 75px;
+    font-size: 18px;
+  }
+}

@@ -4,8 +4,8 @@
       <NavbarInRoom />
 
       <div class="container-fluid">
-        <div class="col s12 space-left margin-bottom-small center">
-          <h6 class="white-text"> Welcome to <span style="font-weight: bold;">{{ gameData.name}}</span> - - - Game Room ID: <span class="red-text grey lighten-3 hoverable">{{id}}</span> <span style="font-style: italic;">(Share this ID with other players for them to join)</span></h6>
+        <div class="col s12 space-left margin-bottom-small center pageHeadingSmall">
+          <h6 class="white-text"> Welcome to <span style="font-weight: bold;">{{ gameData.name}}</span> - - - Game Room ID: <span class="red-text grey lighten-3 hoverable">{{id}}</span> <span style="font-style: italic;">(Share this ID with other players)</span></h6>
         </div>
         
 
@@ -20,7 +20,7 @@
         <div class="gameAreaLeft">
         
           <div class="onTableContracts" v-if=" contracts === gameData.rules" >
-            <h5 class="white-text"><i class="material-icons right">send</i>Contract Cards</h5>
+            <h5 class="white-text hide-on-med-and-down"><i class="material-icons right">send</i>Contract Cards</h5>
             
             <div class="contract_card hoverable" v-for="contract in gameData.z00contractCards.slice(0,4)" :key="gameData.z00contractCards.index" >
               <div class="contract_details" @click="handleContractCard(contract)">
@@ -104,7 +104,7 @@
 
 
         <div class="upComingCards">
-          <h5 class="white-text"><i class="material-icons right">send</i>Upcoming cards</h5>
+          <h5 class="white-text  hide-on-med-and-down"><i class="material-icons right">send</i>Upcoming cards</h5>
           
           <div class="resource_card greenResource" v-for="greenCard in gameData.z01greenCards.slice(2,3)" :key="gameData.z01greenCards.index" >
               <div class="card_details greyOut">
