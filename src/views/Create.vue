@@ -359,6 +359,7 @@ const shuffle = (array) => {
               reserve: gameReserve.value,
               rules: gameWinCondition.value,
               maxnumberofplayers: resetValues.numberOfPlayers,
+              lastAction: "",
 
 // variables haven't been linked
             gstate: gameState,

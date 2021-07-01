@@ -113,7 +113,7 @@ td {
     "onTableContracts onTableContracts onTableContracts onTableContracts"
     "onTableRow1 onTableRow1 tempResources tempResources"
     "onTableRow2 onTableRow2 tempLastActionsArea tempLastActionsArea"
-    "onTableRow3 onTableRow3 tempLastActionsArea tempLastActionsArea"
+    "onTableRow3 onTableRow3 onTableRow3 onTableRow3"
     "upComingCards upComingCards upComingCards upComingCards";
   align-content: start;
   justify-content: start;
@@ -139,9 +139,7 @@ td {
 
 .tempLastActionsArea {
   grid-area: tempLastActionsArea;
-  display: flex;
-  flex-wrap: wrap;
-  padding: 5px;
+  padding: 5px 5px 0px 5px;
   border: 1px solid grey;
   border-radius: 10px;
   margin: 5px;

@@ -25,10 +25,10 @@
               <div class="card-stacked">
                 <div class="card-content">
                   
-                    <form>
+                    <form @submit.prevent="joinRoom()">
                             <div class="row">
                               <div class="input-field col s12 m12 ">
-                                <input id="room_id" type="text" class="validate" v-model="roomID">
+                                <input id="room_id" type="text" class="validate" v-model="roomID" required>
                                 <label for="room_id" >Enter the room ID</label>
                               </div>
                              
@@ -36,7 +36,7 @@
                             
                             <div class="row">
                               <div class="col s12 m12 center">
-                                <a class="waves-effect waves-light btn amber accent-4 black-text" @click="joinRoom"><i class="material-icons left">fingerprint</i>Join a room</a>
+                                <button type="submit" class="waves-effect waves-light btn amber accent-4 black-text"><i class="material-icons left">fingerprint</i>Join a room</button>
                                 <div class="center space-allaround"><span>If you would like to create a room instead, click <router-link to="/create">here</router-link>.</span></div>
                               </div>
                             </div>
@@ -83,11 +83,11 @@ export default {
       console.log('Join a room clicked');
     };
 
-    const Player = { name: 'Brian' };
+
 
     const haveRooms = null;
 
-    return { joinRoom, Player, haveRooms, roomID }
+    return { joinRoom, haveRooms, roomID }
   }
 }
 

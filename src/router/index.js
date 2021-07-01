@@ -3,6 +3,7 @@ import Home from '../views/Home.vue'
 import Player from '../views/Player.vue'
 import Create from '../views/Create.vue'
 import Join from '../views/Join.vue'
+import Lobby from '../views/Lobby.vue'
 import GameRoom from '../views/GameRoom.vue'
 import Login from '../views/Login.vue'
 import Signup from '../views/Signup.vue'
@@ -60,6 +61,12 @@ const routes = [
     name: 'GameRoom',
     component: GameRoom,
     props: true,
+    beforeEnter: requireAuth
+  },
+  {
+    path: '/lobby',
+    name: 'Lobby',
+    component: Lobby,
     beforeEnter: requireAuth
   }
 ]

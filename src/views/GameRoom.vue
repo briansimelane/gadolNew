@@ -14,7 +14,7 @@
       <div class="gameArea">
 
         <div class="gameNotifications">
-            Game notifications
+            CURRENT PLAYER IS: PLAYER {{ gameData.currentPlayer + 1 }}
           </div>
 
         <div class="gameAreaLeft">
@@ -192,18 +192,12 @@
             
         </div>
 
-        <!-- Test area for actions - Area to be removed -->
-        <div class="tempLastActionsArea white-text">
-          Actions test area: to be removed
+        <!-- Last actions Area -->
+          <div class="tempLastActionsArea">
+              <h6 class="white-text" style="display: inline-block;">Last Action:</h6>
+              <p class="white multipadding-5">{{ gameData.lastAction }}</p>
           
-          <table>
-            <tr>
-              <td><button class="btn waves-effect waves-light" @click="nextPlayer()">Next player</button></td>
-              <td><button class="btn waves-effect waves-light" @click="testModal = !testModal">Test fuction</button></td>
-            </tr>
-          </table>    
-          
-        </div>
+          </div>
 
         </div>
         <div class="gameAreaRight">
@@ -632,6 +626,8 @@ export default {
     const ModalPermResources = ref(false)
     const ModalContracts = ref(false)
 
+    const LastAction = ref()
+
     // Connection to the game       
 const dbConnectionGame = projectFirestore.collection('rooms').doc(props.id)
     
@@ -907,10 +903,13 @@ const minTokensToTakeTwo = ref(4)
 const getTwoTokens = (colour) => {
   if (colour === "green" && gameData.value.z08marketGreenTokens >= 4) {
             if(ValueplayerCash.value >= 2) {
+                LastAction.value = `Player ${currentPlayer.value + 1} bought 2 Green tokens`
+
               dbConnectionGame.update({
                 z08marketGreenTokens:  gameData.value.z08marketGreenTokens - 2,
                 [LabelplayerGreenTemp.value]: ValueplayerGreenTemp.value + 2,
-                [LabelplayerCash.value]: ValueplayerCash.value - 2 
+                [LabelplayerCash.value]: ValueplayerCash.value - 2,
+                lastAction: LastAction.value 
               })
               
               M.toast({html: `You bought 2 ${colour} tokens`})
@@ -927,10 +926,13 @@ const getTwoTokens = (colour) => {
         } 
   else if (colour === "red" && gameData.value.z07marketRedTokens >= minTokensToTakeTwo.value) {
             if(ValueplayerCash.value >= 2) {
+              LastAction.value = `Player ${currentPlayer.value + 1} bought 2 Red tokens`
+
               dbConnectionGame.update({
                 z07marketRedTokens:  gameData.value.z07marketRedTokens - 2,
                 [LabelplayerRedTemp.value]: ValueplayerRedTemp.value + 2,
-                [LabelplayerCash.value]: ValueplayerCash.value - 2 
+                [LabelplayerCash.value]: ValueplayerCash.value - 2,
+                lastAction: LastAction.value  
               })
               
               M.toast({html: `You bought 2 ${colour} tokens`})
@@ -946,11 +948,15 @@ const getTwoTokens = (colour) => {
             console.log('get two '+ colour + " tokens --- script triggered")
         } 
   else if (colour === "yellow" && gameData.value.z09marketYellowTokens >= 4) {
+            
             if(ValueplayerCash.value >= 2) {
+              LastAction.value = `Player ${currentPlayer.value + 1} bought 2 Yellow tokens`
+
               dbConnectionGame.update({
                 z09marketYellowTokens:  gameData.value.z09marketYellowTokens - 2,
                 [LabelplayerYellowTemp.value]: ValueplayerYellowTemp.value + 2,
-                [LabelplayerCash.value]: ValueplayerCash.value - 2 
+                [LabelplayerCash.value]: ValueplayerCash.value - 2,
+                lastAction: LastAction.value  
               })
               
               M.toast({html: `You bought 2 ${colour} tokens`})
@@ -966,11 +972,15 @@ const getTwoTokens = (colour) => {
             console.log('get two '+ colour + " tokens --- script triggered")
         } 
   else if (colour === "purple" && gameData.value.z10marketPurpleTokens >= 4) {
+            
             if(ValueplayerCash.value >= 2) {
+              LastAction.value = `Player ${currentPlayer.value + 1} bought 2 Purple tokens`
+
               dbConnectionGame.update({
                 z10marketPurpleTokens:  gameData.value.z10marketPurpleTokens - 2,
                 [LabelplayerPurpleTemp.value]: ValueplayerPurpleTemp.value + 2,
-                [LabelplayerCash.value]: ValueplayerCash.value - 2 
+                [LabelplayerCash.value]: ValueplayerCash.value - 2,
+                lastAction: LastAction.value 
               })
               
               M.toast({html: `You bought 2 ${colour} tokens`})
@@ -987,10 +997,13 @@ const getTwoTokens = (colour) => {
         }
   else if (colour === "black" && gameData.value.z11marketBlackTokens >= 4) {
             if(ValueplayerCash.value >= 2) {
+              LastAction.value = `Player ${currentPlayer.value + 1} bought 2 Black tokens`
+
               dbConnectionGame.update({
                 z11marketBlackTokens:  gameData.value.z11marketBlackTokens - 2,
                 [LabelplayerBlackTemp.value]: ValueplayerBlackTemp.value + 2,
-                [LabelplayerCash.value]: ValueplayerCash.value - 2 
+                [LabelplayerCash.value]: ValueplayerCash.value - 2,
+                lastAction: LastAction.value 
               })
               
               M.toast({html: `You bought 2 ${colour} tokens`})
@@ -1011,13 +1024,19 @@ const getTwoTokens = (colour) => {
 const getOneToken = (colour) => {
   if (colour === "green" && gameData.value.z08marketGreenTokens >= 1) {
             if(ValueplayerCash.value >= 1) {
+              LastAction.value = `Player ${currentPlayer.value + 1} bought 1 Green token`
+
               dbConnectionGame.update({
                 z08marketGreenTokens:  gameData.value.z08marketGreenTokens - 1,
                 [LabelplayerGreenTemp.value]: ValueplayerGreenTemp.value + 1,
-                [LabelplayerCash.value]: ValueplayerCash.value - 1 
+                [LabelplayerCash.value]: ValueplayerCash.value - 1,
+                lastAction: LastAction.value 
               })
+
+              // close modal
+              ModalTempResources.value = false
               
-              M.toast({html: `1 ${colour}  token bought by Player ${currentPlayer.value+1}`})
+              M.toast({html: `You bought 1 ${colour}  token`})
               nextPlayer()  
             }
             else {
@@ -1027,13 +1046,19 @@ const getOneToken = (colour) => {
         } 
   else if (colour === "red" && gameData.value.z07marketRedTokens >= 1) {
             if(ValueplayerCash.value >= 1) {
+              LastAction.value = `Player ${currentPlayer.value + 1} bought 1 Red token`
+
               dbConnectionGame.update({
                 z07marketRedTokens:  gameData.value.z07marketRedTokens - 1,
                 [LabelplayerRedTemp.value]: ValueplayerRedTemp.value + 1,
-                [LabelplayerCash.value]: ValueplayerCash.value - 1 
+                [LabelplayerCash.value]: ValueplayerCash.value - 1,
+                lastAction: LastAction.value  
               })
               
-              M.toast({html: `1 ${colour} token bought by Player ${currentPlayer.value+1}`})
+              // close modal
+              ModalTempResources.value = false
+
+              M.toast({html: `You bought 1 ${colour}  token`})
               nextPlayer()  
             }
             else {
@@ -1043,13 +1068,19 @@ const getOneToken = (colour) => {
         } 
   else if (colour === "yellow" && gameData.value.z09marketYellowTokens >= 1) {
             if(ValueplayerCash.value >= 1) {
+              LastAction.value = `Player ${currentPlayer.value + 1} bought 1 Yellow token`
+
               dbConnectionGame.update({
                 z09marketYellowTokens:  gameData.value.z09marketYellowTokens - 1,
                 [LabelplayerYellowTemp.value]: ValueplayerYellowTemp.value + 1,
-                [LabelplayerCash.value]: ValueplayerCash.value - 1 
+                [LabelplayerCash.value]: ValueplayerCash.value - 1,
+                lastAction: LastAction.value  
               })
               
-              M.toast({html: `1 ${colour} token bought by Player ${currentPlayer.value+1}`})
+              // close modal
+              ModalTempResources.value = false
+
+              M.toast({html: `You bought 1 ${colour}  token`})
               nextPlayer()  
             }
             else {
@@ -1059,13 +1090,18 @@ const getOneToken = (colour) => {
         } 
   else if (colour === "purple" && gameData.value.z10marketPurpleTokens >= 1) {
             if(ValueplayerCash.value >= 1) {
+              LastAction.value = `Player ${currentPlayer.value + 1} bought 1 Purple token`
+
               dbConnectionGame.update({
                 z10marketPurpleTokens:  gameData.value.z10marketPurpleTokens - 1,
                 [LabelplayerPurpleTemp.value]: ValueplayerPurpleTemp.value + 1,
-                [LabelplayerCash.value]: ValueplayerCash.value - 1 
+                [LabelplayerCash.value]: ValueplayerCash.value - 1,
+                lastAction: LastAction.value 
               })
-              
-              M.toast({html: `1 ${colour} token bought by Player ${currentPlayer.value+1}`})
+              // close modal
+              ModalTempResources.value = false
+
+              M.toast({html: `You bought 1 ${colour}  token`})
               nextPlayer()  
             }
             else {
@@ -1075,13 +1111,19 @@ const getOneToken = (colour) => {
         }
   else if (colour === "black" && gameData.value.z11marketBlackTokens >= 1) {
             if(ValueplayerCash.value >= 1) {
+              LastAction.value = `Player ${currentPlayer.value + 1} bought 1 Black token`
+
               dbConnectionGame.update({
                 z11marketBlackTokens:  gameData.value.z11marketBlackTokens - 1,
                 [LabelplayerBlackTemp.value]: ValueplayerBlackTemp.value + 1,
-                [LabelplayerCash.value]: ValueplayerCash.value - 1 
+                [LabelplayerCash.value]: ValueplayerCash.value - 1,
+                lastAction: LastAction.value 
               })
               
-              M.toast({html: `1 ${colour} token bought by Player ${currentPlayer.value+1}`})
+              // close modal
+              ModalTempResources.value = false
+
+              M.toast({html: `You bought 1 ${colour}  token`})
               nextPlayer()  
             }
             else {
@@ -1144,6 +1186,8 @@ const BuyPermResource = () => {
             CardValue.value = ValueplayerBlackPerm.value           
         }
 
+        LastAction.value = `Player ${currentPlayer.value + 1} bought a ${permCardColour} permanent resource`
+
          /* Update purchagse in Firebase */
         dbConnectionGame.update({
           // Put tokens back into the market
@@ -1152,6 +1196,7 @@ const BuyPermResource = () => {
                 z09marketYellowTokens:  gameData.value.z09marketYellowTokens + yellowTokensAdjust,
                 z10marketPurpleTokens:  gameData.value.z10marketPurpleTokens + purpleTokensAdjust,
                 z11marketBlackTokens:  gameData.value.z11marketBlackTokens + blackTokensAdjust,
+                lastAction: LastAction.value, 
         // Update player tokens
                 [LabelplayerGreenTemp.value]: ValueplayerGreenTemp.value - greenTokensAdjust,
                 [LabelplayerRedTemp.value]: ValueplayerRedTemp.value - redTokensAdjust,
@@ -1218,7 +1263,7 @@ const BuyContract = () => {
       ) {
                 
         // Player has enough resources
-
+           LastAction.value = `Player ${currentPlayer.value + 1} completed a contract`
          /* Update purchagse in Firebase */
         dbConnectionGame.update({         
         // Update player  values
@@ -1226,6 +1271,7 @@ const BuyContract = () => {
                 [LabelplayerProduction.value]: ValueplayerProduction.value - lastClickedContractCard.value.Production,
                 [LabelplayerCash.value]: ValueplayerCash.value + lastClickedContractCard.value.Cash,
                 [LabelplayerDebtors.value]: ValueplayerDebtors.value + lastClickedContractCard.value.Debtors,
+                lastAction: LastAction.value, 
                 // Adjust player resources
                 [LabelplayerGreenPerm.value]: ValueplayerGreenPerm.value - lastClickedContractCard.value.CostGreen,
                 [LabelplayerRedPerm.value]: ValueplayerRedPerm.value - lastClickedContractCard.value.CostRed,
@@ -1251,6 +1297,9 @@ const BuyContract = () => {
         ModalContracts.value = !ModalContracts.value
 
         M.toast({html: `You completed a Contract`})
+      
+      // Advance player
+      nextPlayer()
              
       } 
       else {
