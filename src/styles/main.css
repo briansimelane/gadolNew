@@ -943,3 +943,37 @@ td {
     border-bottom-right-radius: 5px;
   }
 }
+
+/* --- DeskopMobile devices --- */
+@media only screen and (max-width: 1200px) {
+  .gameArea {
+    display: grid;
+    grid-template-columns: 1fr 1.2fr 1fr 1.1fr;
+    grid-template-rows: 30px auto;
+    grid-template-areas:
+      "notifications notifications notifications rightside"
+      "mainarea mainarea mainarea rightside";
+  }
+  .gameAreaLeft {
+    grid-template-columns: 1fr 1.5fr 0.5fr 1.3fr;
+    grid-template-rows: auto auto auto auto auto;
+    grid-template-areas:
+      "onTableContracts onTableContracts onTableContracts onTableContracts"
+      "onTableRow1 onTableRow1 onTableRow1 tempResources"
+      "onTableRow2 onTableRow2 onTableRow2 tempLastActionsArea"
+      "onTableRow3 onTableRow3 onTableRow3 onTableRow3"
+      "upComingCards upComingCards upComingCards upComingCards";
+  }
+
+  .lastAction {
+    margin-top: 0px;
+    margin-bottom: 2px;
+    border-bottom-left-radius: 5px;
+    border-bottom-right-radius: 5px;
+  }
+
+  .Mymodal {
+    top: 10%;
+    left: 3%;
+  }
+}
