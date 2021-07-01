@@ -195,7 +195,7 @@
         <!-- Last actions Area -->
           <div class="tempLastActionsArea">
               <h6 class="white-text" style="display: inline-block;">Last Action:</h6>
-              <p class="white multipadding-5">{{ gameData.lastAction }}</p>
+              <p class="white multipadding-5" v-if="gameData.lastAction">{{ gameData.lastAction }}</p>
           
           </div>
 
