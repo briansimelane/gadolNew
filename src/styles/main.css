@@ -231,23 +231,12 @@ td {
   width: 140px;
   height: 170px;
   padding-right: 0px;
-  margin-left: 10px;
+  margin-left: 5px;
   display: inline-block;
   background-image: url(../assets/img/ContractBg.png);
   background-repeat: no-repeat;
   background-position: 0px;
   background-size: 100%;
-  border-radius: 5px;
-}
-
-.tokens_card {
-  background: #c9c7c7;
-  border: 1px solid gray;
-  width: 296px;
-  height: 170px;
-  padding-right: 0px;
-  margin-left: 10px;
-  display: inline-block;
   border-radius: 5px;
 }
 
@@ -509,57 +498,6 @@ td {
   right: 104px;
   width: 90px;
   height: 44px;
-}
-
-/* Tokens value */
-
-#redTokensValue {
-  position: absolute;
-  display: inline-block;
-  top: 6px;
-  left: 40px;
-  width: 20px;
-  height: 20px;
-  z-index: 2;
-}
-#greenTokensValue {
-  position: absolute;
-  display: inline-block;
-  top: 88px;
-  left: 40px;
-  width: 20px;
-  height: 20px;
-  z-index: 2;
-}
-
-#yellowTokensValue {
-  position: absolute;
-  display: inline-block;
-  top: 88px;
-  left: 142px;
-  width: 20px;
-  height: 20px;
-  z-index: 2;
-}
-
-#purpleTokensValue {
-  position: absolute;
-  display: inline-block;
-  top: 6px;
-  left: 246px;
-  width: 20px;
-  height: 20px;
-  z-index: 2;
-}
-
-#blackTokensValue {
-  position: absolute;
-  display: inline-block;
-  top: 88px;
-  left: 246px;
-  width: 20px;
-  height: 20px;
-  z-index: 2;
 }
 
 /* Contracts Modal positioning and styling */
@@ -826,6 +764,7 @@ td {
     line-height: normal;
   }
 
+  /* --- Game area layout -- */
   .gameArea {
     display: grid;
     grid-template-columns: 1fr;
@@ -857,62 +796,150 @@ td {
     justify-content: start;
   }
 
+  /* --- Contract cards -- */
+
   .contract_card {
-    width: 93px;
+    width: 97px;
     height: 120px;
   }
 
   .contract_details {
     font-weight: 600;
-    font-size: 14px;
+    font-size: 13px;
   }
 
   .contractValue {
-    top: -6px;
-    right: 39px;
-    font-size: 24px;
+    top: -5px;
+    right: 36px;
+    font-size: 22px;
   }
 
   .contractCash {
     top: 30px;
     right: 25px;
-    font-size: 11px;
+    font-size: 10px;
   }
 
   .contractDebtors {
-    top: 42px;
+    top: 40px;
     right: 25px;
-    font-size: 11px;
+    font-size: 10px;
   }
 
   .redValue {
-    top: 57px;
-    right: 24px;
+    top: 53px;
+    right: 22px;
   }
 
   .greenValue {
-    top: 75px;
-    right: 37px;
+    top: 70px;
+    right: 34px;
   }
 
   .yellowValue {
-    top: 93px;
-    right: 37px;
+    top: 87px;
+    right: 34px;
   }
 
   .purpleValue {
-    top: 75px;
-    right: 9px;
+    top: 70px;
+    right: 8px;
   }
 
   .blackValue {
-    top: 93px;
-    right: 9px;
+    top: 87px;
+    right: 8px;
   }
 
   .productValue {
-    top: 52px;
-    right: 75px;
-    font-size: 18px;
+    top: 50px;
+    right: 69px;
+    font-size: 16px;
+  }
+
+  /* --- Temp Resources market area --- */
+  .boldTempResources {
+    font-weight: bold;
+    font-size: 1.1rem;
+  }
+
+  .tempResourceIcon {
+    height: 35px;
+    width: 35px;
+    margin-top: 5px;
+  }
+
+  /* -- Perm Resources Market Area -- */
+  .resource_card {
+    width: 97px;
+    height: 97px;
+    margin-left: 5px;
+    border-radius: 5px;
+  }
+  .card_details {
+    font-weight: 700;
+    font-size: 16px;
+  }
+
+  .productsValue {
+    display: inline-block;
+    position: absolute;
+    top: 1px;
+    left: 15px;
+    font-size: 19px;
+  }
+  .redCost {
+    top: 0px;
+    right: 8px;
+  }
+
+  .greenCost {
+    top: 18px;
+    right: 8px;
+  }
+
+  .yellowCost {
+    top: 36px;
+    right: 8px;
+  }
+
+  .purpleCost {
+    top: 54px;
+    right: 8px;
+  }
+
+  .blackCost {
+    top: 71px;
+    right: 8px;
+  }
+
+  /* -- Modals styling -- */
+  .Mymodal {
+    top: 10%;
+    left: 0%;
+  }
+
+  /* -- Modals: Contract -- */
+  .modal-content .contract_card {
+    width: 140px;
+    height: 170px;
+  }
+
+  /* -- Modals: Resources -- */
+  .modal-content .contract_card {
+    width: 140px;
+    height: 170px;
+  }
+
+  .modal-content .resource_card {
+    width: 140px;
+    height: 140px;
+  }
+
+  .lastAction {
+    margin-top: 0px;
+    margin-bottom: 2px;
+    border-bottom-left-radius: 5px;
+    border-bottom-right-radius: 5px;
   }
 }

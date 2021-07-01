@@ -187,7 +187,7 @@
               </tbody>
             </table>
             <div class="center space-allaround">
-              <button class="btn waves-effect waves-light cyan darken-3"  @click="ModalTempResources = !ModalTempResources">Acquire resources</button>
+              <button class="btn-small waves-effect waves-light cyan darken-3"  @click="ModalTempResources = !ModalTempResources">Acquire resources</button>
             </div>
             
         </div>
@@ -195,7 +195,7 @@
         <!-- Last actions Area -->
           <div class="tempLastActionsArea">
               <h6 class="white-text" style="display: inline-block;">Last Action:</h6>
-              <p class="white multipadding-5" v-if="gameData.lastAction">{{ gameData.lastAction }}</p>
+              <p class="white multipadding-5 lastAction" v-if="gameData.lastAction">{{ gameData.lastAction }}</p>
           
           </div>
 
@@ -422,7 +422,7 @@
       
 
       <div class="row">
-        <div class="col s5 center">
+        <div class="col s12 m5 center">
           <br>
           <br>
 
@@ -441,7 +441,7 @@
             </div>
         </div>
 
-        <div class="col s7">
+        <div class="col s12 m7">
           <h4 class="center">Contract Card</h4>
 
           <div>
@@ -473,7 +473,7 @@
       <h4 class="center">Permanent Resource Card</h4>
 
       <div class="row">
-        <div class="col s4 center">
+        <div class="col s12 m4 center">
             <div class="resource_card" :class="resourceCardBackground">
                 <div class="card_details_modal">
                     <div v-for="(value, index) in resourceCardID" :key="index" :class="index">
@@ -491,7 +491,7 @@
             
         </div>
 
-        <div class="col s8">
+        <div class="col s12 m8">
           <div>
             <ul class="center">
               <li>A permanent resource card may be bought with a combination of other permanent resources (cards) or temporary resources (tokens).</li>
@@ -522,7 +522,7 @@
           <h4 class="center">Acquire temporary resources</h4>
 
           <div class="row">
-            <div class="col s7">
+            <div class="col s12 m7">
                 <table>
                   <tbody>
                     <tr class="boldTempResources">
@@ -571,7 +571,7 @@
 
             </div>
 
-            <div class="col s5">
+            <div class="col s12 m5">
               <div>
                 <ul class="center">
                   <li>You can acquire 2 tokens of the same colour <br>
