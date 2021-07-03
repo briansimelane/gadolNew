@@ -75,6 +75,17 @@ td {
   padding: 0px;
   border: none;
 }
+
+.takeAseat {
+  margin-right: 0px;
+  margin-top: 0px;
+  padding: 2px;
+  cursor: pointer;
+  background-color: #ef9a9a;
+  border-radius: 3px;
+  border: 1px solid#ef9a9a;
+}
+
 /* Layout */
 
 .gameRoomBg {
@@ -968,8 +979,8 @@ td {
   .lastAction {
     margin-top: 0px;
     margin-bottom: 2px;
-    border-bottom-left-radius: 5px;
-    border-bottom-right-radius: 5px;
+    /* border-bottom-left-radius: 5px;
+    border-bottom-right-radius: 5px; */
   }
 
   .Mymodal {

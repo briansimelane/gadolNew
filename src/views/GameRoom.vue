@@ -208,11 +208,19 @@
             <div class="scoreP1 PlayerScoreArea" >
               
               <div class="scorePlayerHeader yellow">
-               <p> 
-                 <i class="material-icons" v-show="Player1DOM">send</i>
-                 <span class="playerName">Player name (P1)</span> 
-                 <i class="material-icons right green-text text-darken-3 white" style="padding-left: 5px; padding-right: 5px;">brightness_1</i>
-              </p>
+                <p> 
+                  <i class="material-icons" v-if="Player1DOM">send</i>
+                  <span v-if="!gameData.joinedPlayers.Player1Joined">
+                      <span class="playerName">Waiting for player (P1)</span> 
+                      <span class="right takeAseat" @click="JoinPlayer('Player1')">Take this seat</span>   
+                  </span>
+
+                  <span v-if="gameData.joinedPlayers.Player1Joined">
+                    <span class="playerName">{{gameData.joinedPlayers.Player1Name }} (P1)</span> 
+                      <i class="material-icons right black-text " style="padding-left: 5px; padding-right: 5px;">account_circle</i>
+                  </span>
+                  
+                </p>
               </div>
               
               <div class="scorePlayerTempResources">
@@ -257,10 +265,18 @@
             <div class="scoreP2 PlayerScoreArea" v-show="parseInt(gameData.numPlayers) >= 2">
               <div class="scorePlayerHeader green">
                <p> 
-                 <i class="material-icons"  v-show="Player2DOM">send</i>
-                 <span class="playerName" >Player name (P2)</span> 
-                 <i class="material-icons right green-text text-darken-3 white" style="padding-left: 5px; padding-right: 5px;">brightness_1</i>
-              </p>
+                  <i class="material-icons" v-if="Player2DOM">send</i>
+                  <span v-if="!gameData.joinedPlayers.Player2Joined">
+                      <span class="playerName">Waiting for player (P2)</span> 
+                      <span class="right takeAseat" @click="JoinPlayer('Player2')">Take this seat</span>   
+                  </span>
+
+                  <span v-if="gameData.joinedPlayers.Player2Joined">
+                    <span class="playerName">{{gameData.joinedPlayers.Player2Name }} (P2)</span> 
+                      <i class="material-icons right black-text " style="padding-left: 5px; padding-right: 5px;">account_circle</i>
+                  </span>
+                  
+                </p>
               </div>
               
               <div class="scorePlayerTempResources">
@@ -304,10 +320,18 @@
             <div class="scoreP3 PlayerScoreArea" v-show="parseInt(gameData.numPlayers) >= 3">
               <div class="scorePlayerHeader blue">
                <p> 
-                 <i class="material-icons"   v-show="Player3DOM">send</i>
-                 <span class="playerName" >Player name (P3)</span> 
-                 <i class="material-icons right green-text text-darken-3 white" style="padding-left: 5px; padding-right: 5px;">brightness_1</i>
-              </p>
+                  <i class="material-icons" v-if="Player3DOM">send</i>
+                  <span v-if="!gameData.joinedPlayers.Player3Joined">
+                      <span class="playerName">Waiting for player (P3)</span> 
+                      <span class="right takeAseat" @click="JoinPlayer('Player3')">Take this seat</span>   
+                  </span>
+
+                  <span v-if="gameData.joinedPlayers.Player3Joined">
+                    <span class="playerName">{{ gameData.joinedPlayers.Player3Name }} (P3)</span> 
+                      <i class="material-icons right black-text " style="padding-left: 5px; padding-right: 5px;">account_circle</i>
+                  </span>
+                  
+                </p>
               </div>
               
               <div class="scorePlayerTempResources">
@@ -351,10 +375,18 @@
             <div class="scoreP4 PlayerScoreArea" v-show="parseInt(gameData.numPlayers) >= 4">
               <div class="scorePlayerHeader orange">
                <p> 
-                 <i class="material-icons"   v-show="Player4DOM">send</i>
-                 <span class="playerName" >Player name (P4)</span> 
-                 <i class="material-icons right green-text text-darken-3 white" style="padding-left: 5px; padding-right: 5px;">brightness_1</i>
-              </p>
+                  <i class="material-icons" v-if="Player4DOM">send</i>
+                  <span v-if="!gameData.joinedPlayers.Player4Joined">
+                      <span class="playerName">Waiting for player (P4)</span> 
+                      <span class="right takeAseat" @click="JoinPlayer('Player4')">Take this seat</span>   
+                  </span>
+
+                  <span v-if="gameData.joinedPlayers.Player4Joined">
+                    <span class="playerName">{{ gameData.joinedPlayers.Player4Name }} (P4)</span> 
+                      <i class="material-icons right black-text " style="padding-left: 5px; padding-right: 5px;">account_circle</i>
+                  </span>
+                  
+                </p>
               </div>
               
               <div class="scorePlayerTempResources">
@@ -403,7 +435,7 @@
                 <table>
                   <tr>
                     <td><button class="btn waves-effect waves-light" @click="nextPlayer()">Next player</button></td>
-                    <td><button class="btn waves-effect waves-light" @click="testModal = !testModal">Test fuction</button></td>
+                    <td><button class="btn waves-effect waves-light" @click="testFunction()">Test fuction</button></td>
                   </tr>
                 </table>    
                 
@@ -627,6 +659,7 @@ export default {
     const ModalContracts = ref(false)
 
     const LastAction = ref()
+
 
     // Connection to the game       
 const dbConnectionGame = projectFirestore.collection('rooms').doc(props.id)
@@ -1542,10 +1575,55 @@ function nextPlayer() {
   console.log('Next player script run')
 }
 
+
+const JoinPlayer = (role) => {
+  
+  // Test first if player has already taken a seat
+  if(user.value.uid === gameData.value.joinedPlayers.Player1UserID || user.value.uid === gameData.value.joinedPlayers.Player2UserID
+      || user.value.uid === gameData.value.joinedPlayers.Player3UserID || user.value.uid === gameData.value.joinedPlayers.Player4UserID){
+        M.toast({html: `You have already taken a seat in the game`})
+      } else {
+        switch (role) {
+            case 'Player1':
+              dbConnectionGame.update({
+                  "joinedPlayers.Player1Joined": true,
+                    "joinedPlayers.Player1Name": user.value.displayName,
+                    "joinedPlayers.Player1Online": true,
+                    "joinedPlayers.Player1UserID": user.value.uid
+                          })
+             break
+             case 'Player2':
+              dbConnectionGame.update({
+                  "joinedPlayers.Player2Joined": true,
+                    "joinedPlayers.Player2Name": user.value.displayName,
+                    "joinedPlayers.Player2Online": true,
+                    "joinedPlayers.Player2UserID": user.value.uid
+                          })
+             break
+             case 'Player3':
+              dbConnectionGame.update({
+                  "joinedPlayers.Player3Joined": true,
+                    "joinedPlayers.Player3Name": user.value.displayName,
+                    "joinedPlayers.Player3Online": true,
+                    "joinedPlayers.Player3UserID": user.value.uid
+                          })
+             break
+             case 'Player4':
+              dbConnectionGame.update({
+                  "joinedPlayers.Player4Joined": true,
+                    "joinedPlayers.Player4Name": user.value.displayName,
+                    "joinedPlayers.Player4Online": true,
+                    "joinedPlayers.Player4UserID": user.value.uid
+                          })
+                    } // closing SWITCH
+                  } // CLOSING ELSE STATEMENT
+}
+
+
 const testFunction = () => {
 
+  console.log(user.value.displayName)
   
-
   console.log('Test function')
 
 }
@@ -1555,7 +1633,7 @@ const testFunction = () => {
                   contractAfford, resourceCardID, resourceAfford, handleResourceCard,
                   resourceCardBackground, nextPlayer, Player1DOM, Player2DOM, Player3DOM, Player4DOM,
                   getTwoTokens, getOneToken, BuyPermResource, BuyContract, testFunction, ModalTempResources,
-                  ModalPermResources, ModalContracts
+                  ModalPermResources, ModalContracts, JoinPlayer
         }
   }
 }

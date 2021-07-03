@@ -348,8 +348,34 @@ const shuffle = (array) => {
     const playerScorePermPurple = new Array(resetValues.numberOfPlayers).fill(playerPermPurple);
     const playerScorePermBlack = new Array(resetValues.numberOfPlayers).fill(playerPermBlack);
     const currentPlayer = 0;
-    const playerOrder = [];
-    const joinedPlayers = [];
+    const playerOrder = {
+                      "Player1": '',
+                      "Player2": '',
+                      "Player3": '',
+                      "Player4": ''                
+                    };
+    const joinedPlayers = {
+                           "Player1Joined": false,
+                           "Player1Index": 0,
+                           "Player1UserID": '',
+                           "Player1Name": '',
+                           "Player1Online": false,
+                           "Player2Joined": false,
+                           "Player2Index": 1,
+                           "Player2UserID": '',
+                           "Player2Name": '',
+                           "Player2Online": false,
+                           "Player3Joined": false,
+                           "Player3Index": 2,
+                           "Player3UserID": '',
+                           "Player3Name": '',
+                           "Player3Online": false,
+                           "Player4Joined": false,
+                           "Player4Index": 3,
+                           "Player4UserID": '',
+                           "Player4Name": '',
+                           "Player4Online": false,
+                          };
             
             const roomDetails = {
               creator: user.value.uid,
@@ -364,7 +390,7 @@ const shuffle = (array) => {
 // variables haven't been linked
             gstate: gameState,
             currentPlayer: currentPlayer,
-            playerOder: playerOrder,
+            playerOrder: playerOrder,
             joinedPlayers: joinedPlayers,
             z00contractCards: shuffledContractCards,
             z01greenCards: shuffledGreenCards,
