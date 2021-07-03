@@ -14,7 +14,14 @@
       <div class="gameArea">
 
         <div class="gameNotifications">
-            ACTIVE PLAYER IS: {{ ValueplayerName }}
+          <span class="left">ACTIVE PLAYER IS: {{ ValueplayerName }}</span>  
+           <span class="right white-text" 
+           v-if=" user.uid !== gameData.facilitator && user.uid !== gameData.joinedPlayers.Player1UserID
+            && user.uid !== gameData.joinedPlayers.Player2UserID
+             && user.uid !== gameData.joinedPlayers.Player3UserID
+              && user.uid !== gameData.joinedPlayers.Player4UserID"
+           >You are in Spectator view</span>
+            <span class="right  white-text" v-if="user.uid == gameData.facilitator">You are in Facilitator view</span> 
           </div>
 
         <div class="gameAreaLeft">
@@ -443,7 +450,7 @@
 
           <div class="gameChat">
             <!-- Test area for actions - Area to be removed -->
-              <div class="tempActionsTestArea white-text">
+              <div class="tempActionsTestArea white-text" v-if="testMode">
                 Actions test area: to be removed
                 
                 <table>
@@ -668,6 +675,9 @@ export default {
 
     const { user } = getUser() 
     let gameData = ref(null)
+
+    // switch off when deploying
+    const testMode = ref(false)
 
     const ModalTempResources = ref(false)
     const ModalPermResources = ref(false)
@@ -1688,7 +1698,7 @@ const testFunction2 = () => {
 }
 
 
-        return { user, gameData, contracts, handleContractCard, contractCardID,
+        return { testMode, user, gameData, contracts, handleContractCard, contractCardID,
                   contractAfford, resourceCardID, resourceAfford, handleResourceCard,
                   resourceCardBackground, nextPlayer, Player1DOM, Player2DOM, Player3DOM, Player4DOM, ValueplayerUid, ValueplayerName,
                   getTwoTokens, getOneToken, BuyPermResource, BuyContract, testFunction1, testFunction2, ModalTempResources,
