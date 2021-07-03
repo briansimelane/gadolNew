@@ -24,7 +24,7 @@
             
             <div class="contract_card hoverable" v-for="contract in gameData.z00contractCards.slice(0,4)" :key="gameData.z00contractCards.index" >
               <div class="contract_details" 
-                v-on="user.uid == ValueplayerUid ? {click: () => handleContractCard(contract)}: 
+                v-on="user.uid == ValueplayerUid || user.uid == gameData.facilitator ? {click: () => handleContractCard(contract)}: 
                 {click: () => NotActivePlayer() }">
                 <div class="contractValue">{{ contract.Value }}</div>
                 <div class="contractCash">{{ contract.Cash }}</div>
@@ -42,7 +42,7 @@
         <div class="onTableRow1">
           <div class="resource_card greenResource hoverable" v-for="greenCard in gameData.z01greenCards.slice(0,2)" :key="gameData.z01greenCards.index" >
               <div class="card_details" 
-              v-on="user.uid == ValueplayerUid ? {click: () => handleResourceCard(greenCard)}: 
+              v-on="user.uid == ValueplayerUid || user.uid == gameData.facilitator  ? {click: () => handleResourceCard(greenCard)}: 
                 {click: () => NotActivePlayer() }">
                 <div class="productsValue">{{ greenCard.Production }}</div>
                 <div class="redCost">{{ greenCard.CostRed }}</div>
@@ -56,7 +56,7 @@
 
           <div class="resource_card yellowResource hoverable" v-for="yellowCard in gameData.z02yellowCards.slice(0,2)" :key="gameData.z02yellowCards.index" >
               <div class="card_details" 
-              v-on="user.uid == ValueplayerUid ? {click: () => handleResourceCard(yellowCard)}: 
+              v-on="user.uid == ValueplayerUid || user.uid == gameData.facilitator  ? {click: () => handleResourceCard(yellowCard)}: 
                 {click: () => NotActivePlayer() }">
                 <div class="productsValue">{{ yellowCard.Production }}</div>
                 <div class="redCost">{{ yellowCard.CostRed }}</div>
@@ -73,7 +73,7 @@
         <div class="onTableRow2">
           <div class="resource_card redResource hoverable" v-for="redCard in gameData.z03redCards.slice(0,2)" :key="gameData.z03redCards.index" >
               <div class="card_details" 
-              v-on="user.uid == ValueplayerUid ? {click: () => handleResourceCard(redCard)}: 
+              v-on="user.uid == ValueplayerUid || user.uid == gameData.facilitator  ? {click: () => handleResourceCard(redCard)}: 
                 {click: () => NotActivePlayer() }">
                 <div class="productsValue">{{ redCard.Production }}</div>
                 <div class="redCost">{{ redCard.CostRed }}</div>
@@ -86,7 +86,7 @@
 
           <div class="resource_card purpleResource hoverable" v-for="purpleCard in gameData.z04purpleCards.slice(0,2)" :key="gameData.z04purpleCards.index" >
               <div class="card_details" 
-              v-on="user.uid == ValueplayerUid ? {click: () => handleResourceCard(purpleCard)}: 
+              v-on="user.uid == ValueplayerUid || user.uid == gameData.facilitator  ? {click: () => handleResourceCard(purpleCard)}: 
                 {click: () => NotActivePlayer() }">
                 <div class="productsValue">{{ purpleCard.Production }}</div>
                 <div class="redCost">{{ purpleCard.CostRed }}</div>
@@ -101,7 +101,7 @@
         <div class="onTableRow3">
           <div class="resource_card blackResource hoverable" v-for="blackCard in gameData.z05blackCards.slice(0,2)" :key="gameData.z05blackCards.index" >
               <div class="card_details" 
-              v-on="user.uid == ValueplayerUid ? {click: () => handleResourceCard(blackCard)}: 
+              v-on="user.uid == ValueplayerUid || user.uid == gameData.facilitator ? {click: () => handleResourceCard(blackCard)}: 
                 {click: () => NotActivePlayer() }">
                 <div class="productsValue">{{ blackCard.Production }}</div>
                 <div class="redCost">{{ blackCard.CostRed }}</div>
@@ -200,7 +200,7 @@
             </table>
             <div class="center space-allaround">
               <button class="btn-small waves-effect waves-light cyan darken-3"
-                v-on="user.uid == ValueplayerUid ? {click: () => { ModalTempResources = !ModalTempResources }}: 
+                v-on="user.uid == ValueplayerUid || user.uid == gameData.facilitator ? {click: () => { ModalTempResources = !ModalTempResources }}: 
                 {click: () => NotActivePlayer() }">Acquire resources</button>
             </div>
             

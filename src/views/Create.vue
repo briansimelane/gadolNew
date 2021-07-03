@@ -254,6 +254,7 @@ const shuffle = (array) => {
 
       // processed variables to push to Firebase
     const gameState = 0;
+    const facilitator = ""
     const shuffledContractCards = shuffle(resetContractCards);
     const shuffledGreenCards = shuffle(resetGreenCards);
     const shuffledYellowCards = shuffle(resetYellowCards);
@@ -348,12 +349,7 @@ const shuffle = (array) => {
     const playerScorePermPurple = new Array(resetValues.numberOfPlayers).fill(playerPermPurple);
     const playerScorePermBlack = new Array(resetValues.numberOfPlayers).fill(playerPermBlack);
     const currentPlayer = 0;
-    const playerOrder = {
-                      "Player1": '',
-                      "Player2": '',
-                      "Player3": '',
-                      "Player4": ''                
-                    };
+    
     const joinedPlayers = {
                            "Player1Joined": false,
                            "Player1Index": 0,
@@ -389,8 +385,8 @@ const shuffle = (array) => {
 
 // variables haven't been linked
             gstate: gameState,
+            facilitator: facilitator,
             currentPlayer: currentPlayer,
-            playerOrder: playerOrder,
             joinedPlayers: joinedPlayers,
             z00contractCards: shuffledContractCards,
             z01greenCards: shuffledGreenCards,
