@@ -14,7 +14,7 @@
       <div class="gameArea">
 
         <div class="gameNotifications">
-            CURRENT PLAYER IS: PLAYER {{ gameData.currentPlayer + 1 }}
+            ACTIVE PLAYER IS: {{ ValueplayerName }}
           </div>
 
         <div class="gameAreaLeft">
@@ -23,7 +23,9 @@
             <h5 class="white-text hide-on-med-and-down"><i class="material-icons right">send</i>Contract Cards</h5>
             
             <div class="contract_card hoverable" v-for="contract in gameData.z00contractCards.slice(0,4)" :key="gameData.z00contractCards.index" >
-              <div class="contract_details" @click="handleContractCard(contract)">
+              <div class="contract_details" 
+                v-on="user.uid == ValueplayerUid ? {click: () => handleContractCard(contract)}: 
+                {click: () => NotActivePlayer() }">
                 <div class="contractValue">{{ contract.Value }}</div>
                 <div class="contractCash">{{ contract.Cash }}</div>
                 <div class="contractDebtors">{{ contract.Debtors }}</div>
@@ -39,7 +41,9 @@
 
         <div class="onTableRow1">
           <div class="resource_card greenResource hoverable" v-for="greenCard in gameData.z01greenCards.slice(0,2)" :key="gameData.z01greenCards.index" >
-              <div class="card_details" @click="handleResourceCard(greenCard)">
+              <div class="card_details" 
+              v-on="user.uid == ValueplayerUid ? {click: () => handleResourceCard(greenCard)}: 
+                {click: () => NotActivePlayer() }">
                 <div class="productsValue">{{ greenCard.Production }}</div>
                 <div class="redCost">{{ greenCard.CostRed }}</div>
                 <div class="greenCost">{{ greenCard.CostGreen }}</div>
@@ -51,7 +55,9 @@
           </div>
 
           <div class="resource_card yellowResource hoverable" v-for="yellowCard in gameData.z02yellowCards.slice(0,2)" :key="gameData.z02yellowCards.index" >
-              <div class="card_details" @click="handleResourceCard(yellowCard)">
+              <div class="card_details" 
+              v-on="user.uid == ValueplayerUid ? {click: () => handleResourceCard(yellowCard)}: 
+                {click: () => NotActivePlayer() }">
                 <div class="productsValue">{{ yellowCard.Production }}</div>
                 <div class="redCost">{{ yellowCard.CostRed }}</div>
                 <div class="greenCost">{{ yellowCard.CostGreen }}</div>
@@ -66,7 +72,9 @@
 
         <div class="onTableRow2">
           <div class="resource_card redResource hoverable" v-for="redCard in gameData.z03redCards.slice(0,2)" :key="gameData.z03redCards.index" >
-              <div class="card_details" @click="handleResourceCard(redCard)">
+              <div class="card_details" 
+              v-on="user.uid == ValueplayerUid ? {click: () => handleResourceCard(redCard)}: 
+                {click: () => NotActivePlayer() }">
                 <div class="productsValue">{{ redCard.Production }}</div>
                 <div class="redCost">{{ redCard.CostRed }}</div>
                 <div class="greenCost">{{ redCard.CostGreen }}</div>
@@ -77,7 +85,9 @@
           </div>
 
           <div class="resource_card purpleResource hoverable" v-for="purpleCard in gameData.z04purpleCards.slice(0,2)" :key="gameData.z04purpleCards.index" >
-              <div class="card_details" @click="handleResourceCard(purpleCard)">
+              <div class="card_details" 
+              v-on="user.uid == ValueplayerUid ? {click: () => handleResourceCard(purpleCard)}: 
+                {click: () => NotActivePlayer() }">
                 <div class="productsValue">{{ purpleCard.Production }}</div>
                 <div class="redCost">{{ purpleCard.CostRed }}</div>
                 <div class="greenCost">{{ purpleCard.CostGreen }}</div>
@@ -90,7 +100,9 @@
 
         <div class="onTableRow3">
           <div class="resource_card blackResource hoverable" v-for="blackCard in gameData.z05blackCards.slice(0,2)" :key="gameData.z05blackCards.index" >
-              <div class="card_details" @click="handleResourceCard(blackCard)">
+              <div class="card_details" 
+              v-on="user.uid == ValueplayerUid ? {click: () => handleResourceCard(blackCard)}: 
+                {click: () => NotActivePlayer() }">
                 <div class="productsValue">{{ blackCard.Production }}</div>
                 <div class="redCost">{{ blackCard.CostRed }}</div>
                 <div class="greenCost">{{ blackCard.CostGreen }}</div>
@@ -187,7 +199,9 @@
               </tbody>
             </table>
             <div class="center space-allaround">
-              <button class="btn-small waves-effect waves-light cyan darken-3"  @click="ModalTempResources = !ModalTempResources">Acquire resources</button>
+              <button class="btn-small waves-effect waves-light cyan darken-3"
+                v-on="user.uid == ValueplayerUid ? {click: () => { ModalTempResources = !ModalTempResources }}: 
+                {click: () => NotActivePlayer() }">Acquire resources</button>
             </div>
             
         </div>
@@ -435,7 +449,8 @@
                 <table>
                   <tr>
                     <td><button class="btn waves-effect waves-light" @click="nextPlayer()">Next player</button></td>
-                    <td><button class="btn waves-effect waves-light" @click="testFunction()">Test fuction</button></td>
+                    <td><button class="btn waves-effect waves-light" v-on="gameData.currentPlayer == 0 || gameData.currentPlayer == 1 ? {click: () => testFunction1()}: 
+                      {click: () => testFunction2() }">Test fuction</button></td>
                   </tr>
                 </table>    
                 
@@ -686,6 +701,8 @@ const LabelplayerCosts = ref()
 const LabelplayerDebtors = ref()
 const LabelplayerProduction = ref()
 const LabelplayerValue = ref()
+const LabelplayerUid = ref()
+const LabelplayerName = ref()
 
 /* values */
 const ValueplayerBlackPerm = ref()
@@ -703,7 +720,8 @@ const ValueplayerCosts = ref()
 const ValueplayerDebtors = ref()
 const ValueplayerProduction = ref()
 const ValueplayerValue = ref()
-
+const ValueplayerUid = ref()
+const ValueplayerName = ref()
 
   
 
@@ -756,6 +774,9 @@ projectAuth.onAuthStateChanged(user => {
                 LabelplayerDebtors.value = "z12Player1Scores.debtors"
                 LabelplayerProduction.value = "z12Player1Scores.production"
                 LabelplayerValue.value = "z12Player1Scores.value"
+                LabelplayerUid.value = "joinedPlayers.Player1UserID"
+                LabelplayerName.value = "joinedPlayers.Player1Name"
+
                 /* Values */
                 ValueplayerBlackPerm.value = gameData.value.z12Player1Scores.blackPerm
                 ValueplayerBlackTemp.value = gameData.value.z12Player1Scores.blackTemp
@@ -772,6 +793,8 @@ projectAuth.onAuthStateChanged(user => {
                 ValueplayerDebtors.value = gameData.value.z12Player1Scores.debtors
                 ValueplayerProduction.value = gameData.value.z12Player1Scores.production
                 ValueplayerValue.value = gameData.value.z12Player1Scores.value
+                ValueplayerUid.value = gameData.value.joinedPlayers.Player1UserID
+                ValueplayerName.value = gameData.value.joinedPlayers.Player1Name
               break
             case 1:
               Player1DOM.value = false
@@ -795,6 +818,8 @@ projectAuth.onAuthStateChanged(user => {
                 LabelplayerDebtors.value = "z13Player2Scores.debtors"
                 LabelplayerProduction.value = "z13Player2Scores.production"
                 LabelplayerValue.value = "z13Player2Scores.value"
+                LabelplayerUid.value = "joinedPlayers.Player2UserID"
+                LabelplayerName.value = "joinedPlayers.Player2Name"
                 /* Values */
                 ValueplayerBlackPerm.value = gameData.value.z13Player2Scores.blackPerm
                 ValueplayerBlackTemp.value = gameData.value.z13Player2Scores.blackTemp
@@ -811,6 +836,8 @@ projectAuth.onAuthStateChanged(user => {
                 ValueplayerDebtors.value = gameData.value.z13Player2Scores.debtors
                 ValueplayerProduction.value = gameData.value.z13Player2Scores.production
                 ValueplayerValue.value = gameData.value.z13Player2Scores.value
+                ValueplayerUid.value = gameData.value.joinedPlayers.Player2UserID
+                ValueplayerName.value = gameData.value.joinedPlayers.Player2Name
               break
             case 2:
               Player1DOM.value = false
@@ -834,6 +861,8 @@ projectAuth.onAuthStateChanged(user => {
                 LabelplayerDebtors.value = "z14Player3Scores.debtors"
                 LabelplayerProduction.value = "z14Player3Scores.production"
                 LabelplayerValue.value = "z14Player3Scores.value"
+                LabelplayerUid.value = "joinedPlayers.Player3UserID"
+                LabelplayerName.value = "joinedPlayers.Player3Name"
                 /* Values */
                 ValueplayerBlackPerm.value = gameData.value.z14Player3Scores.blackPerm
                 ValueplayerBlackTemp.value = gameData.value.z14Player3Scores.blackTemp
@@ -850,6 +879,8 @@ projectAuth.onAuthStateChanged(user => {
                 ValueplayerDebtors.value = gameData.value.z14Player3Scores.debtors
                 ValueplayerProduction.value = gameData.value.z14Player3Scores.production
                 ValueplayerValue.value = gameData.value.z14Player3Scores.value
+                ValueplayerUid.value = gameData.value.joinedPlayers.Player3UserID
+                ValueplayerName.value = gameData.value.joinedPlayers.Player3Name
               break
             case 3:
               Player1DOM.value = false
@@ -873,6 +904,8 @@ projectAuth.onAuthStateChanged(user => {
                 LabelplayerDebtors.value = "z15Player4Scores.debtors"
                 LabelplayerProduction.value = "z15Player4Scores.production"
                 LabelplayerValue.value = "z15Player4Scores.value"
+                LabelplayerUid.value = "joinedPlayers.Player4UserID"
+                LabelplayerName.value = "joinedPlayers.Player4Name"
                 /* Values */
                 ValueplayerBlackPerm.value = gameData.value.z15Player4Scores.blackPerm
                 ValueplayerBlackTemp.value = gameData.value.z15Player4Scores.blackTemp
@@ -889,6 +922,8 @@ projectAuth.onAuthStateChanged(user => {
                 ValueplayerDebtors.value = gameData.value.z15Player4Scores.debtors
                 ValueplayerProduction.value = gameData.value.z15Player4Scores.production
                 ValueplayerValue.value = gameData.value.z15Player4Scores.value
+                ValueplayerUid.value = gameData.value.joinedPlayers.Player4UserID
+                ValueplayerName.value = gameData.value.joinedPlayers.Player4Name
               
           }
          
@@ -1435,6 +1470,9 @@ function nextPlayer() {
                 LabelplayerDebtors.value = "z12Player1Scores.debtors"
                 LabelplayerProduction.value = "z12Player1Scores.production"
                 LabelplayerValue.value = "z12Player1Scores.value"
+                LabelplayerUid.value = "joinedPlayers.Player1UserID"
+                LabelplayerName.value = "joinedPlayers.Player1Name"
+
                 /* Values */
                 ValueplayerBlackPerm.value = gameData.value.z12Player1Scores.blackPerm
                 ValueplayerBlackTemp.value = gameData.value.z12Player1Scores.blackTemp
@@ -1451,6 +1489,8 @@ function nextPlayer() {
                 ValueplayerDebtors.value = gameData.value.z12Player1Scores.debtors
                 ValueplayerProduction.value = gameData.value.z12Player1Scores.production
                 ValueplayerValue.value = gameData.value.z12Player1Scores.value
+                ValueplayerUid.value = gameData.value.joinedPlayers.Player1UserID
+                ValueplayerName.value = gameData.value.joinedPlayers.Player1Name
               break
             case 1:
               Player1DOM.value = false
@@ -1474,6 +1514,8 @@ function nextPlayer() {
                 LabelplayerDebtors.value = "z13Player2Scores.debtors"
                 LabelplayerProduction.value = "z13Player2Scores.production"
                 LabelplayerValue.value = "z13Player2Scores.value"
+                LabelplayerUid.value = "joinedPlayers.Player2UserID"
+                LabelplayerName.value = "joinedPlayers.Player2Name"
                 /* Values */
                 ValueplayerBlackPerm.value = gameData.value.z13Player2Scores.blackPerm
                 ValueplayerBlackTemp.value = gameData.value.z13Player2Scores.blackTemp
@@ -1490,6 +1532,8 @@ function nextPlayer() {
                 ValueplayerDebtors.value = gameData.value.z13Player2Scores.debtors
                 ValueplayerProduction.value = gameData.value.z13Player2Scores.production
                 ValueplayerValue.value = gameData.value.z13Player2Scores.value
+                ValueplayerUid.value = gameData.value.joinedPlayers.Player2UserID
+                ValueplayerName.value = gameData.value.joinedPlayers.Player2Name
               break
             case 2:
               Player1DOM.value = false
@@ -1513,6 +1557,8 @@ function nextPlayer() {
                 LabelplayerDebtors.value = "z14Player3Scores.debtors"
                 LabelplayerProduction.value = "z14Player3Scores.production"
                 LabelplayerValue.value = "z14Player3Scores.value"
+                LabelplayerUid.value = "joinedPlayers.Player3UserID"
+                LabelplayerName.value = "joinedPlayers.Player3Name"
                 /* Values */
                 ValueplayerBlackPerm.value = gameData.value.z14Player3Scores.blackPerm
                 ValueplayerBlackTemp.value = gameData.value.z14Player3Scores.blackTemp
@@ -1529,6 +1575,8 @@ function nextPlayer() {
                 ValueplayerDebtors.value = gameData.value.z14Player3Scores.debtors
                 ValueplayerProduction.value = gameData.value.z14Player3Scores.production
                 ValueplayerValue.value = gameData.value.z14Player3Scores.value
+                ValueplayerUid.value = gameData.value.joinedPlayers.Player3UserID
+                ValueplayerName.value = gameData.value.joinedPlayers.Player3Name
               break
             case 3:
               Player1DOM.value = false
@@ -1552,6 +1600,8 @@ function nextPlayer() {
                 LabelplayerDebtors.value = "z15Player4Scores.debtors"
                 LabelplayerProduction.value = "z15Player4Scores.production"
                 LabelplayerValue.value = "z15Player4Scores.value"
+                LabelplayerUid.value = "joinedPlayers.Player4UserID"
+                LabelplayerName.value = "joinedPlayers.Player4Name"
                 /* Values */
                 ValueplayerBlackPerm.value = gameData.value.z15Player4Scores.blackPerm
                 ValueplayerBlackTemp.value = gameData.value.z15Player4Scores.blackTemp
@@ -1568,6 +1618,8 @@ function nextPlayer() {
                 ValueplayerDebtors.value = gameData.value.z15Player4Scores.debtors
                 ValueplayerProduction.value = gameData.value.z15Player4Scores.production
                 ValueplayerValue.value = gameData.value.z15Player4Scores.value
+                ValueplayerUid.value = gameData.value.joinedPlayers.Player4UserID
+                ValueplayerName.value = gameData.value.joinedPlayers.Player4Name
               
           }
 
@@ -1619,21 +1671,29 @@ const JoinPlayer = (role) => {
                   } // CLOSING ELSE STATEMENT
 }
 
+// Helper message functions
+const NotActivePlayer = () => {
+  M.toast({html: 'You are not the active player'})
+}
 
-const testFunction = () => {
+const testFunction1 = () => {
+  M.toast({html: 'Great job!'})
+  console.log('Test function 1')
 
-  console.log(user.value.displayName)
-  
-  console.log('Test function')
+}
+const testFunction2 = () => {
+  M.toast({html: 'It is not your turn'})
+  console.log('Test function 2')
 
 }
 
 
         return { user, gameData, contracts, handleContractCard, contractCardID,
                   contractAfford, resourceCardID, resourceAfford, handleResourceCard,
-                  resourceCardBackground, nextPlayer, Player1DOM, Player2DOM, Player3DOM, Player4DOM,
-                  getTwoTokens, getOneToken, BuyPermResource, BuyContract, testFunction, ModalTempResources,
-                  ModalPermResources, ModalContracts, JoinPlayer
+                  resourceCardBackground, nextPlayer, Player1DOM, Player2DOM, Player3DOM, Player4DOM, ValueplayerUid, ValueplayerName,
+                  getTwoTokens, getOneToken, BuyPermResource, BuyContract, testFunction1, testFunction2, ModalTempResources,
+                  ModalPermResources, ModalContracts, JoinPlayer,
+                  NotActivePlayer
         }
   }
 }
