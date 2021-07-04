@@ -451,7 +451,7 @@
           <div class="gameChat">
             <!-- Test area for actions - Area to be removed -->
               <div class="tempActionsTestArea white-text" v-if="testMode">
-                Actions test area: to be removed
+               Facilitator Area
                 
                 <table>
                   <tr>
@@ -595,23 +595,24 @@
                     </tr>
 
                     <tr>
-                      <td class="center"><button class="btn-small waves-effect waves-light tempResourceActionBtn" @click="getTwoTokens('green')">Get 2</button></td>
-                      <td class="center"><button class="btn-small waves-effect waves-light tempResourceActionBtn" @click="getTwoTokens('red')">Get 2</button></td>
-                      <td class="center"><button class="btn-small waves-effect waves-light tempResourceActionBtn" @click="getTwoTokens('yellow')">Get 2</button></td>
-                      <td class="center"><button class="btn-small waves-effect waves-light tempResourceActionBtn" @click="getTwoTokens('purple')">Get 2</button></td>
-                      <td class="center"><button class="btn-small waves-effect waves-light tempResourceActionBtn" @click="getTwoTokens('black')">Get 2</button></td>
+                      <td class="center"><button class="btn-small waves-effect waves-light tempResourceActionBtn" @click="getTwoTokens('green')" :class="{ disabled: ValueTempTokensTakenCounter > 0 }">Get 2</button></td>
+                      <td class="center"><button class="btn-small waves-effect waves-light tempResourceActionBtn" @click="getTwoTokens('red')" :class="{ disabled: ValueTempTokensTakenCounter > 0  }">Get 2</button></td>
+                      <td class="center"><button class="btn-small waves-effect waves-light tempResourceActionBtn" @click="getTwoTokens('yellow')" :class="{ disabled: ValueTempTokensTakenCounter > 0  }">Get 2</button></td>
+                      <td class="center"><button class="btn-small waves-effect waves-light tempResourceActionBtn" @click="getTwoTokens('purple')" :class="{ disabled: ValueTempTokensTakenCounter > 0  }">Get 2</button></td>
+                      <td class="center"><button class="btn-small waves-effect waves-light tempResourceActionBtn" @click="getTwoTokens('black')" :class="{ disabled: ValueTempTokensTakenCounter > 0  }">Get 2</button></td>
                     </tr>
 
                     <tr>
-                      <td class="center"><button class="btn-small waves-effect waves-light cyan darken-2 tempResourceActionBtn" @click="getOneToken('green')">Get 1</button></td>
-                      <td class="center"><button class="btn-small waves-effect waves-light cyan darken-2 tempResourceActionBtn" @click="getOneToken('red')">Get 1</button></td>
-                      <td class="center"><button class="btn-small waves-effect waves-light cyan darken-2 tempResourceActionBtn" @click="getOneToken('yellow')">Get 1</button></td>
-                      <td class="center"><button class="btn-small waves-effect waves-light cyan darken-2 tempResourceActionBtn" @click="getOneToken('purple')">Get 1</button></td>
-                      <td class="center"><button class="btn-small waves-effect waves-light cyan darken-2 tempResourceActionBtn" @click="getOneToken('black')">Get 1</button></td>
+                      <td class="center"><button class="btn-small waves-effect waves-light cyan darken-2 tempResourceActionBtn" @click="getOneToken('green')" :class="{ disabled: ValuegreenTokenTaken }">Get 1</button></td>
+                      <td class="center"><button class="btn-small waves-effect waves-light cyan darken-2 tempResourceActionBtn" @click="getOneToken('red')" :class="{ disabled: ValueredTokenTaken }">Get 1</button></td>
+                      <td class="center"><button class="btn-small waves-effect waves-light cyan darken-2 tempResourceActionBtn" @click="getOneToken('yellow')" :class="{ disabled: ValueyellowTokenTaken }">Get 1</button></td>
+                      <td class="center"><button class="btn-small waves-effect waves-light cyan darken-2 tempResourceActionBtn" @click="getOneToken('purple')" :class="{ disabled: ValuepurpleTokenTaken }">Get 1</button></td>
+                      <td class="center"><button class="btn-small waves-effect waves-light cyan darken-2 tempResourceActionBtn" @click="getOneToken('black')" :class="{ disabled: ValueblackTokenTaken }">Get 1</button></td>
                     </tr>
                     
                     <tr>
-                      <td colspan="5"><p class="green-text center">Make your selection</p></td>
+                      <td colspan="5" v-if="ValueTempTokensTakenCounter === 0 "><p class="green-text center">Make your selection</p></td>
+                      <td colspan="5" v-if="ValueTempTokensTakenCounter > 0"><p class="green-text center">You have taken {{  ValueTempTokensTakenCounter }} token<span v-if="ValueTempTokensTakenCounter > 1">/s</span>. Maximum is 3 tokens.</p></td>
                     </tr>
                   </tbody>
                 </table>
@@ -621,6 +622,7 @@
                 <div class="center">
                   <button class="btn waves-effect waves-light red darken-3" @click="ModalTempResources = !ModalTempResources">Close
                   </button>
+
                 </div>
 
             </div>
@@ -677,13 +679,17 @@ export default {
     let gameData = ref(null)
 
     // switch off when deploying
-    const testMode = ref(false)
+    const testMode = ref(true)
 
     const ModalTempResources = ref(false)
     const ModalPermResources = ref(false)
     const ModalContracts = ref(false)
 
     const LastAction = ref()
+    
+    // variables to manage get One token
+    const DOMshowSelection = ref(false)
+    
 
 
     // Connection to the game       
@@ -713,6 +719,12 @@ const LabelplayerProduction = ref()
 const LabelplayerValue = ref()
 const LabelplayerUid = ref()
 const LabelplayerName = ref()
+const LabelTempTokensTakenCounter = ref()
+const LabelgreenTokenTaken = ref()
+const LabelredTokenTaken = ref()
+const LabelyellowTokenTaken = ref()
+const LabelpurpleTokenTaken = ref()
+const LabelblackTokenTaken = ref()
 
 /* values */
 const ValueplayerBlackPerm = ref()
@@ -732,6 +744,12 @@ const ValueplayerProduction = ref()
 const ValueplayerValue = ref()
 const ValueplayerUid = ref()
 const ValueplayerName = ref()
+const ValueTempTokensTakenCounter = ref()
+const ValuegreenTokenTaken = ref()
+const ValueredTokenTaken = ref()
+const ValueyellowTokenTaken = ref()
+const ValuepurpleTokenTaken = ref()
+const ValueblackTokenTaken = ref()
 
   
 
@@ -786,6 +804,12 @@ projectAuth.onAuthStateChanged(user => {
                 LabelplayerValue.value = "z12Player1Scores.value"
                 LabelplayerUid.value = "joinedPlayers.Player1UserID"
                 LabelplayerName.value = "joinedPlayers.Player1Name"
+                LabelTempTokensTakenCounter.value = "z12Player1Scores.TempTokensTakenCounter"
+                LabelgreenTokenTaken.value = "z12Player1Scores.greenTokenTaken"
+                LabelredTokenTaken.value = "z12Player1Scores.redTokenTaken"
+                LabelyellowTokenTaken.value = "z12Player1Scores.yellowTokenTaken"
+                LabelpurpleTokenTaken.value = "z12Player1Scores.purpleTokenTaken"
+                LabelblackTokenTaken.value = "z12Player1Scores.blackTokenTaken"
 
                 /* Values */
                 ValueplayerBlackPerm.value = gameData.value.z12Player1Scores.blackPerm
@@ -805,6 +829,12 @@ projectAuth.onAuthStateChanged(user => {
                 ValueplayerValue.value = gameData.value.z12Player1Scores.value
                 ValueplayerUid.value = gameData.value.joinedPlayers.Player1UserID
                 ValueplayerName.value = gameData.value.joinedPlayers.Player1Name
+                ValueTempTokensTakenCounter.value = gameData.value.z12Player1Scores.TempTokensTakenCounter
+                ValuegreenTokenTaken.value = gameData.value.z12Player1Scores.greenTokenTaken
+                ValueredTokenTaken.value = gameData.value.z12Player1Scores.redTokenTaken
+                ValueyellowTokenTaken.value = gameData.value.z12Player1Scores.yellowTokenTaken
+                ValuepurpleTokenTaken.value = gameData.value.z12Player1Scores.purpleTokenTaken
+                ValueblackTokenTaken.value = gameData.value.z12Player1Scores.blackTokenTaken
               break
             case 1:
               Player1DOM.value = false
@@ -830,6 +860,12 @@ projectAuth.onAuthStateChanged(user => {
                 LabelplayerValue.value = "z13Player2Scores.value"
                 LabelplayerUid.value = "joinedPlayers.Player2UserID"
                 LabelplayerName.value = "joinedPlayers.Player2Name"
+                LabelTempTokensTakenCounter.value = "z13Player2Scores.TempTokensTakenCounter"
+                LabelgreenTokenTaken.value = "z13Player2Scores.greenTokenTaken"
+                LabelredTokenTaken.value = "z13Player2Scores.redTokenTaken"
+                LabelyellowTokenTaken.value = "z13Player2Scores.yellowTokenTaken"
+                LabelpurpleTokenTaken.value = "z13Player2Scores.purpleTokenTaken"
+                LabelblackTokenTaken.value = "z13Player2Scores.blackTokenTaken"
                 /* Values */
                 ValueplayerBlackPerm.value = gameData.value.z13Player2Scores.blackPerm
                 ValueplayerBlackTemp.value = gameData.value.z13Player2Scores.blackTemp
@@ -848,6 +884,12 @@ projectAuth.onAuthStateChanged(user => {
                 ValueplayerValue.value = gameData.value.z13Player2Scores.value
                 ValueplayerUid.value = gameData.value.joinedPlayers.Player2UserID
                 ValueplayerName.value = gameData.value.joinedPlayers.Player2Name
+                ValueTempTokensTakenCounter.value = gameData.value.z13Player2Scores.TempTokensTakenCounter
+                ValuegreenTokenTaken.value = gameData.value.z13Player2Scores.greenTokenTaken
+                ValueredTokenTaken.value = gameData.value.z13Player2Scores.redTokenTaken
+                ValueyellowTokenTaken.value = gameData.value.z13Player2Scores.yellowTokenTaken
+                ValuepurpleTokenTaken.value = gameData.value.z13Player2Scores.purpleTokenTaken
+                ValueblackTokenTaken.value = gameData.value.z13Player2Scores.blackTokenTaken
               break
             case 2:
               Player1DOM.value = false
@@ -873,6 +915,12 @@ projectAuth.onAuthStateChanged(user => {
                 LabelplayerValue.value = "z14Player3Scores.value"
                 LabelplayerUid.value = "joinedPlayers.Player3UserID"
                 LabelplayerName.value = "joinedPlayers.Player3Name"
+                LabelTempTokensTakenCounter.value = "z14Player3Scores.TempTokensTakenCounter"
+                LabelgreenTokenTaken.value = "z14Player3Scores.greenTokenTaken"
+                LabelredTokenTaken.value = "z14Player3Scores.redTokenTaken"
+                LabelyellowTokenTaken.value = "z14Player3Scores.yellowTokenTaken"
+                LabelpurpleTokenTaken.value = "z14Player3Scores.purpleTokenTaken"
+                LabelblackTokenTaken.value = "z14Player3Scores.blackTokenTaken"
                 /* Values */
                 ValueplayerBlackPerm.value = gameData.value.z14Player3Scores.blackPerm
                 ValueplayerBlackTemp.value = gameData.value.z14Player3Scores.blackTemp
@@ -891,6 +939,12 @@ projectAuth.onAuthStateChanged(user => {
                 ValueplayerValue.value = gameData.value.z14Player3Scores.value
                 ValueplayerUid.value = gameData.value.joinedPlayers.Player3UserID
                 ValueplayerName.value = gameData.value.joinedPlayers.Player3Name
+                ValueTempTokensTakenCounter.value = gameData.value.z14Player3Scores.TempTokensTakenCounter
+                ValuegreenTokenTaken.value = gameData.value.z14Player3Scores.greenTokenTaken
+                ValueredTokenTaken.value = gameData.value.z14Player3Scores.redTokenTaken
+                ValueyellowTokenTaken.value = gameData.value.z14Player3Scores.yellowTokenTaken
+                ValuepurpleTokenTaken.value = gameData.value.z14Player3Scores.purpleTokenTaken
+                ValueblackTokenTaken.value = gameData.value.z14Player3Scores.blackTokenTaken
               break
             case 3:
               Player1DOM.value = false
@@ -916,6 +970,12 @@ projectAuth.onAuthStateChanged(user => {
                 LabelplayerValue.value = "z15Player4Scores.value"
                 LabelplayerUid.value = "joinedPlayers.Player4UserID"
                 LabelplayerName.value = "joinedPlayers.Player4Name"
+                LabelTempTokensTakenCounter.value = "z14Player3Scores.TempTokensTakenCounter"
+                LabelgreenTokenTaken.value = "z14Player3Scores.greenTokenTaken"
+                LabelredTokenTaken.value = "z14Player3Scores.redTokenTaken"
+                LabelyellowTokenTaken.value = "z14Player3Scores.yellowTokenTaken"
+                LabelpurpleTokenTaken.value = "z14Player3Scores.purpleTokenTaken"
+                LabelblackTokenTaken.value = "z14Player3Scores.blackTokenTaken"
                 /* Values */
                 ValueplayerBlackPerm.value = gameData.value.z15Player4Scores.blackPerm
                 ValueplayerBlackTemp.value = gameData.value.z15Player4Scores.blackTemp
@@ -934,6 +994,12 @@ projectAuth.onAuthStateChanged(user => {
                 ValueplayerValue.value = gameData.value.z15Player4Scores.value
                 ValueplayerUid.value = gameData.value.joinedPlayers.Player4UserID
                 ValueplayerName.value = gameData.value.joinedPlayers.Player4Name
+                ValueTempTokensTakenCounter.value = gameData.value.z14Player3Scores.TempTokensTakenCounter
+                ValuegreenTokenTaken.value = gameData.value.z14Player3Scores.greenTokenTaken
+                ValueredTokenTaken.value = gameData.value.z14Player3Scores.redTokenTaken
+                ValueyellowTokenTaken.value = gameData.value.z14Player3Scores.yellowTokenTaken
+                ValuepurpleTokenTaken.value = gameData.value.z14Player3Scores.purpleTokenTaken
+                ValueblackTokenTaken.value = gameData.value.z14Player3Scores.blackTokenTaken
               
           }
          
@@ -981,7 +1047,7 @@ const minTokensToTakeTwo = ref(4)
 const getTwoTokens = (colour) => {
   if (colour === "green" && gameData.value.z08marketGreenTokens >= 4) {
             if(ValueplayerCash.value >= 2) {
-                LastAction.value = `Player ${currentPlayer.value + 1} bought 2 Green tokens`
+                LastAction.value = `${ValueplayerName.value} (p${currentPlayer.value + 1}) bought 2 Green tokens`
 
               dbConnectionGame.update({
                 z08marketGreenTokens:  gameData.value.z08marketGreenTokens - 2,
@@ -1004,7 +1070,7 @@ const getTwoTokens = (colour) => {
         } 
   else if (colour === "red" && gameData.value.z07marketRedTokens >= minTokensToTakeTwo.value) {
             if(ValueplayerCash.value >= 2) {
-              LastAction.value = `Player ${currentPlayer.value + 1} bought 2 Red tokens`
+              LastAction.value = `${ValueplayerName.value} (p${currentPlayer.value + 1})  bought 2 Red tokens`
 
               dbConnectionGame.update({
                 z07marketRedTokens:  gameData.value.z07marketRedTokens - 2,
@@ -1028,7 +1094,7 @@ const getTwoTokens = (colour) => {
   else if (colour === "yellow" && gameData.value.z09marketYellowTokens >= 4) {
             
             if(ValueplayerCash.value >= 2) {
-              LastAction.value = `Player ${currentPlayer.value + 1} bought 2 Yellow tokens`
+              LastAction.value = `${ValueplayerName.value} (p${currentPlayer.value + 1})  bought 2 Yellow tokens`
 
               dbConnectionGame.update({
                 z09marketYellowTokens:  gameData.value.z09marketYellowTokens - 2,
@@ -1052,7 +1118,7 @@ const getTwoTokens = (colour) => {
   else if (colour === "purple" && gameData.value.z10marketPurpleTokens >= 4) {
             
             if(ValueplayerCash.value >= 2) {
-              LastAction.value = `Player ${currentPlayer.value + 1} bought 2 Purple tokens`
+              LastAction.value = `${ValueplayerName.value} (p${currentPlayer.value + 1})  bought 2 Purple tokens`
 
               dbConnectionGame.update({
                 z10marketPurpleTokens:  gameData.value.z10marketPurpleTokens - 2,
@@ -1075,7 +1141,7 @@ const getTwoTokens = (colour) => {
         }
   else if (colour === "black" && gameData.value.z11marketBlackTokens >= 4) {
             if(ValueplayerCash.value >= 2) {
-              LastAction.value = `Player ${currentPlayer.value + 1} bought 2 Black tokens`
+              LastAction.value = `${ValueplayerName.value} (p${currentPlayer.value + 1})  bought 2 Black tokens`
 
               dbConnectionGame.update({
                 z11marketBlackTokens:  gameData.value.z11marketBlackTokens - 2,
@@ -1102,112 +1168,169 @@ const getTwoTokens = (colour) => {
 const getOneToken = (colour) => {
   if (colour === "green" && gameData.value.z08marketGreenTokens >= 1) {
             if(ValueplayerCash.value >= 1) {
-              LastAction.value = `Player ${currentPlayer.value + 1} bought 1 Green token`
+              LastAction.value = `${ValueplayerName.value} (p${currentPlayer.value + 1}) bought 1 Green token`
 
               dbConnectionGame.update({
                 z08marketGreenTokens:  gameData.value.z08marketGreenTokens - 1,
                 [LabelplayerGreenTemp.value]: ValueplayerGreenTemp.value + 1,
                 [LabelplayerCash.value]: ValueplayerCash.value - 1,
-                lastAction: LastAction.value 
+                lastAction: LastAction.value,
+                [LabelTempTokensTakenCounter.value]: ValueTempTokensTakenCounter.value + 1,
+                [LabelgreenTokenTaken.value]: true
               })
 
-              // close modal
-              ModalTempResources.value = false
-              
+              setTimeout(function(){ 
+                
+                  // conditional - close modal and end turn
+                  if(ValueTempTokensTakenCounter.value === 3) {
+                      // close modal
+                    ModalTempResources.value = false
+                    // Advance turn
+                    nextPlayer() 
+                  }
+
+              },50)
+
               M.toast({html: `You bought 1 ${colour}  token`})
-              nextPlayer()  
+              
             }
             else {
               M.toast({html: 'You don\'t have enough cash'})
             }
-            console.log('get two '+ colour + " tokens --- script triggered")
+            console.log('get 1 '+ colour + " token --- script triggered")
         } 
   else if (colour === "red" && gameData.value.z07marketRedTokens >= 1) {
             if(ValueplayerCash.value >= 1) {
-              LastAction.value = `Player ${currentPlayer.value + 1} bought 1 Red token`
+              LastAction.value = `${ValueplayerName.value} (p${currentPlayer.value + 1})  bought 1 Red token`
 
               dbConnectionGame.update({
                 z07marketRedTokens:  gameData.value.z07marketRedTokens - 1,
                 [LabelplayerRedTemp.value]: ValueplayerRedTemp.value + 1,
                 [LabelplayerCash.value]: ValueplayerCash.value - 1,
-                lastAction: LastAction.value  
+                lastAction: LastAction.value,  
+                [LabelTempTokensTakenCounter.value]: ValueTempTokensTakenCounter.value + 1,
+                [LabelredTokenTaken.value]: true
               })
-              
-              // close modal
-              ModalTempResources.value = false
+
+              setTimeout(function(){ 
+                
+                  // conditional - close modal and end turn
+                  if(ValueTempTokensTakenCounter.value === 3) {
+                      // close modal
+                    ModalTempResources.value = false
+                    // Advance turn
+                    nextPlayer() 
+                  }
+
+              },50)
 
               M.toast({html: `You bought 1 ${colour}  token`})
-              nextPlayer()  
+              
             }
             else {
               M.toast({html: 'You don\'t have enough cash'})
             }
-            console.log('get two '+ colour + " tokens --- script triggered")
+            console.log('get 1 '+ colour + " token --- script triggered")
         } 
   else if (colour === "yellow" && gameData.value.z09marketYellowTokens >= 1) {
-            if(ValueplayerCash.value >= 1) {
-              LastAction.value = `Player ${currentPlayer.value + 1} bought 1 Yellow token`
+            if(ValueplayerCash.value >= 1 && ValueTempTokensTakenCounter.value < 3) {
+              LastAction.value = `${ValueplayerName.value} (p${currentPlayer.value + 1}) bought 1 Yellow token`
 
-              dbConnectionGame.update({
+             dbConnectionGame.update({
                 z09marketYellowTokens:  gameData.value.z09marketYellowTokens - 1,
                 [LabelplayerYellowTemp.value]: ValueplayerYellowTemp.value + 1,
                 [LabelplayerCash.value]: ValueplayerCash.value - 1,
-                lastAction: LastAction.value  
+                lastAction: LastAction.value,  
+                [LabelTempTokensTakenCounter.value]: ValueTempTokensTakenCounter.value + 1,
+                [LabelyellowTokenTaken.value]: true
               })
-              
-              // close modal
-              ModalTempResources.value = false
 
+              setTimeout(function(){ 
+                
+                  // conditional - close modal and end turn
+                  if(ValueTempTokensTakenCounter.value === 3) {
+                      // close modal
+                    ModalTempResources.value = false
+                    // Advance turn
+                    nextPlayer() 
+                  }
+
+              },50)
+                               
               M.toast({html: `You bought 1 ${colour}  token`})
-              nextPlayer()  
+              
             }
+            
             else {
               M.toast({html: 'You don\'t have enough cash'})
             }
-            console.log('get two '+ colour + " tokens --- script triggered")
+            console.log('get 1 '+ colour + " token --- script triggered")
         } 
   else if (colour === "purple" && gameData.value.z10marketPurpleTokens >= 1) {
             if(ValueplayerCash.value >= 1) {
-              LastAction.value = `Player ${currentPlayer.value + 1} bought 1 Purple token`
+              LastAction.value = `${ValueplayerName.value} (p${currentPlayer.value + 1})  bought 1 Purple token`
 
               dbConnectionGame.update({
                 z10marketPurpleTokens:  gameData.value.z10marketPurpleTokens - 1,
                 [LabelplayerPurpleTemp.value]: ValueplayerPurpleTemp.value + 1,
                 [LabelplayerCash.value]: ValueplayerCash.value - 1,
-                lastAction: LastAction.value 
+                lastAction: LastAction.value, 
+                [LabelTempTokensTakenCounter.value]: ValueTempTokensTakenCounter.value + 1,
+                [LabelpurpleTokenTaken.value]: true
               })
-              // close modal
-              ModalTempResources.value = false
+
+              setTimeout(function(){ 
+                
+                  // conditional - close modal and end turn
+                  if(ValueTempTokensTakenCounter.value === 3) {
+                      // close modal
+                    ModalTempResources.value = false
+                    // Advance turn
+                    nextPlayer() 
+                  }
+
+              },50)
 
               M.toast({html: `You bought 1 ${colour}  token`})
-              nextPlayer()  
+               
             }
             else {
               M.toast({html: 'You don\'t have enough cash'})
             }
-            console.log('get two '+ colour + " tokens --- script triggered")
+            console.log('get 1 '+ colour + " token --- script triggered")
         }
   else if (colour === "black" && gameData.value.z11marketBlackTokens >= 1) {
             if(ValueplayerCash.value >= 1) {
-              LastAction.value = `Player ${currentPlayer.value + 1} bought 1 Black token`
+              LastAction.value = `${ValueplayerName.value} (p${currentPlayer.value + 1})  bought 1 Black token`
 
               dbConnectionGame.update({
                 z11marketBlackTokens:  gameData.value.z11marketBlackTokens - 1,
                 [LabelplayerBlackTemp.value]: ValueplayerBlackTemp.value + 1,
                 [LabelplayerCash.value]: ValueplayerCash.value - 1,
-                lastAction: LastAction.value 
+                lastAction: LastAction.value, 
+                [LabelTempTokensTakenCounter.value]: ValueTempTokensTakenCounter.value + 1,
+                [LabelblackTokenTaken.value]: true
               })
-              
-              // close modal
-              ModalTempResources.value = false
+
+              setTimeout(function(){ 
+                
+                  // conditional - close modal and end turn
+                  if(ValueTempTokensTakenCounter.value === 3) {
+                      // close modal
+                    ModalTempResources.value = false
+                    // Advance turn
+                    nextPlayer() 
+                  }
+
+              },50)
 
               M.toast({html: `You bought 1 ${colour}  token`})
-              nextPlayer()  
+              
             }
             else {
               M.toast({html: 'You don\'t have enough cash'})
             }
-            console.log('get two '+ colour + " tokens --- script triggered")
+            console.log('get 1 '+ colour + " token --- script triggered")
         }
 }
 
@@ -1264,7 +1387,7 @@ const BuyPermResource = () => {
             CardValue.value = ValueplayerBlackPerm.value           
         }
 
-        LastAction.value = `Player ${currentPlayer.value + 1} bought a ${permCardColour} permanent resource`
+        LastAction.value = `${ValueplayerName.value} (p${currentPlayer.value + 1})  bought a ${permCardColour} permanent resource`
 
          /* Update purchagse in Firebase */
         dbConnectionGame.update({
@@ -1341,7 +1464,7 @@ const BuyContract = () => {
       ) {
                 
         // Player has enough resources
-           LastAction.value = `Player ${currentPlayer.value + 1} completed a contract`
+           LastAction.value = `${ValueplayerName.value} (p${currentPlayer.value + 1})  completed a contract`
          /* Update purchagse in Firebase */
         dbConnectionGame.update({         
         // Update player  values
@@ -1445,6 +1568,18 @@ console.log('Contract card function triggered.')
 
 // Testing scripts
 function nextPlayer() {
+  // reset token counters in DB to update DOM
+  dbConnectionGame.update({
+    [LabelTempTokensTakenCounter.value]: 0,
+    [LabelgreenTokenTaken.value]: false,
+    [LabelredTokenTaken.value]: false,
+    [LabelyellowTokenTaken.value]: false,
+    [LabelpurpleTokenTaken.value]: false,
+    [LabelblackTokenTaken.value]: false
+      })
+
+  DOMshowSelection.value = true
+
   // Next player advances
   if(currentPlayer.value < gameData.value.numPlayers - 1 ) {
     dbConnectionGame.update({
@@ -1456,7 +1591,7 @@ function nextPlayer() {
   })
   }
   // Updated DOM variables to show which player is action in the DOM
-   switch (currentPlayer.value) {
+switch (currentPlayer.value) {
             case 0:
               // DOM ELEMENTS
               Player1DOM.value = true
@@ -1482,6 +1617,12 @@ function nextPlayer() {
                 LabelplayerValue.value = "z12Player1Scores.value"
                 LabelplayerUid.value = "joinedPlayers.Player1UserID"
                 LabelplayerName.value = "joinedPlayers.Player1Name"
+                LabelTempTokensTakenCounter.value = "z12Player1Scores.TempTokensTakenCounter"
+                LabelgreenTokenTaken.value = "z12Player1Scores.greenTokenTaken"
+                LabelredTokenTaken.value = "z12Player1Scores.redTokenTaken"
+                LabelyellowTokenTaken.value = "z12Player1Scores.yellowTokenTaken"
+                LabelpurpleTokenTaken.value = "z12Player1Scores.purpleTokenTaken"
+                LabelblackTokenTaken.value = "z12Player1Scores.blackTokenTaken"
 
                 /* Values */
                 ValueplayerBlackPerm.value = gameData.value.z12Player1Scores.blackPerm
@@ -1501,6 +1642,12 @@ function nextPlayer() {
                 ValueplayerValue.value = gameData.value.z12Player1Scores.value
                 ValueplayerUid.value = gameData.value.joinedPlayers.Player1UserID
                 ValueplayerName.value = gameData.value.joinedPlayers.Player1Name
+                ValueTempTokensTakenCounter.value = gameData.value.z12Player1Scores.TempTokensTakenCounter
+                ValuegreenTokenTaken.value = gameData.value.z12Player1Scores.greenTokenTaken
+                ValueredTokenTaken.value = gameData.value.z12Player1Scores.redTokenTaken
+                ValueyellowTokenTaken.value = gameData.value.z12Player1Scores.yellowTokenTaken
+                ValuepurpleTokenTaken.value = gameData.value.z12Player1Scores.purpleTokenTaken
+                ValueblackTokenTaken.value = gameData.value.z12Player1Scores.blackTokenTaken
               break
             case 1:
               Player1DOM.value = false
@@ -1526,6 +1673,12 @@ function nextPlayer() {
                 LabelplayerValue.value = "z13Player2Scores.value"
                 LabelplayerUid.value = "joinedPlayers.Player2UserID"
                 LabelplayerName.value = "joinedPlayers.Player2Name"
+                LabelTempTokensTakenCounter.value = "z13Player2Scores.TempTokensTakenCounter"
+                LabelgreenTokenTaken.value = "z13Player2Scores.greenTokenTaken"
+                LabelredTokenTaken.value = "z13Player2Scores.redTokenTaken"
+                LabelyellowTokenTaken.value = "z13Player2Scores.yellowTokenTaken"
+                LabelpurpleTokenTaken.value = "z13Player2Scores.purpleTokenTaken"
+                LabelblackTokenTaken.value = "z13Player2Scores.blackTokenTaken"
                 /* Values */
                 ValueplayerBlackPerm.value = gameData.value.z13Player2Scores.blackPerm
                 ValueplayerBlackTemp.value = gameData.value.z13Player2Scores.blackTemp
@@ -1544,6 +1697,12 @@ function nextPlayer() {
                 ValueplayerValue.value = gameData.value.z13Player2Scores.value
                 ValueplayerUid.value = gameData.value.joinedPlayers.Player2UserID
                 ValueplayerName.value = gameData.value.joinedPlayers.Player2Name
+                ValueTempTokensTakenCounter.value = gameData.value.z13Player2Scores.TempTokensTakenCounter
+                ValuegreenTokenTaken.value = gameData.value.z13Player2Scores.greenTokenTaken
+                ValueredTokenTaken.value = gameData.value.z13Player2Scores.redTokenTaken
+                ValueyellowTokenTaken.value = gameData.value.z13Player2Scores.yellowTokenTaken
+                ValuepurpleTokenTaken.value = gameData.value.z13Player2Scores.purpleTokenTaken
+                ValueblackTokenTaken.value = gameData.value.z13Player2Scores.blackTokenTaken
               break
             case 2:
               Player1DOM.value = false
@@ -1569,6 +1728,12 @@ function nextPlayer() {
                 LabelplayerValue.value = "z14Player3Scores.value"
                 LabelplayerUid.value = "joinedPlayers.Player3UserID"
                 LabelplayerName.value = "joinedPlayers.Player3Name"
+                LabelTempTokensTakenCounter.value = "z14Player3Scores.TempTokensTakenCounter"
+                LabelgreenTokenTaken.value = "z14Player3Scores.greenTokenTaken"
+                LabelredTokenTaken.value = "z14Player3Scores.redTokenTaken"
+                LabelyellowTokenTaken.value = "z14Player3Scores.yellowTokenTaken"
+                LabelpurpleTokenTaken.value = "z14Player3Scores.purpleTokenTaken"
+                LabelblackTokenTaken.value = "z14Player3Scores.blackTokenTaken"
                 /* Values */
                 ValueplayerBlackPerm.value = gameData.value.z14Player3Scores.blackPerm
                 ValueplayerBlackTemp.value = gameData.value.z14Player3Scores.blackTemp
@@ -1587,6 +1752,12 @@ function nextPlayer() {
                 ValueplayerValue.value = gameData.value.z14Player3Scores.value
                 ValueplayerUid.value = gameData.value.joinedPlayers.Player3UserID
                 ValueplayerName.value = gameData.value.joinedPlayers.Player3Name
+                ValueTempTokensTakenCounter.value = gameData.value.z14Player3Scores.TempTokensTakenCounter
+                ValuegreenTokenTaken.value = gameData.value.z14Player3Scores.greenTokenTaken
+                ValueredTokenTaken.value = gameData.value.z14Player3Scores.redTokenTaken
+                ValueyellowTokenTaken.value = gameData.value.z14Player3Scores.yellowTokenTaken
+                ValuepurpleTokenTaken.value = gameData.value.z14Player3Scores.purpleTokenTaken
+                ValueblackTokenTaken.value = gameData.value.z14Player3Scores.blackTokenTaken
               break
             case 3:
               Player1DOM.value = false
@@ -1612,6 +1783,12 @@ function nextPlayer() {
                 LabelplayerValue.value = "z15Player4Scores.value"
                 LabelplayerUid.value = "joinedPlayers.Player4UserID"
                 LabelplayerName.value = "joinedPlayers.Player4Name"
+                LabelTempTokensTakenCounter.value = "z14Player3Scores.TempTokensTakenCounter"
+                LabelgreenTokenTaken.value = "z14Player3Scores.greenTokenTaken"
+                LabelredTokenTaken.value = "z14Player3Scores.redTokenTaken"
+                LabelyellowTokenTaken.value = "z14Player3Scores.yellowTokenTaken"
+                LabelpurpleTokenTaken.value = "z14Player3Scores.purpleTokenTaken"
+                LabelblackTokenTaken.value = "z14Player3Scores.blackTokenTaken"
                 /* Values */
                 ValueplayerBlackPerm.value = gameData.value.z15Player4Scores.blackPerm
                 ValueplayerBlackTemp.value = gameData.value.z15Player4Scores.blackTemp
@@ -1630,6 +1807,12 @@ function nextPlayer() {
                 ValueplayerValue.value = gameData.value.z15Player4Scores.value
                 ValueplayerUid.value = gameData.value.joinedPlayers.Player4UserID
                 ValueplayerName.value = gameData.value.joinedPlayers.Player4Name
+                ValueTempTokensTakenCounter.value = gameData.value.z14Player3Scores.TempTokensTakenCounter
+                ValuegreenTokenTaken.value = gameData.value.z14Player3Scores.greenTokenTaken
+                ValueredTokenTaken.value = gameData.value.z14Player3Scores.redTokenTaken
+                ValueyellowTokenTaken.value = gameData.value.z14Player3Scores.yellowTokenTaken
+                ValuepurpleTokenTaken.value = gameData.value.z14Player3Scores.purpleTokenTaken
+                ValueblackTokenTaken.value = gameData.value.z14Player3Scores.blackTokenTaken
               
           }
 
@@ -1687,13 +1870,11 @@ const NotActivePlayer = () => {
 }
 
 const testFunction1 = () => {
-  M.toast({html: 'Great job!'})
-  console.log('Test function 1')
+  console.log('DOM tokens balance value: ', ValueTempTokensTakenCounter.value)
 
 }
 const testFunction2 = () => {
-  M.toast({html: 'It is not your turn'})
-  console.log('Test function 2')
+  console.log('DOM tokens balance value: ', ValueTempTokensTakenCounter.value)
 
 }
 
@@ -1703,7 +1884,12 @@ const testFunction2 = () => {
                   resourceCardBackground, nextPlayer, Player1DOM, Player2DOM, Player3DOM, Player4DOM, ValueplayerUid, ValueplayerName,
                   getTwoTokens, getOneToken, BuyPermResource, BuyContract, testFunction1, testFunction2, ModalTempResources,
                   ModalPermResources, ModalContracts, JoinPlayer,
-                  NotActivePlayer
+                  NotActivePlayer, 
+                  
+                  // Temp tokens counters and class update variables
+                  DOMshowSelection,
+                  ValueTempTokensTakenCounter, ValuegreenTokenTaken, ValueredTokenTaken, ValueyellowTokenTaken, 
+                  ValuepurpleTokenTaken, ValueblackTokenTaken
         }
   }
 }

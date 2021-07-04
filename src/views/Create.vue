@@ -276,7 +276,13 @@ const shuffle = (array) => {
       "production": playerStartProduction,
       "value": playerStartValue,
       "costs": playerStartCost,
-      "debtors": playerStartDebtors
+      "debtors": playerStartDebtors,
+      "TempTokensTakenCounter": 0,
+      "greenTokenTaken": false,
+      "redTokenTaken": false,
+      "yellowTokenTaken": false,
+      "purpleTokenTaken": false,
+      "blackTokenTaken": false
     }
 
     const player2Scores = {
@@ -294,7 +300,13 @@ const shuffle = (array) => {
       "production": playerStartProduction,
       "value": playerStartValue,
       "costs": playerStartCost,
-      "debtors": playerStartDebtors
+      "debtors": playerStartDebtors,
+      "TempTokensTakenCounter": 0,
+      "greenTokenTaken": false,
+      "redTokenTaken": false,
+      "yellowTokenTaken": false,
+      "purpleTokenTaken": false,
+      "blackTokenTaken": false
     }
 
     const player3Scores = {
@@ -312,7 +324,13 @@ const shuffle = (array) => {
       "production": playerStartProduction,
       "value": playerStartValue,
       "costs": playerStartCost,
-      "debtors": playerStartDebtors
+      "debtors": playerStartDebtors,
+      "TempTokensTakenCounter": 0,
+      "greenTokenTaken": false,
+      "redTokenTaken": false,
+      "yellowTokenTaken": false,
+      "purpleTokenTaken": false,
+      "blackTokenTaken": false
     }
 
     const player4Scores = {
@@ -330,7 +348,13 @@ const shuffle = (array) => {
       "production": playerStartProduction,
       "value": playerStartValue,
       "costs": playerStartCost,
-      "debtors": playerStartDebtors
+      "debtors": playerStartDebtors,
+      "TempTokensTakenCounter": 0,
+      "greenTokenTaken": false,
+      "redTokenTaken": false,
+      "yellowTokenTaken": false,
+      "purpleTokenTaken": false,
+      "blackTokenTaken": false
     }
 
     const playerScoreCash = new Array(resetValues.numberOfPlayers).fill(playerStartCash);
