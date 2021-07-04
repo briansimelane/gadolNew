@@ -407,8 +407,9 @@ const shuffle = (array) => {
               maxnumberofplayers: resetValues.numberOfPlayers,
               lastAction: "",
 
-// variables haven't been linked
             gstate: gameState,
+            modalPoints: false,
+            modalContracts: false,
             facilitator: facilitator,
             currentPlayer: currentPlayer,
             joinedPlayers: joinedPlayers,

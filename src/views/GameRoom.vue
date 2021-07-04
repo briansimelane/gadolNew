@@ -456,8 +456,7 @@
                 <table>
                   <tr>
                     <td><button class="btn waves-effect waves-light" @click="nextPlayer()">Next player</button></td>
-                    <td><button class="btn waves-effect waves-light" v-on="gameData.currentPlayer == 0 || gameData.currentPlayer == 1 ? {click: () => testFunction1()}: 
-                      {click: () => testFunction2() }">Test fuction</button></td>
+                    <td><button class="btn waves-effect waves-light" @click="testFunction1()">Test fuction</button></td>
                   </tr>
                 </table>    
                 
@@ -649,6 +648,68 @@
       </div>
     </teleport>
 
+  <!-- Modal: Game End POINTS -->
+<teleport to='#modals'>
+  <div id="ModalGameEndPoints" v-if="ModalGameEndPoints">
+    <div class="modal-content">
+      
+
+      <div class="row">
+        <div class="col s12 center">
+          <br>
+          <br>
+          <h4 class="center">Game Over! Highest points.</h4>
+          <br>
+          <br>  
+          <h6>{{ ValueplayerName }} has won.</h6>
+
+        </div>
+
+        
+      </div>
+      
+      <hr>
+      
+    </div>
+    <div class="center">
+      <button class="btn waves-effect waves-light red darken-3" @click="ModalGameEndPoints = !ModalGameEndPoints">Close
+      </button>
+    </div>
+    <hr>
+  </div>
+</teleport>
+
+
+  <!-- Modal: Game End CONTRACTS -->
+<teleport to='#modals'>
+  <div id="ModalGameEndContracts" v-if="ModalGameEndContracts">
+    <div class="modal-content">
+      
+
+      <div class="row">
+        <div class="col s12 center">
+          <br>
+          <br>
+          <h4 class="center">Game Over! Contract completed.</h4>
+          <br>
+          <br>  
+          <h6>{{ ValueplayerName }} has won.</h6>
+
+        </div>
+
+        
+      </div>
+      
+      <hr>
+      
+    </div>
+    <div class="center">
+      <button class="btn waves-effect waves-light red darken-3" @click="ModalGameEndContracts = !ModalGameEndContracts" >Close
+      </button>
+    </div>
+    <hr>
+  </div>
+</teleport>
 
 
   </div>
@@ -684,6 +745,8 @@ export default {
     const ModalTempResources = ref(false)
     const ModalPermResources = ref(false)
     const ModalContracts = ref(false)
+    const ModalGameEndPoints = ref(false)
+    const ModalGameEndContracts = ref(false)
 
     const LastAction = ref()
     
@@ -777,6 +840,11 @@ projectAuth.onAuthStateChanged(user => {
         
         // set current player  
         currentPlayer.value = gameData.value.currentPlayer
+
+        // establish game end modals state
+        ModalGameEndPoints.value = gameData.value.modalPoints
+        ModalGameEndContracts.value = gameData.value.modalContracts
+
 
         switch (currentPlayer.value) {
             case 0:
@@ -1568,7 +1636,40 @@ console.log('Contract card function triggered.')
 
 // Testing scripts
 function nextPlayer() {
-  // reset token counters in DB to update DOM
+  // Set time out put in to allow data to come back from the server
+  setTimeout(function (){
+    // Game End Tests
+// Test for the points rules
+if (gameData.value.rules === "points" &&
+    gameData.value.z12Player1Scores.production >= 15 ||
+    gameData.value.z13Player2Scores.production >= 15 ||
+    gameData.value.z14Player3Scores.production >= 15 || 
+    gameData.value.z15Player4Scores.production >= 15
+    ) 
+    {
+      // Trigger Points modal via the DB
+        dbConnectionGame.update({
+          modalPoints: true
+            })
+    }
+
+// Test for contract rules
+else if (gameData.value.rules === "contracts" &&
+         gameData.value.z12Player1Scores.value > 0 ||
+         gameData.value.z13Player2Scores.value > 0 ||
+         gameData.value.z14Player3Scores.value > 0 || 
+         gameData.value.z15Player4Scores.value > 0
+         ) 
+      {
+        // Trigger Contracts modal via the DB
+          dbConnectionGame.update({
+            modalContracts: true
+              })
+      }
+
+// Advance player
+else {
+ // reset token counters in DB to update DOM
   dbConnectionGame.update({
     [LabelTempTokensTakenCounter.value]: 0,
     [LabelgreenTokenTaken.value]: false,
@@ -1816,10 +1917,17 @@ switch (currentPlayer.value) {
               
           }
 
-  // Script end
-  console.log('Next player script run')
+        // Script end
+        console.log('Next player script run')
+      }
+
+
+  },60)
+
 }
 
+
+ 
 
 const JoinPlayer = (role) => {
   
@@ -1870,9 +1978,25 @@ const NotActivePlayer = () => {
 }
 
 const testFunction1 = () => {
-  console.log('DOM tokens balance value: ', ValueTempTokensTakenCounter.value)
+// Test for the points rules
+if(gameData.value.rules === "points" &&
+    gameData.value.z12Player1Scores.production >= 15 ||
+    gameData.value.z13Player2Scores.production >= 15 ||
+    gameData.value.z14Player3Scores.production >= 15 || 
+    gameData.value.z15Player4Scores.production >= 15){
+  var resultsPoints = true
+} else {
+  resultsPoints = false
+}
+console.log("Are rules points? ", gameData.value.rules === "points")
+console.log("Has player 1 won? ",gameData.value.z12Player1Scores.production >= 15)
+console.log("Has player 2 won? ",gameData.value.z13Player2Scores.production >= 15)
+console.log("Has player 3 won? ",gameData.value.z14Player3Scores.production >= 15)
+console.log("Has player 4 won? ",gameData.value.z15Player4Scores.production >= 15)
+console.log("All conditions met? ", resultsPoints)
 
 }
+
 const testFunction2 = () => {
   console.log('DOM tokens balance value: ', ValueTempTokensTakenCounter.value)
 
@@ -1882,8 +2006,11 @@ const testFunction2 = () => {
         return { testMode, user, gameData, contracts, handleContractCard, contractCardID,
                   contractAfford, resourceCardID, resourceAfford, handleResourceCard,
                   resourceCardBackground, nextPlayer, Player1DOM, Player2DOM, Player3DOM, Player4DOM, ValueplayerUid, ValueplayerName,
-                  getTwoTokens, getOneToken, BuyPermResource, BuyContract, testFunction1, testFunction2, ModalTempResources,
-                  ModalPermResources, ModalContracts, JoinPlayer,
+                  getTwoTokens, getOneToken, BuyPermResource, BuyContract, testFunction1, testFunction2, 
+                  // Modals
+                  ModalTempResources, ModalPermResources, ModalContracts, ModalGameEndPoints, ModalGameEndContracts,
+                  
+                  JoinPlayer,
                   NotActivePlayer, 
                   
                   // Temp tokens counters and class update variables
