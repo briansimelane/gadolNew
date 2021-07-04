@@ -450,7 +450,7 @@
 
           <div class="gameChat">
             <!-- Test area for actions - Area to be removed -->
-              <div class="tempActionsTestArea white-text" v-if="testMode">
+              <div class="tempActionsTestArea white-text" v-if="user.uid == gameData.facilitator">
                Facilitator Area
                 
                 <table>
