@@ -309,6 +309,31 @@ export default {
       M.AutoInit()
     })
 
+    const JoinPlayer = (seatNumber) => {
+      if (!gameData.value || !gameData.value.players) return
+      const idx = (seatNumber || 1) - 1
+      const targetSeat = gameData.value.players[idx]
+      if (!targetSeat || targetSeat.joined) {
+        M.toast({ html: 'Seat is already taken' })
+        return
+      }
+      let name = prompt(`Enter your name to claim Seat ${seatNumber}:`)
+      if (!name || !name.trim()) return
+
+      const updatedPlayers = JSON.parse(JSON.stringify(gameData.value.players))
+      const pCopy = updatedPlayers[idx]
+      pCopy.joined = true
+      pCopy.name = name.trim()
+      pCopy.online = true
+      pCopy.uid = 'player-' + seatNumber
+
+      updateDoc(roomDocRef, {
+        players: updatedPlayers
+      }).then(() => {
+        M.toast({ html: `Welcome, ${name.trim()}! You joined Seat ${seatNumber}.` })
+      })
+    }
+
     // Watch for room snapshot to prompt player name on first join
     watch(gameData, (newGameData) => {
       if (newGameData && role.value === 'PLAYER' && seat.value) {
@@ -698,7 +723,8 @@ export default {
       getPlayerHeaderColor,
       getTwoTokens,
       getOneToken,
-      handleZoomAction
+      handleZoomAction,
+      JoinPlayer
     }
   }
 }
