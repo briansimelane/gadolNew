@@ -61,12 +61,24 @@ const restoreSession = async () => {
           seat.value = storedSeat ? parseInt(storedSeat) : null
           userEmail.value = storedEmail
           userName.value = storedName
-        } else {
+        } else if (roomSnap.exists() && roomSnap.data().status !== 'OPEN') {
           clearSession()
           return { success: false, message: 'This game has ended' }
+        } else {
+          // If doc snapshot check is inconclusive, keep stored session active
+          role.value = storedRole
+          roomId.value = storedRoomId
+          seat.value = storedSeat ? parseInt(storedSeat) : null
+          userEmail.value = storedEmail
+          userName.value = storedName
         }
       } catch (err) {
-        clearSession()
+        console.warn('Error fetching room snapshot during restoreSession, falling back to local session:', err)
+        role.value = storedRole
+        roomId.value = storedRoomId
+        seat.value = storedSeat ? parseInt(storedSeat) : null
+        userEmail.value = storedEmail
+        userName.value = storedName
       }
     } else {
       role.value = storedRole
@@ -81,9 +93,10 @@ const restoreSession = async () => {
 
 const loginWithCode = async (rawCode) => {
   if (!rawCode) return { success: false, message: 'Code cannot be empty' }
-  const code = rawCode.trim().toUpperCase()
+  const clean = (s) => (s || '').replace(/[^A-Za-z0-9]/g, '').toUpperCase()
+  const code = clean(rawCode)
 
-  if (code === 'ADMIN-MASTER') {
+  if (code === 'ADMINMASTER') {
     setSession('ADMIN', null, null, null, 'Master Admin')
     return { success: true }
   }
@@ -108,7 +121,7 @@ const loginWithCode = async (rawCode) => {
       if (matched) return
       const room = docSnap.data()
 
-      if (room.facilitatorCode === code) {
+      if (clean(room.facilitatorCode) === code) {
         matched = true
         resolvedRole = 'FACILITATOR'
         resolvedRoomId = docSnap.id
@@ -116,7 +129,7 @@ const loginWithCode = async (rawCode) => {
       
       if (!matched && room.seatCodes) {
         for (const [seatKey, seatVal] of Object.entries(room.seatCodes)) {
-          if (seatVal === code) {
+          if (clean(seatVal) === code) {
             matched = true
             resolvedRole = 'PLAYER'
             resolvedRoomId = docSnap.id
@@ -129,7 +142,7 @@ const loginWithCode = async (rawCode) => {
 
     if (matched) {
       setSession(resolvedRole, resolvedRoomId, resolvedSeat, null, null)
-      return { success: true }
+      return { success: true, roomId: resolvedRoomId, role: resolvedRole }
     } else {
       return { success: false, message: 'Invalid access code' }
     }

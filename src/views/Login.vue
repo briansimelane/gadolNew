@@ -160,10 +160,11 @@ export default {
 
       if (res.success) {
         M.toast({ html: 'Successfully logged in!' })
-        if (role.value === 'ADMIN' || role.value === 'FACILITATOR') {
+        if (res.roomId || roomId.value) {
+          const targetId = res.roomId || roomId.value
+          router.push({ name: 'GameRoom', params: { id: targetId } })
+        } else if (role.value === 'ADMIN' || role.value === 'FACILITATOR') {
           router.push({ name: 'FacilitatorHub' })
-        } else {
-          router.push({ name: 'GameRoom', params: { id: roomId.value } })
         }
       } else {
         playerError.value = res.message

@@ -7,7 +7,7 @@ import useSession from '../composables/useSession'
 const homeGuard = async (to, from, next) => {
   const { restoreSession, role, roomId } = useSession()
   await restoreSession()
-  if (role.value === 'PLAYER' && roomId.value) {
+  if (roomId.value && (role.value === 'PLAYER' || role.value === 'FACILITATOR')) {
     next({ name: 'GameRoom', params: { id: roomId.value } })
   } else if (role.value === 'FACILITATOR' || role.value === 'ADMIN') {
     next({ name: 'FacilitatorHub' })
@@ -19,7 +19,7 @@ const homeGuard = async (to, from, next) => {
 const loginGuard = async (to, from, next) => {
   const { restoreSession, role, roomId } = useSession()
   await restoreSession()
-  if (role.value === 'PLAYER' && roomId.value) {
+  if (roomId.value && (role.value === 'PLAYER' || role.value === 'FACILITATOR')) {
     next({ name: 'GameRoom', params: { id: roomId.value } })
   } else if (role.value === 'FACILITATOR' || role.value === 'ADMIN') {
     next({ name: 'FacilitatorHub' })
