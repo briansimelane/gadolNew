@@ -5,7 +5,7 @@
 
     <div class="container-fluid">
       <div class="col s12 space-left margin-bottom-small center pageHeadingSmall">
-        <h6 class="white-text"> Welcome to <span style="font-weight: bold;">{{ gameData.name }}</span> - - - Game Room ID: <span class="red-text grey lighten-3 hoverable">{{ id }}</span> <span style="font-style: italic;">(Share this ID with other players)</span></h6>
+        <h6 class="white-text"> Welcome to <span style="font-weight: bold;">{{ gameData.name }}</span></h6>
       </div>
     </div>
 
@@ -86,40 +86,45 @@
             :key="card.Ref"
             :card="card"
             color="green"
-            :interactive="false"
+            :interactive="true"
             :dimmed="true"
+            @select="c => handleCardClick(c, 'upcoming', 'green')"
           />
           <ResourceCard
             v-for="card in gameData.z02yellowCards.slice(2, 3)"
             :key="card.Ref"
             :card="card"
             color="yellow"
-            :interactive="false"
+            :interactive="true"
             :dimmed="true"
+            @select="c => handleCardClick(c, 'upcoming', 'yellow')"
           />
           <ResourceCard
             v-for="card in gameData.z03redCards.slice(2, 3)"
             :key="card.Ref"
             :card="card"
             color="red"
-            :interactive="false"
+            :interactive="true"
             :dimmed="true"
+            @select="c => handleCardClick(c, 'upcoming', 'red')"
           />
           <ResourceCard
             v-for="card in gameData.z04purpleCards.slice(2, 3)"
             :key="card.Ref"
             :card="card"
             color="purple"
-            :interactive="false"
+            :interactive="true"
             :dimmed="true"
+            @select="c => handleCardClick(c, 'upcoming', 'purple')"
           />
           <ResourceCard
             v-for="card in gameData.z05blackCards.slice(2, 3)"
             :key="card.Ref"
             :card="card"
             color="black"
-            :interactive="false"
+            :interactive="true"
             :dimmed="true"
+            @select="c => handleCardClick(c, 'upcoming', 'black')"
           />
         </div>
 
@@ -263,6 +268,51 @@
       </div>
     </teleport>
 
+    <!-- Modal: Claim Seat Dialog -->
+    <teleport to="#modals">
+      <div v-if="showClaimModal" class="custom-modal-overlay">
+        <div class="custom-modal-content card white">
+          <div class="card-content">
+            <span class="card-title teal-text text-darken-4 bold center" style="display: flex; flex-direction: column; align-items: center; gap: 8px; margin-bottom: 15px;">
+              <i class="material-icons large teal-text text-darken-3">account_box</i>
+              Claim Seat {{ claimSeatNumber }}
+            </span>
+            <p class="grey-text text-darken-2 center" style="margin-bottom: 25px; font-size: 0.95rem;">
+              Enter your display name to claim your seat and enter the simulation.
+            </p>
+
+            <form @submit.prevent="confirmClaimSeat">
+              <div class="input-field col s12 no-padding">
+                <input 
+                  id="claim_player_name" 
+                  type="text" 
+                  v-model="claimInputName" 
+                  placeholder="e.g. Alex"
+                  required
+                  autofocus
+                  style="font-size: 1.2rem; font-weight: bold; text-align: center;"
+                />
+                <label for="claim_player_name" class="active center-align">Display Name</label>
+              </div>
+
+              <div class="center" style="margin-top: 25px; display: flex; gap: 12px; justify-content: center;">
+                <button type="button" class="btn grey lighten-1 black-text waves-effect" @click="cancelClaimSeat">
+                  Cancel
+                </button>
+                <button 
+                  type="submit" 
+                  class="waves-effect waves-light btn teal darken-3" 
+                  :disabled="!claimInputName.trim()"
+                >
+                  <i class="material-icons left">check_circle</i>Join Game
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </teleport>
+
   </div>
 </template>
 
@@ -305,9 +355,43 @@ export default {
     const ModalGameEndPoints = ref(false)
     const ModalGameEndContracts = ref(false)
 
+    const showClaimModal = ref(false)
+    const claimSeatNumber = ref(1)
+    const claimInputName = ref('')
+
     onMounted(() => {
       M.AutoInit()
     })
+
+    const openClaimModal = (seatNum) => {
+      claimSeatNumber.value = seatNum || 1
+      claimInputName.value = ''
+      showClaimModal.value = true
+    }
+
+    const cancelClaimSeat = () => {
+      showClaimModal.value = false
+    }
+
+    const confirmClaimSeat = () => {
+      if (!claimInputName.value.trim()) return
+      const seatNum = claimSeatNumber.value
+      const name = claimInputName.value.trim()
+      showClaimModal.value = false
+
+      const updatedPlayers = JSON.parse(JSON.stringify(gameData.value.players))
+      const pCopy = updatedPlayers[seatNum - 1]
+      pCopy.joined = true
+      pCopy.name = name
+      pCopy.online = true
+      pCopy.uid = 'player-' + seatNum
+
+      updateDoc(roomDocRef, {
+        players: updatedPlayers
+      }).then(() => {
+        M.toast({ html: `Welcome, ${name}! You claimed Seat ${seatNum}.` })
+      })
+    }
 
     const JoinPlayer = (seatNumber) => {
       if (!gameData.value || !gameData.value.players) return
@@ -317,21 +401,7 @@ export default {
         M.toast({ html: 'Seat is already taken' })
         return
       }
-      let name = prompt(`Enter your name to claim Seat ${seatNumber}:`)
-      if (!name || !name.trim()) return
-
-      const updatedPlayers = JSON.parse(JSON.stringify(gameData.value.players))
-      const pCopy = updatedPlayers[idx]
-      pCopy.joined = true
-      pCopy.name = name.trim()
-      pCopy.online = true
-      pCopy.uid = 'player-' + seatNumber
-
-      updateDoc(roomDocRef, {
-        players: updatedPlayers
-      }).then(() => {
-        M.toast({ html: `Welcome, ${name.trim()}! You joined Seat ${seatNumber}.` })
-      })
+      openClaimModal(seatNumber)
     }
 
     // Watch for room snapshot to prompt player name on first join
@@ -339,26 +409,7 @@ export default {
       if (newGameData && role.value === 'PLAYER' && seat.value) {
         const mySeat = newGameData.players[seat.value - 1]
         if (mySeat && !mySeat.joined) {
-          let name = ''
-          while (!name || !name.trim()) {
-            name = prompt('Welcome to Gadol! Please enter your name to claim Seat ' + seat.value + ':')
-            if (name === null) {
-              name = ''
-            }
-          }
-          
-          const updatedPlayers = JSON.parse(JSON.stringify(newGameData.players))
-          const pCopy = updatedPlayers[seat.value - 1]
-          pCopy.joined = true
-          pCopy.name = name.trim()
-          pCopy.online = true
-          pCopy.uid = 'player-' + seat.value
-
-          updateDoc(roomDocRef, {
-            players: updatedPlayers
-          }).then(() => {
-            M.toast({ html: `Welcome, ${name.trim()}! You are bound to Seat ${seat.value}.` })
-          })
+          openClaimModal(seat.value)
         }
       }
     }, { immediate: true })
@@ -440,10 +491,6 @@ export default {
     })
 
     const handleCardClick = (card, type, color = null) => {
-      if (!isMyTurn.value) {
-        NotActivePlayer()
-        return
-      }
       openZoom(card, type, color)
     }
 
@@ -513,7 +560,7 @@ export default {
         marketCards.splice(index, 1)
       }
 
-      const actionText = `${pCopy.name} (P${pCopy.seat}) bought a ${permCardColour} permanent resource`
+      const actionText = `${pCopy.name} bought a ${permCardColour} permanent resource`
 
       updateDoc(roomDocRef, {
         z08marketGreenTokens: gameData.value.z08marketGreenTokens + greenTokensAdjust,
@@ -556,7 +603,7 @@ export default {
         contractCards.splice(index, 1)
       }
 
-      const actionText = `${pCopy.name} (P${pCopy.seat}) completed a contract`
+      const actionText = `${pCopy.name} completed a contract`
 
       updateDoc(roomDocRef, {
         players: updatedPlayers,
@@ -596,7 +643,7 @@ export default {
           pCopy.scores[colour + 'Temp'] += 2
           pCopy.scores.cash -= 2
 
-          const actionText = `${pCopy.name} (P${pCopy.seat}) bought 2 ${colour.toUpperCase()} tokens`
+          const actionText = `${pCopy.name} bought 2 ${colour.toUpperCase()} tokens`
 
           updateDoc(roomDocRef, {
             [marketField]: marketCount - 2,
@@ -635,7 +682,7 @@ export default {
           pCopy.scores.TempTokensTakenCounter += 1
           pCopy.scores[colour + 'TokenTaken'] = true
 
-          const actionText = `${pCopy.name} (P${pCopy.seat}) bought 1 ${colour.toUpperCase()} token`
+          const actionText = `${pCopy.name} bought 1 ${colour.toUpperCase()} token`
           const finishedTurn = pCopy.scores.TempTokensTakenCounter === 3
 
           updateDoc(roomDocRef, {
@@ -722,10 +769,40 @@ export default {
       handleAcquireClick,
       getPlayerHeaderColor,
       getTwoTokens,
-      getOneToken,
-      handleZoomAction,
-      JoinPlayer
+      JoinPlayer,
+      showClaimModal,
+      claimSeatNumber,
+      claimInputName,
+      cancelClaimSeat,
+      confirmClaimSeat
     }
   }
 }
 </script>
+
+<style scoped>
+.custom-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.65);
+  backdrop-filter: blur(5px);
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.custom-modal-content {
+  width: 90%;
+  max-width: 440px;
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.35);
+  animation: modalFadeIn 0.25s ease-out;
+}
+@keyframes modalFadeIn {
+  from { opacity: 0; transform: translateY(-20px) scale(0.95); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+</style>

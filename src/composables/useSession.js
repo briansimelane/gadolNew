@@ -62,7 +62,7 @@ const restoreSession = async () => {
   const storedName = localStorage.getItem('gadol_user_name')
 
   if (storedRole) {
-    if (storedRoomId && (storedRole === 'PLAYER' || storedRole === 'FACILITATOR')) {
+    if (storedRoomId && (storedRole === 'PLAYER' || storedRole === 'FACILITATOR' || storedRole === 'SPECTATOR')) {
       try {
         await ensureCodeAuth()
         const roomRef = doc(projectFirestore, 'rooms', storedRoomId)
@@ -125,6 +125,7 @@ const loginWithCode = async (rawCode) => {
     querySnapshot.forEach((docSnap) => {
       if (matched) return
       const room = docSnap.data()
+      const fallbackSpecCode = clean('SPEC-' + docSnap.id.substring(0, 4))
 
       if (clean(room.facilitatorCode) === code) {
         matched = true
@@ -132,6 +133,12 @@ const loginWithCode = async (rawCode) => {
         resolvedRoomId = docSnap.id
       }
       
+      if (!matched && ((room.spectatorCode && clean(room.spectatorCode) === code) || fallbackSpecCode === code)) {
+        matched = true
+        resolvedRole = 'SPECTATOR'
+        resolvedRoomId = docSnap.id
+      }
+
       if (!matched && room.seatCodes) {
         for (const [seatKey, seatVal] of Object.entries(room.seatCodes)) {
           if (clean(seatVal) === code) {

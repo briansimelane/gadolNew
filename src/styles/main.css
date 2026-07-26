@@ -311,6 +311,7 @@ td {
 }
 
 /* Position inside Resource Cards */
+/* Position inside Resource Cards */
 .card_details {
   position: relative;
   font-weight: 600;
@@ -318,6 +319,7 @@ td {
   width: 100%;
   height: 100%;
   cursor: pointer;
+  color: #000000;
 }
 
 .greyOut {
@@ -331,12 +333,14 @@ td {
   top: 5px;
   left: 23px;
   font-size: 26px;
+  color: #000000;
 }
 .redCost {
   display: inline-block;
   position: absolute;
   top: 2px;
   right: 12px;
+  color: #000000;
 }
 
 .greenCost {
@@ -344,6 +348,7 @@ td {
   position: absolute;
   top: 28px;
   right: 12px;
+  color: #000000;
 }
 
 .yellowCost {
@@ -351,6 +356,7 @@ td {
   position: absolute;
   top: 54px;
   right: 12px;
+  color: #000000;
 }
 
 .purpleCost {
@@ -358,6 +364,7 @@ td {
   position: absolute;
   top: 81px;
   right: 12px;
+  color: #000000;
 }
 
 .blackCost {
@@ -365,6 +372,7 @@ td {
   position: absolute;
   top: 107px;
   right: 12px;
+  color: #000000;
 }
 
 /* Positioning inside contract card */
@@ -376,6 +384,7 @@ td {
   width: 100%;
   height: 100%;
   cursor: pointer;
+  color: #000000;
 }
 
 .contractValue {
@@ -384,7 +393,7 @@ td {
   top: -6px;
   right: 53px;
   font-size: 30px;
-  color: #ffffff;
+  color: #ffffff !important;
 }
 
 .contractCash {
@@ -393,6 +402,7 @@ td {
   top: 42px;
   right: 40px;
   font-size: 14px;
+  color: #000000;
 }
 
 .contractDebtors {
@@ -401,6 +411,7 @@ td {
   top: 56px;
   right: 40px;
   font-size: 14px;
+  color: #000000;
 }
 
 .redValue {
@@ -408,6 +419,7 @@ td {
   position: absolute;
   top: 77px;
   right: 34px;
+  color: #000000;
 }
 
 .greenValue {
@@ -415,6 +427,7 @@ td {
   position: absolute;
   top: 102px;
   right: 52px;
+  color: #000000;
 }
 
 .yellowValue {
@@ -422,6 +435,7 @@ td {
   position: absolute;
   top: 126px;
   right: 52px;
+  color: #000000;
 }
 
 .purpleValue {
@@ -429,6 +443,7 @@ td {
   position: absolute;
   top: 102px;
   right: 13px;
+  color: #000000;
 }
 
 .blackValue {
@@ -436,6 +451,7 @@ td {
   position: absolute;
   top: 126px;
   right: 13px;
+  color: #000000;
 }
 
 .productValue {
@@ -444,6 +460,7 @@ td {
   top: 70px;
   right: 102px;
   font-size: 24px;
+  color: #000000;
 }
 
 /* tokens details */

@@ -54,6 +54,12 @@ export default function useCreateGame() {
       } while (existingCodes.has(facilitatorCode))
       existingCodes.add(facilitatorCode)
 
+      let spectatorCode = ''
+      do {
+        spectatorCode = `SPEC-${randDigit4()}`
+      } while (existingCodes.has(spectatorCode))
+      existingCodes.add(spectatorCode)
+
       const seatCodes = {}
       for (let i = 1; i <= 4; i++) {
         let seatCode = ''
@@ -173,6 +179,7 @@ export default function useCreateGame() {
         
         players: playersArray,
         facilitatorCode,
+        spectatorCode,
         seatCodes
       }
 

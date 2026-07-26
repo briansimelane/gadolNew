@@ -80,9 +80,15 @@
                 <div style="margin-bottom: 8px;">
                   <strong>Room Name:</strong> {{ newlyCreatedGame.name }}
                 </div>
-                <div style="margin-bottom: 12px; display: flex; align-items: center; justify-content: space-between;">
+                <div style="margin-bottom: 8px; display: flex; align-items: center; justify-content: space-between;">
                   <span><strong>Facilitator Code:</strong> <code class="code-badge">{{ newlyCreatedGame.facilitatorCode }}</code></span>
                   <button class="btn-flat btn-small" @click="copyText(newlyCreatedGame.facilitatorCode)">
+                    <i class="material-icons teal-text">content_copy</i>
+                  </button>
+                </div>
+                <div style="margin-bottom: 12px; display: flex; align-items: center; justify-content: space-between;">
+                  <span><strong>Spectator Code:</strong> <code class="code-badge">{{ newlyCreatedGame.spectatorCode || 'SPEC-XXXX' }}</code></span>
+                  <button class="btn-flat btn-small" @click="copyText(newlyCreatedGame.spectatorCode)">
                     <i class="material-icons teal-text">content_copy</i>
                   </button>
                 </div>
@@ -136,12 +142,20 @@
                     <span class="grey-text text-darken-1" style="font-size: 0.8rem;">{{ formatDate(game.createdAt) }}</span>
                   </div>
                   <div class="collapsible-body white">
-                    <!-- Facilitator Code -->
-                    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 15px; background: #f5f5f5; padding: 10px; border-radius: 4px;">
-                      <span><strong>Facilitator Code:</strong> <code class="code-badge">{{ game.facilitatorCode }}</code></span>
-                      <button class="btn-small waves-effect waves-light teal darken-2" @click="copyText(game.facilitatorCode)">
-                        <i class="material-icons left">content_copy</i>Copy Code
-                      </button>
+                    <!-- Facilitator & Spectator Codes -->
+                    <div style="display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 15px;">
+                      <div style="flex: 1; min-width: 240px; display: flex; align-items: center; justify-content: space-between; background: #f5f5f5; padding: 10px; border-radius: 4px;">
+                        <span><strong>Facilitator Code:</strong> <code class="code-badge">{{ game.facilitatorCode }}</code></span>
+                        <button class="btn-small waves-effect waves-light teal darken-2" @click="copyText(game.facilitatorCode)">
+                          <i class="material-icons left">content_copy</i>Copy
+                        </button>
+                      </div>
+                      <div style="flex: 1; min-width: 240px; display: flex; align-items: center; justify-content: space-between; background: #e0f2f1; padding: 10px; border-radius: 4px;">
+                        <span><strong>Spectator Code:</strong> <code class="code-badge">{{ game.spectatorCode || 'SPEC-' + game.id.substring(0,4).toUpperCase() }}</code></span>
+                        <button class="btn-small waves-effect waves-light teal darken-2" @click="copyText(game.spectatorCode || 'SPEC-' + game.id.substring(0,4).toUpperCase())">
+                          <i class="material-icons left">content_copy</i>Copy
+                        </button>
+                      </div>
                     </div>
 
                     <!-- Seat Codes Table -->

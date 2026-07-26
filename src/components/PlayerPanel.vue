@@ -4,7 +4,7 @@
       <p>
         <i class="material-icons" v-if="isActive">send</i>
         <span v-if="!player.joined">
-          <span class="playerName">Waiting for player (P{{ player.seat }})</span>
+          <span class="playerName">Waiting for Player {{ player.seat }}</span>
           <span 
             class="right takeAseat" 
             v-if="joinable" 
@@ -14,7 +14,7 @@
           </span>
         </span>
         <span v-else>
-          <span class="playerName">{{ player.name }} (P{{ player.seat }})</span>
+          <span class="playerName">{{ player.name }}</span>
           <i 
             class="material-icons right black-text" 
             style="padding-left: 5px; padding-right: 5px;"

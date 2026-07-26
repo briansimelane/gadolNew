@@ -7,7 +7,7 @@ import useSession from '../composables/useSession'
 const homeGuard = async (to, from, next) => {
   const { restoreSession, role, roomId } = useSession()
   await restoreSession()
-  if (roomId.value && (role.value === 'PLAYER' || role.value === 'FACILITATOR')) {
+  if (roomId.value && (role.value === 'PLAYER' || role.value === 'FACILITATOR' || role.value === 'SPECTATOR')) {
     next({ name: 'GameRoom', params: { id: roomId.value } })
   } else if (role.value === 'FACILITATOR' || role.value === 'ADMIN') {
     next({ name: 'FacilitatorHub' })
@@ -19,7 +19,7 @@ const homeGuard = async (to, from, next) => {
 const loginGuard = async (to, from, next) => {
   const { restoreSession, role, roomId } = useSession()
   await restoreSession()
-  if (roomId.value && (role.value === 'PLAYER' || role.value === 'FACILITATOR')) {
+  if (roomId.value && (role.value === 'PLAYER' || role.value === 'FACILITATOR' || role.value === 'SPECTATOR')) {
     next({ name: 'GameRoom', params: { id: roomId.value } })
   } else if (role.value === 'FACILITATOR' || role.value === 'ADMIN') {
     next({ name: 'FacilitatorHub' })
@@ -49,7 +49,7 @@ const requireGameRoom = async (to, from, next) => {
     return
   }
 
-  if (role.value === 'ADMIN' || role.value === 'FACILITATOR') {
+  if (role.value === 'ADMIN' || role.value === 'FACILITATOR' || role.value === 'SPECTATOR') {
     next()
   } else if (role.value === 'PLAYER' && roomId.value === targetRoomId) {
     next()

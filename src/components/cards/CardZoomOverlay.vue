@@ -13,7 +13,7 @@
 
         <div class="zoom-card-wrapper">
           <ResourceCard 
-            v-if="zoomType === 'resource'" 
+            v-if="zoomType === 'resource' || zoomType === 'upcoming'" 
             :card="zoomedCard" 
             :color="zoomColor" 
             :interactive="false"
@@ -30,11 +30,22 @@
         <!-- Action / Info Panel -->
         <div class="zoom-panel">
           <h5 class="zoom-title">
-            {{ zoomType === 'resource' ? 'Permanent Resource Card' : 'Contract Card' }}
+            <span v-if="zoomType === 'upcoming'">Upcoming Resource Card</span>
+            <span v-else-if="zoomType === 'resource'">Permanent Resource Card</span>
+            <span v-else>Contract Card</span>
           </h5>
 
           <div class="zoom-instructions">
-            <ul v-if="zoomType === 'resource'">
+            <div v-if="zoomType === 'upcoming'" style="padding: 12px; background: #e0f2f1; border-radius: 8px; border-left: 4px solid #00796b; margin-top: 5px;">
+              <p style="margin: 0; font-weight: 600; color: #004d40; font-size: 0.95rem;">
+                <i class="material-icons tiny" style="vertical-align: middle; margin-right: 4px;">schedule</i>
+                Upcoming Card
+              </p>
+              <p style="margin: 6px 0 0 0; font-size: 0.88rem; color: #00695c;">
+                This card is currently in the upcoming queue. It will move into the active market once top cards are purchased.
+              </p>
+            </div>
+            <ul v-else-if="zoomType === 'resource'">
               <li>A permanent resource card may be bought with a combination of other permanent resources (cards) or temporary resources (tokens).</li>
               <li>The number on the top left of the card shows its value of Production.</li>
             </ul>
@@ -44,7 +55,13 @@
             </ul>
           </div>
 
-          <div class="zoom-actions" v-if="isMyTurn">
+          <div class="zoom-actions" v-if="zoomType === 'upcoming'" style="padding: 10px 0;">
+            <p class="grey-text center italic" style="font-size: 0.9rem; margin: 0;">
+              <i class="material-icons tiny" style="vertical-align: middle; margin-right: 4px;">lock</i>
+              Upcoming cards cannot be purchased yet
+            </p>
+          </div>
+          <div class="zoom-actions" v-else-if="isMyTurn">
             <button 
               v-if="afford" 
               class="btn waves-effect waves-light green darken-3 zoom-action-btn" 
@@ -54,6 +71,12 @@
               <i class="material-icons right">send</i>
             </button>
             <p v-else class="red-text center bold">You do not have enough resources to buy this card</p>
+          </div>
+          <div class="zoom-actions" v-else style="padding: 10px 0;">
+            <p class="grey-text center italic" style="font-size: 0.9rem; margin: 0;">
+              <i class="material-icons tiny" style="vertical-align: middle; margin-right: 4px;">visibility</i>
+              Viewing card details
+            </p>
           </div>
         </div>
       </div>
@@ -135,7 +158,8 @@ export default {
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: rgba(0, 0, 0, 0.75);
+  background-color: rgba(0, 0, 0, 0.65);
+  backdrop-filter: blur(4px);
   display: flex;
   justify-content: center;
   align-items: center;
@@ -144,7 +168,7 @@ export default {
 }
 
 .zoom-container {
-  background-color: #1e1e24;
+  background-color: #ffffff;
   border-radius: 12px;
   max-width: 600px;
   width: 100%;
@@ -152,9 +176,9 @@ export default {
   flex-direction: row;
   padding: 24px;
   position: relative;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
-  border: 1px solid #333;
-  color: #fff;
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.3);
+  border: 1px solid #e0e0e0;
+  color: #212121;
 }
 
 @media only screen and (max-width: 600px) {
@@ -172,14 +196,14 @@ export default {
   right: 15px;
   background: none;
   border: none;
-  color: #aaa;
+  color: #666;
   font-size: 28px;
   cursor: pointer;
   z-index: 10;
 }
 
 .zoom-close-btn:hover {
-  color: #fff;
+  color: #000;
 }
 
 .zoom-card-wrapper {
@@ -210,7 +234,8 @@ export default {
   margin-top: 0;
   font-size: 20px;
   font-weight: bold;
-  border-bottom: 1px solid #444;
+  color: #004d40;
+  border-bottom: 2px solid #e0e0e0;
   padding-bottom: 8px;
 }
 
@@ -218,7 +243,7 @@ export default {
   margin: 16px 0;
   font-size: 14px;
   line-height: 1.5;
-  color: #ccc;
+  color: #37474f;
 }
 
 .zoom-instructions ul {

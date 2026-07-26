@@ -74,7 +74,7 @@ export default {
     })
 
     const onClick = () => {
-      if (props.interactive && !props.dimmed) {
+      if (props.interactive) {
         emit('select', props.card)
       }
     }
