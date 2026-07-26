@@ -14,7 +14,8 @@
       <div class="gameNotifications">
         <span class="left">ACTIVE PLAYER IS: {{ activePlayerName }}</span>  
         <span class="right white-text" v-if="isSpectator">You are in Spectator view</span>
-        <span class="right white-text" v-if="user && user.uid === gameData.facilitator">You are in Facilitator view</span> 
+        <span class="right white-text" v-if="role === 'FACILITATOR' || role === 'ADMIN'">You are in Facilitator view</span> 
+        <span class="right white-text" v-if="role === 'PLAYER' && seat">You are playing in Seat {{ seat }}</span>
       </div>
 
       <div class="gameAreaLeft">
@@ -267,9 +268,9 @@
 
 <script>
 import { ref, computed, onMounted, watch } from 'vue'
-import getUser from '../composables/getUser'
 import useRoom from '../composables/useRoom'
 import useCardZoom from '../composables/useCardZoom'
+import useSession from '../composables/useSession'
 import NavbarInRoom from '../components/NavbarInRoom.vue'
 import ResourceCard from '../components/cards/ResourceCard.vue'
 import ContractCard from '../components/cards/ContractCard.vue'
@@ -296,17 +297,46 @@ export default {
     }
   },
   setup(props) {
-    onMounted(() => {
-      M.AutoInit()
-    })
-
-    const { user } = getUser()
+    const { role, roomId, seat } = useSession()
     const { gameData, error, roomDocRef } = useRoom(props.id)
     const { zoomedCard, zoomType, zoomColor, openZoom, closeZoom } = useCardZoom()
 
     const ModalTempResources = ref(false)
     const ModalGameEndPoints = ref(false)
     const ModalGameEndContracts = ref(false)
+
+    onMounted(() => {
+      M.AutoInit()
+    })
+
+    // Watch for room snapshot to prompt player name on first join
+    watch(gameData, (newGameData) => {
+      if (newGameData && role.value === 'PLAYER' && seat.value) {
+        const mySeat = newGameData.players[seat.value - 1]
+        if (mySeat && !mySeat.joined) {
+          let name = ''
+          while (!name || !name.trim()) {
+            name = prompt('Welcome to Gadol! Please enter your name to claim Seat ' + seat.value + ':')
+            if (name === null) {
+              name = ''
+            }
+          }
+          
+          const updatedPlayers = JSON.parse(JSON.stringify(newGameData.players))
+          const pCopy = updatedPlayers[seat.value - 1]
+          pCopy.joined = true
+          pCopy.name = name.trim()
+          pCopy.online = true
+          pCopy.uid = 'player-' + seat.value
+
+          updateDoc(roomDocRef, {
+            players: updatedPlayers
+          }).then(() => {
+            M.toast({ html: `Welcome, ${name.trim()}! You are bound to Seat ${seat.value}.` })
+          })
+        }
+      }
+    }, { immediate: true })
 
     // Watch for server game end states to trigger local modal flags
     watch(() => gameData.value?.modalPoints, (newVal) => {
@@ -327,8 +357,11 @@ export default {
     })
 
     const isMyTurn = computed(() => {
-      if (!activePlayer.value) return false
-      return user.value?.uid === activePlayer.value.uid || user.value?.uid === gameData.value.facilitator
+      if (role.value === 'FACILITATOR' || role.value === 'ADMIN') return true
+      if (role.value === 'PLAYER' && seat.value) {
+        return (seat.value - 1) === gameData.value?.currentPlayer
+      }
+      return false
     })
 
     const activePlayerName = computed(() => {
@@ -336,14 +369,12 @@ export default {
       return activePlayer.value.joined ? activePlayer.value.name : `Seat ${activePlayer.value.seat}`
     })
 
-    const hasJoinedAnySeat = computed(() => {
-      if (!gameData.value || !gameData.value.players) return true
-      return gameData.value.players.some(p => p.uid === user.value?.uid)
-    })
+    const hasJoinedAnySeat = computed(() => true)
 
     const isSpectator = computed(() => {
-      if (!gameData.value || !gameData.value.players) return false
-      return !gameData.value.players.some(p => p.uid === user.value?.uid) && user.value?.uid !== gameData.value.facilitator
+      if (role.value === 'FACILITATOR' || role.value === 'ADMIN') return false
+      if (role.value === 'PLAYER' && seat.value) return false
+      return true
     })
 
     const tempTokensCount = computed(() => {
@@ -399,11 +430,11 @@ export default {
       ModalTempResources.value = true
     }
 
-    const getPlayerHeaderColor = (seat) => {
-      if (seat === 1) return 'yellow'
-      if (seat === 2) return 'green'
-      if (seat === 3) return 'blue'
-      if (seat === 4) return 'orange'
+    const getPlayerHeaderColor = (seatVal) => {
+      if (seatVal === 1) return 'yellow'
+      if (seatVal === 2) return 'green'
+      if (seatVal === 3) return 'blue'
+      if (seatVal === 4) return 'orange'
       return 'yellow'
     }
 
@@ -642,29 +673,9 @@ export default {
       })
     }
 
-    const JoinPlayer = (seatNum) => {
-      const alreadyJoined = gameData.value.players.some(p => p.uid === user.value?.uid)
-      if (alreadyJoined) {
-        M.toast({ html: `You have already taken a seat in the game` })
-        return
-      }
-
-      const updatedPlayers = JSON.parse(JSON.stringify(gameData.value.players))
-      const targetP = updatedPlayers[seatNum - 1]
-      targetP.joined = true
-      targetP.name = user.value.displayName
-      targetP.online = true
-      targetP.uid = user.value.uid
-
-      updateDoc(roomDocRef, {
-        players: updatedPlayers
-      }).then(() => {
-        M.toast({ html: `You joined Seat ${seatNum}` })
-      })
-    }
-
     return {
-      user,
+      role,
+      seat,
       gameData,
       error,
       ModalTempResources,
@@ -685,7 +696,6 @@ export default {
       handleCardClick,
       handleAcquireClick,
       getPlayerHeaderColor,
-      JoinPlayer,
       getTwoTokens,
       getOneToken,
       handleZoomAction

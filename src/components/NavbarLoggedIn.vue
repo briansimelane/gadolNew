@@ -5,48 +5,32 @@
         <router-link to="/" class="brand-logo center black-text smaller-font hide-on-med-and-up">Gadol Online</router-link>
         
         <ul id="nav-mobile" class="right hide-on-med-and-down">
-               <li>You are logged in as: {{ user.displayName }} </li> 
-              <!-- <li><a @click="handleClick">Exit Game <i class="material-icons right">exit_to_app</i></a></li> -->
-              <li><a @click="handleLogout">Logout<i class="material-icons right">highlight_off</i></a></li>
+               <li v-if="userName">You are logged in as: {{ userName }} </li> 
+               <li><a @click="handleLogout">Logout<i class="material-icons right">highlight_off</i></a></li>
         </ul>
         </div>
     </nav>
 </template>
 
 <script>
-import useLogout from '../composables/useLogout'
-import getUser from '../composables/getUser'
+import useSession from '../composables/useSession'
 import { useRouter } from 'vue-router'
+import M from 'materialize-css'
 
 export default {
-  setup(props, context) {
-    const { logout, error } = useLogout()
-    const { user } = getUser()  
+  setup() {
+    const { logout, userName } = useSession()  
     const router = useRouter()
 
-  const handleClick = async () => {
-    await logout()
-    if(!error.value) {
-      console.log('user logged out')
-      router.push ({ name: 'Home'})
-      M.toast({html: 'You logged out'})
-            }
+    const handleLogout = async () => {
+      await logout()
+      router.push({ name: 'Login' })
+      M.toast({ html: 'You logged out' })
     }
 
-  const handleLogout = async () => {
-    await logout()
-    if(!error.value) {
-      console.log('user logged out')
-      router.push ({ name: 'Home'})
-      M.toast({html: 'You logged out'})
-        }
-    }
-
-  return { handleClick, handleLogout, user }
-
+    return { handleLogout, userName }
   }
 }    
-    
 </script>
 
 <style scoped>

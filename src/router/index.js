@@ -1,79 +1,98 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import Home from '../views/Home.vue'
-import Player from '../views/Player.vue'
-import Create from '../views/Create.vue'
-import Join from '../views/Join.vue'
-import Lobby from '../views/Lobby.vue'
-import GameRoom from '../views/GameRoom.vue'
 import Login from '../views/Login.vue'
-import Signup from '../views/Signup.vue'
-import { projectAuth } from '../firebase/config'
+import FacilitatorHub from '../views/FacilitatorHub.vue'
+import GameRoom from '../views/GameRoom.vue'
+import useSession from '../composables/useSession'
 
-
-// auth guard
-const requireAuth = async (to, from, next) => {
-  let user = projectAuth.currentUser
-  console.log('currect user in auth guard: ', user)
-  if(!user){
-    next({ name: 'Home' })
-  } else
-    next()
- 
+const homeGuard = async (to, from, next) => {
+  const { restoreSession, role, roomId } = useSession()
+  await restoreSession()
+  if (role.value === 'PLAYER' && roomId.value) {
+    next({ name: 'GameRoom', params: { id: roomId.value } })
+  } else if (role.value === 'FACILITATOR' || role.value === 'ADMIN') {
+    next({ name: 'FacilitatorHub' })
+  } else {
+    next({ name: 'Login' })
+  }
 }
 
+const loginGuard = async (to, from, next) => {
+  const { restoreSession, role, roomId } = useSession()
+  await restoreSession()
+  if (role.value === 'PLAYER' && roomId.value) {
+    next({ name: 'GameRoom', params: { id: roomId.value } })
+  } else if (role.value === 'FACILITATOR' || role.value === 'ADMIN') {
+    next({ name: 'FacilitatorHub' })
+  } else {
+    next()
+  }
+}
+
+const requireFacilitator = async (to, from, next) => {
+  const { restoreSession, role } = useSession()
+  await restoreSession()
+  if (role.value === 'FACILITATOR' || role.value === 'ADMIN') {
+    next()
+  } else {
+    next({ name: 'Login' })
+  }
+}
+
+const requireGameRoom = async (to, from, next) => {
+  const { restoreSession, role, roomId } = useSession()
+  const res = await restoreSession()
+  const targetRoomId = to.params.id
+
+  if (!res.success && res.message === 'This game has ended') {
+    M.toast({ html: 'This game has ended.' })
+    next({ name: 'Login' })
+    return
+  }
+
+  if (role.value === 'ADMIN' || role.value === 'FACILITATOR') {
+    next()
+  } else if (role.value === 'PLAYER' && roomId.value === targetRoomId) {
+    next()
+  } else {
+    next({ name: 'Login' })
+  }
+}
 
 const routes = [
   {
     path: '/',
     name: 'Home',
-    component: Home
+    beforeEnter: homeGuard,
+    component: { template: '<div>Loading...</div>' } // Handled by guard redirect
   },
   {
     path: '/login',
     name: 'Login',
-    component: Login
+    component: Login,
+    beforeEnter: loginGuard
   },
   {
-    path: '/signup',
-    name: 'Signup',
-    component: Signup
-  },
-  {
-    path: '/player',
-    name: 'Player',
-    component: Player,
-    beforeEnter: requireAuth
-  },
-  {
-    path: '/create',
-    name: 'Create',
-    component: Create,
-    beforeEnter: requireAuth
-  },
-  {
-    path: '/join',
-    name: 'Join',
-    component: Join,
-    beforeEnter: requireAuth
+    path: '/facilitator',
+    name: 'FacilitatorHub',
+    component: FacilitatorHub,
+    beforeEnter: requireFacilitator
   },
   {
     path: '/gameroom/:id',
     name: 'GameRoom',
     component: GameRoom,
     props: true,
-    beforeEnter: requireAuth
+    beforeEnter: requireGameRoom
   },
+  // Catch all, redirect to home
   {
-    path: '/lobby',
-    name: 'Lobby',
-    component: Lobby,
-    beforeEnter: requireAuth
+    path: '/:catchAll(.*)*',
+    redirect: '/'
   }
 ]
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
-  //mode: 'history',
   routes
 })
 
