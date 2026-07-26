@@ -1,6 +1,6 @@
 import { ref } from 'vue'
 import { projectAuth, projectFirestore } from '../firebase/config'
-import { signInWithEmailAndPassword, signInAnonymously, signOut as firebaseSignOut } from 'firebase/auth'
+import { signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut as firebaseSignOut } from 'firebase/auth'
 import { collection, query, where, getDocs, doc, getDoc, setDoc } from 'firebase/firestore'
 
 const role = ref(null)
@@ -8,6 +8,24 @@ const roomId = ref(null)
 const seat = ref(null)
 const userEmail = ref(null)
 const userName = ref(null)
+
+const ensureCodeAuth = async () => {
+  if (projectAuth.currentUser) return projectAuth.currentUser
+  const guestEmail = 'player@gadol.com'
+  const guestPassword = 'GadolPlayer123!'
+  try {
+    const res = await signInWithEmailAndPassword(projectAuth, guestEmail, guestPassword)
+    return res.user
+  } catch (err) {
+    try {
+      const res = await createUserWithEmailAndPassword(projectAuth, guestEmail, guestPassword)
+      return res.user
+    } catch (createErr) {
+      console.warn('Could not establish guest auth session:', createErr)
+      return null
+    }
+  }
+}
 
 const setSession = (newRole, newRoomId, newSeat, newEmail, newName) => {
   role.value = newRole
@@ -46,13 +64,7 @@ const restoreSession = async () => {
   if (storedRole) {
     if (storedRoomId && (storedRole === 'PLAYER' || storedRole === 'FACILITATOR')) {
       try {
-        if (!projectAuth.currentUser) {
-          try {
-            await signInAnonymously(projectAuth)
-          } catch (authErr) {
-            console.warn('Anonymous auth on restore session warning:', authErr)
-          }
-        }
+        await ensureCodeAuth()
         const roomRef = doc(projectFirestore, 'rooms', storedRoomId)
         const roomSnap = await getDoc(roomRef)
         if (roomSnap.exists() && roomSnap.data().status === 'OPEN') {
@@ -65,7 +77,6 @@ const restoreSession = async () => {
           clearSession()
           return { success: false, message: 'This game has ended' }
         } else {
-          // If doc snapshot check is inconclusive, keep stored session active
           role.value = storedRole
           roomId.value = storedRoomId
           seat.value = storedSeat ? parseInt(storedSeat) : null
@@ -102,13 +113,7 @@ const loginWithCode = async (rawCode) => {
   }
 
   try {
-    if (!projectAuth.currentUser) {
-      try {
-        await signInAnonymously(projectAuth)
-      } catch (authErr) {
-        console.warn('Anonymous auth on code login warning:', authErr)
-      }
-    }
+    await ensureCodeAuth()
 
     const q = query(collection(projectFirestore, 'rooms'), where('status', '==', 'OPEN'))
     const querySnapshot = await getDocs(q)
