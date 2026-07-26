@@ -63,92 +63,83 @@
 
 <script>
 
-import NavbarLoggedIn from '../components/NavbarLoggedIn'
+import NavbarLoggedIn from '../components/NavbarLoggedIn.vue'
 import getUser from '../composables/getUser'
 import { projectAuth } from '../firebase/config'
 import { projectFirestore } from '../firebase/config'
-import { ref } from '@vue/reactivity'
+import { ref, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
-
+import { onAuthStateChanged } from 'firebase/auth'
+import { collection, query, where, onSnapshot, doc, getDoc, deleteDoc } from 'firebase/firestore'
 
 export default {
   components: { NavbarLoggedIn },
   setup() {
     const { user } = getUser() 
-    const roomsData = ref(null)
+    const roomsData = ref([])
     const router = useRouter()
     const userID = ref()
+    let unsubSnapshot = null
 
-// Keep track of User's authentication status (listen for auth status changes)
-projectAuth.onAuthStateChanged(user => {
-    if(user) {
-        // If there is a user - it means they are logged in
-        // get data from the database
-        projectFirestore.collection('rooms').where('creator', '==', user.uid).onSnapshot(snapshot => {
-        // calls the function in the app.js to setup guides
-        
+    // Keep track of User's authentication status
+    const unsubAuth = onAuthStateChanged(projectAuth, user => {
+      if (user) {
+        userID.value = user.uid
+
+        // Set up real-time listener for rooms created by the user
+        const q = query(
+          collection(projectFirestore, 'rooms'),
+          where('creator', '==', user.uid)
+        )
+        unsubSnapshot = onSnapshot(q, snapshot => {
           let results = []
-
-          snapshot.docs.forEach(doc => {
-            results.push({...doc.data(), id: doc.id})
+          snapshot.forEach(doc => {
+            results.push({ ...doc.data(), id: doc.id })
           })
-          
-        
-          // update values
           roomsData.value = results
           console.log(results)
-          userID.value = user.uid
 
-        
-
-            projectFirestore.collection('players').doc(user.uid).get().then(doc => {
-                const surname = doc.data().surname
-                
-                console.log('user logged in: ' + surname);
-            });
-
+          // Fetch player profile data
+          getDoc(doc(projectFirestore, 'players', user.uid)).then(playerDoc => {
+            if (playerDoc.exists()) {
+              const surname = playerDoc.data().surname
+              console.log('user logged in: ' + surname)
+            }
+          })
         }, err => {
-                console.log("This is the error: " + err.message);
-            });
-        
-    }else {
-        // User not logged in
-        
+          console.log("This is the error: " + err.message)
+        })
+      } else {
         console.log('user logged out')
+        roomsData.value = []
+        if (unsubSnapshot) unsubSnapshot()
+      }
+    })
+
+    onUnmounted(() => {
+      unsubAuth()
+      if (unsubSnapshot) unsubSnapshot()
+    })
+
+    const haveRooms = ref(true)
+
+    const deleteRoom = async (room) => {
+      try {
+        await deleteDoc(doc(projectFirestore, 'rooms', room))
+        M.toast({ html: 'Room has been deleted.' })
+        console.log("Room deleted: " + room)
+      } catch (err) {
+        console.log("Error deleting room:", err)
+      }
     }
-})
 
-
-const haveRooms = 1;
-
-const deleteRoom = async (room) => {
-  await projectFirestore.collection('rooms').doc(room).delete()
-  M.toast({html: 'Room has been deleted.'})
-  console.log("Room deleted: " + room)
-
-}
-
-const joinRoom = (roomToJoin) => {
-  router.push ({ name: 'GameRoom', params: {id: roomToJoin}})
-  console.log('Room joined')
-  const joinedPlayersArray = ref()
-
-
-/* if(roomsData.value.joinedPlayers.includes(userID.value)) {
-    console.log('Room includes Player')
-  } else {
-    console.log('Room did not include Player')
-  } */
-
-  console.log('Player joined: ', userID.value)
-  
-  M.toast({html: 'Room has been joined'})
-}
-
+    const joinRoom = (roomToJoin) => {
+      router.push({ name: 'GameRoom', params: { id: roomToJoin } })
+      console.log('Room joined')
+      M.toast({ html: 'Room has been joined' })
+    }
 
     return { user, haveRooms, roomsData, deleteRoom, joinRoom }
   }
-  
 }
-
 </script>

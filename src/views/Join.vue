@@ -63,8 +63,8 @@
 </template>
 
 <script>
-import { ref } from '@vue/reactivity';
-import NavbarLoggedIn from '../components/NavbarLoggedIn'
+import { ref } from 'vue';
+import NavbarLoggedIn from '../components/NavbarLoggedIn.vue'
 import { useRouter } from 'vue-router'
 
 

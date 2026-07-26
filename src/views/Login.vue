@@ -52,8 +52,8 @@
 </template>
 
 <script>
-import Navbar from '../components/Navbar'
-import { ref } from '@vue/reactivity'
+import Navbar from '../components/Navbar.vue'
+import { ref } from 'vue'
 import useLogin from '../composables/useLogin'
 import { useRouter } from 'vue-router'
 

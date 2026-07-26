@@ -112,9 +112,9 @@
 </template>
 
 <script>
-import NavbarLoggedIn from '../components/NavbarLoggedIn'
+import NavbarLoggedIn from '../components/NavbarLoggedIn.vue'
 import M from 'materialize-css'
-import { ref } from '@vue/reactivity'
+import { ref } from 'vue'
 import getUser from '../composables/getUser'
 import useCollection from '../composables/useCollection'
 import { useRouter } from 'vue-router'
@@ -261,175 +261,73 @@ const shuffle = (array) => {
     const shuffledRedCards = shuffle(resetRedCards);
     const shuffledPurpleCards = shuffle(resetPurpleCards);
     const shuffledBlackCards = shuffle(resetBlackCards);
-    const player1Scores = {
-      "greenTemp": playerTempGreen,
-      "redTemp": playerTempRed,
-      "yellowTemp": playerTempYellow,
-      "purpleTemp": playerTempPurple,
-      "blackTemp": playerTempBlack,
-      "greenPerm": playerPermGreen,
-      "redPerm": playerPermRed,
-      "yellowPerm": playerPermYellow,
-      "purplePerm": playerPermPurple,
-      "blackPerm": playerPermBlack,
-      "cash": playerStartCash,
-      "production": playerStartProduction,
-      "value": playerStartValue,
-      "costs": playerStartCost,
-      "debtors": playerStartDebtors,
-      "TempTokensTakenCounter": 0,
-      "greenTokenTaken": false,
-      "redTokenTaken": false,
-      "yellowTokenTaken": false,
-      "purpleTokenTaken": false,
-      "blackTokenTaken": false
+    const makePlayerScore = () => ({
+      greenTemp: playerTempGreen,
+      redTemp: playerTempRed,
+      yellowTemp: playerTempYellow,
+      purpleTemp: playerTempPurple,
+      blackTemp: playerTempBlack,
+      greenPerm: playerPermGreen,
+      redPerm: playerPermRed,
+      yellowPerm: playerPermYellow,
+      purplePerm: playerPermPurple,
+      blackPerm: playerPermBlack,
+      cash: playerStartCash,
+      production: playerStartProduction,
+      value: playerStartValue,
+      costs: playerStartCost,
+      debtors: playerStartDebtors,
+      TempTokensTakenCounter: 0,
+      greenTokenTaken: false,
+      redTokenTaken: false,
+      yellowTokenTaken: false,
+      purpleTokenTaken: false,
+      blackTokenTaken: false
+    })
+
+    const playersArray = []
+    for (let i = 1; i <= 4; i++) {
+      playersArray.push({
+        seat: i,
+        joined: false,
+        name: '',
+        online: false,
+        uid: '',
+        scores: makePlayerScore()
+      })
     }
 
-    const player2Scores = {
-      "greenTemp": playerTempGreen,
-      "redTemp": playerTempRed,
-      "yellowTemp": playerTempYellow,
-      "purpleTemp": playerTempPurple,
-      "blackTemp": playerTempBlack,
-      "greenPerm": playerPermGreen,
-      "redPerm": playerPermRed,
-      "yellowPerm": playerPermYellow,
-      "purplePerm": playerPermPurple,
-      "blackPerm": playerPermBlack,
-      "cash": playerStartCash,
-      "production": playerStartProduction,
-      "value": playerStartValue,
-      "costs": playerStartCost,
-      "debtors": playerStartDebtors,
-      "TempTokensTakenCounter": 0,
-      "greenTokenTaken": false,
-      "redTokenTaken": false,
-      "yellowTokenTaken": false,
-      "purpleTokenTaken": false,
-      "blackTokenTaken": false
-    }
-
-    const player3Scores = {
-      "greenTemp": playerTempGreen,
-      "redTemp": playerTempRed,
-      "yellowTemp": playerTempYellow,
-      "purpleTemp": playerTempPurple,
-      "blackTemp": playerTempBlack,
-      "greenPerm": playerPermGreen,
-      "redPerm": playerPermRed,
-      "yellowPerm": playerPermYellow,
-      "purplePerm": playerPermPurple,
-      "blackPerm": playerPermBlack,
-      "cash": playerStartCash,
-      "production": playerStartProduction,
-      "value": playerStartValue,
-      "costs": playerStartCost,
-      "debtors": playerStartDebtors,
-      "TempTokensTakenCounter": 0,
-      "greenTokenTaken": false,
-      "redTokenTaken": false,
-      "yellowTokenTaken": false,
-      "purpleTokenTaken": false,
-      "blackTokenTaken": false
-    }
-
-    const player4Scores = {
-      "greenTemp": playerTempGreen,
-      "redTemp": playerTempRed,
-      "yellowTemp": playerTempYellow,
-      "purpleTemp": playerTempPurple,
-      "blackTemp": playerTempBlack,
-      "greenPerm": playerPermGreen,
-      "redPerm": playerPermRed,
-      "yellowPerm": playerPermYellow,
-      "purplePerm": playerPermPurple,
-      "blackPerm": playerPermBlack,
-      "cash": playerStartCash,
-      "production": playerStartProduction,
-      "value": playerStartValue,
-      "costs": playerStartCost,
-      "debtors": playerStartDebtors,
-      "TempTokensTakenCounter": 0,
-      "greenTokenTaken": false,
-      "redTokenTaken": false,
-      "yellowTokenTaken": false,
-      "purpleTokenTaken": false,
-      "blackTokenTaken": false
-    }
-
-    const playerScoreCash = new Array(resetValues.numberOfPlayers).fill(playerStartCash);
-    const playerScoreProduction = new Array(resetValues.numberOfPlayers).fill(playerStartProduction);
-    const playerScoreContractValue = new Array(resetValues.numberOfPlayers).fill(playerStartValue);
-    const playerScoreContractCost = new Array(resetValues.numberOfPlayers).fill(playerStartCost);
-    const playerScoreContractDebtors = new Array(resetValues.numberOfPlayers).fill(playerStartDebtors);
-    const playerScoreTempRed = new Array(resetValues.numberOfPlayers).fill(playerTempRed);
-    const playerScoreTempGreen = new Array(resetValues.numberOfPlayers).fill(playerTempGreen);
-    const playerScoreTempYellow = new Array(resetValues.numberOfPlayers).fill(playerTempYellow);
-    const playerScoreTempPurple = new Array(resetValues.numberOfPlayers).fill(playerTempPurple);
-    const playerScoreTempBlack = new Array(resetValues.numberOfPlayers).fill(playerTempBlack);
-    const playerScorePermRed = new Array(resetValues.numberOfPlayers).fill(playerPermRed);
-    const playerScorePermGreen = new Array(resetValues.numberOfPlayers).fill(playerPermGreen);
-    const playerScorePermYellow = new Array(resetValues.numberOfPlayers).fill(playerPermYellow);
-    const playerScorePermPurple = new Array(resetValues.numberOfPlayers).fill(playerPermPurple);
-    const playerScorePermBlack = new Array(resetValues.numberOfPlayers).fill(playerPermBlack);
     const currentPlayer = 0;
-    
-    const joinedPlayers = {
-                           "Player1Joined": false,
-                           "Player1Index": 0,
-                           "Player1UserID": '',
-                           "Player1Name": '',
-                           "Player1Online": false,
-                           "Player2Joined": false,
-                           "Player2Index": 1,
-                           "Player2UserID": '',
-                           "Player2Name": '',
-                           "Player2Online": false,
-                           "Player3Joined": false,
-                           "Player3Index": 2,
-                           "Player3UserID": '',
-                           "Player3Name": '',
-                           "Player3Online": false,
-                           "Player4Joined": false,
-                           "Player4Index": 3,
-                           "Player4UserID": '',
-                           "Player4Name": '',
-                           "Player4Online": false,
-                          };
             
-            const roomDetails = {
-              creator: user.value.uid,
-              name: roomName.value,
-              numPlayers: numberPlayers.value,
-              timed: gameTimed.value,
-              reserve: gameReserve.value,
-              rules: gameWinCondition.value,
-              maxnumberofplayers: resetValues.numberOfPlayers,
-              lastAction: "",
-
-            gstate: gameState,
-            modalPoints: false,
-            modalContracts: false,
-            facilitator: facilitator,
-            currentPlayer: currentPlayer,
-            joinedPlayers: joinedPlayers,
-            z00contractCards: shuffledContractCards,
-            z01greenCards: shuffledGreenCards,
-            z02yellowCards: shuffledYellowCards,
-            z03redCards: shuffledRedCards,
-            z04purpleCards: shuffledPurpleCards,
-            z05blackCards: shuffledBlackCards,
-            z06holderCards: [0, 0, 0],
-            z07marketRedTokens: marketTempRed,
-            z08marketGreenTokens: marketTempGreen,
-            z09marketYellowTokens: marketTempYellow,
-            z10marketPurpleTokens: marketTempPurple,
-            z11marketBlackTokens: marketTempBlack,
-            z12Player1Scores: player1Scores,
-            z13Player2Scores: player2Scores,
-            z14Player3Scores: player3Scores,
-            z15Player4Scores: player4Scores
-            }
+    const roomDetails = {
+      creator: user.value.uid,
+      name: roomName.value,
+      numPlayers: numberPlayers.value,
+      timed: gameTimed.value,
+      reserve: gameReserve.value,
+      rules: gameWinCondition.value,
+      maxnumberofplayers: resetValues.numberOfPlayers,
+      lastAction: "",
+      gstate: gameState,
+      modalPoints: false,
+      modalContracts: false,
+      facilitator: facilitator,
+      currentPlayer: currentPlayer,
+      z00contractCards: shuffledContractCards,
+      z01greenCards: shuffledGreenCards,
+      z02yellowCards: shuffledYellowCards,
+      z03redCards: shuffledRedCards,
+      z04purpleCards: shuffledPurpleCards,
+      z05blackCards: shuffledBlackCards,
+      z06holderCards: [0, 0, 0],
+      z07marketRedTokens: marketTempRed,
+      z08marketGreenTokens: marketTempGreen,
+      z09marketYellowTokens: marketTempYellow,
+      z10marketPurpleTokens: marketTempPurple,
+      z11marketBlackTokens: marketTempBlack,
+      players: playersArray,
+      schemaVersion: 2
+    }
 
             await addDoc(roomDetails)
                   if(!error.value) {

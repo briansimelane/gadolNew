@@ -1,31 +1,27 @@
-import { ref } from '@vue/reactivity'
-import { projectAuth } from '../firebase/config'
-import { projectFirestore } from '../firebase/config'
-
+import { ref } from 'vue'
+import { projectAuth, projectFirestore } from '../firebase/config'
+import { createUserWithEmailAndPassword, updateProfile } from 'firebase/auth'
+import { doc, setDoc } from 'firebase/firestore'
 
 const error = ref(null)
-
 
 const signup = async (email, passwword, displayName, lastName) => {
     error.value = null
 
     try {
-        const res = await projectAuth.createUserWithEmailAndPassword(email, passwword)
+        const res = await createUserWithEmailAndPassword(projectAuth, email, passwword)
         if (!res) {
             throw new Error('Could not complete the signup')
         }
-        await res.user.updateProfile({ displayName })
-        projectFirestore.collection('players').doc(res.user.uid).set({ name: displayName, surname: lastName })
+        await updateProfile(res.user, { displayName })
+        await setDoc(doc(projectFirestore, 'players', res.user.uid), { name: displayName, surname: lastName })
         error.value = null
         
         return res
-
-
     } catch(err) {
         console.log(err.message)
         error.value = err.message
     }
-
 }
 
 const useSignup = () => {

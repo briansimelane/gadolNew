@@ -15,65 +15,46 @@
 </template>
 
 <script>
-import { ref } from '@vue/reactivity'
+import { ref, onUnmounted } from 'vue'
 import getUser from '../composables/getUser'
 import { projectAuth } from '../firebase/config'
 import { projectFirestore } from '../firebase/config'
-import NavbarInLobby from '../components/NavbarInLobby'
-
-
-
+import NavbarInLobby from '../components/NavbarInLobby.vue'
+import { onAuthStateChanged } from 'firebase/auth'
+import { doc, onSnapshot } from 'firebase/firestore'
 
 export default {
   components: { NavbarInLobby },
   props: ['id'],
   setup(props) {
-
     const { user } = getUser() 
-    let gameData = ref(null)
+    const gameData = ref(null)
+    let unsubSnapshot = null
   
-    // Connection to the game       
-const dbConnectionGame = projectFirestore.collection('rooms').doc(props.id)
-    
-
-/* Trying using the code from the player side */
-// Keep track of User's authentication status (listen for auth status changes)
-projectAuth.onAuthStateChanged(user => {
-    if(user) {
-        // If there is a user - it means they are logged in
-        // get data from the database
+    const unsubAuth = onAuthStateChanged(projectAuth, user => {
+      if(user) {
         console.log('From inside the fetch: ', props.id)
-        projectFirestore.collection('rooms').doc(props.id).onSnapshot(snapshot => {
-
+        unsubSnapshot = onSnapshot(doc(projectFirestore, 'rooms', props.id), snapshot => {
           let results = snapshot.data() 
-
-       /*   snapshot.docs.forEach(doc => {
-            results.push({...doc.data(), id: doc.id})
-          }) */
-          
-        
-          // update values
           gameData.value = results
           console.log("Game data: ", results)
           console.log("Rules: ", results.rules)
-          
-
         }, err => {
-                console.log(err.message);
-            });
-        
-    }else {
-        // User not logged in
-        
+          console.log(err.message);
+        });
+      } else {
         console.log('user logged out')
-    }
-})
+        gameData.value = null
+        if (unsubSnapshot) unsubSnapshot()
+      }
+    })
 
+    onUnmounted(() => {
+      unsubAuth()
+      if (unsubSnapshot) unsubSnapshot()
+    })
 
-
-
-        return { user, gameData }
+    return { user, gameData }
   }
 }
-
 </script>
