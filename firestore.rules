@@ -20,7 +20,7 @@ service cloud.firestore {
       
       // match documents in the rooms collection
       match /rooms/{roomId} {
-      	allow read, write: if request.auth.uid != null;
+      	allow read, write;
       }
     }
   }

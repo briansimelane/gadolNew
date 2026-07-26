@@ -1,6 +1,6 @@
 import { ref } from 'vue'
 import { projectAuth, projectFirestore } from '../firebase/config'
-import { signInWithEmailAndPassword, signOut as firebaseSignOut } from 'firebase/auth'
+import { signInWithEmailAndPassword, signInAnonymously, signOut as firebaseSignOut } from 'firebase/auth'
 import { collection, query, where, getDocs, doc, getDoc, setDoc } from 'firebase/firestore'
 
 const role = ref(null)
@@ -46,6 +46,13 @@ const restoreSession = async () => {
   if (storedRole) {
     if (storedRoomId && (storedRole === 'PLAYER' || storedRole === 'FACILITATOR')) {
       try {
+        if (!projectAuth.currentUser) {
+          try {
+            await signInAnonymously(projectAuth)
+          } catch (authErr) {
+            console.warn('Anonymous auth on restore session warning:', authErr)
+          }
+        }
         const roomRef = doc(projectFirestore, 'rooms', storedRoomId)
         const roomSnap = await getDoc(roomRef)
         if (roomSnap.exists() && roomSnap.data().status === 'OPEN') {
@@ -82,6 +89,14 @@ const loginWithCode = async (rawCode) => {
   }
 
   try {
+    if (!projectAuth.currentUser) {
+      try {
+        await signInAnonymously(projectAuth)
+      } catch (authErr) {
+        console.warn('Anonymous auth on code login warning:', authErr)
+      }
+    }
+
     const q = query(collection(projectFirestore, 'rooms'), where('status', '==', 'OPEN'))
     const querySnapshot = await getDocs(q)
     let matched = false
