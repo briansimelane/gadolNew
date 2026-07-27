@@ -48,6 +48,27 @@
                 :interactive="true" 
                 @select="c => handleCardClick(c, 'contract')"
               />
+
+              <!-- Team Secret Contract Card (Hidden/Private to Team) -->
+              <div v-if="ownPlayer && ownPlayer.secretContractCard" class="secret-contract-card-wrapper">
+                <div class="secret-card-badge">
+                  <i class="material-icons tiny">lock</i>
+                  <span>Team {{ ownPlayer.seat }} Secret</span>
+                </div>
+
+                <div v-if="ownPlayer.secretContractCompleted" class="secret-completed-box">
+                  <i class="material-icons small teal-text text-darken-2">verified</i>
+                  <span class="completed-text">Secret Done!</span>
+                  <span class="completed-pts">+{{ ownPlayer.secretContractCard.Value }} Pts</span>
+                </div>
+
+                <ContractCard 
+                  v-else
+                  :card="ownPlayer.secretContractCard"
+                  :interactive="true"
+                  @select="c => handleCardClick(c, 'contract')"
+                />
+              </div>
             </div>
 
             <!-- Last Action Card (To the right of Contract cards) -->
@@ -438,6 +459,7 @@ import GameLogPanel from '../components/GameLogPanel.vue'
 import ResourceCard from '../components/cards/ResourceCard.vue'
 import ContractCard from '../components/cards/ContractCard.vue'
 import CardZoomOverlay from '../components/cards/CardZoomOverlay.vue'
+import resetValues from '../assets/reset.json'
 import { updateDoc } from 'firebase/firestore'
 import M from 'materialize-css'
 
@@ -722,6 +744,49 @@ export default {
       }
       openClaimModal(seatNumber)
     }
+
+    // Watch gameData to automatically infuse secret contract cards into existing games if missing
+    let hasAttemptedInfusion = false
+    watch(gameData, (data) => {
+      if (!data || !data.players || !data.players.length || hasAttemptedInfusion) return
+
+      const missingSecret = data.players.some(p => !p.secretContractCard)
+      if (missingSecret) {
+        hasAttemptedInfusion = true
+        console.log('Infusing secret contract cards into existing game room...')
+
+        const updatedPlayers = JSON.parse(JSON.stringify(data.players))
+        const availableContracts = [...(data.z00contractCards || [])]
+
+        let modified = false
+        updatedPlayers.forEach(p => {
+          if (!p.secretContractCard) {
+            let secretCard = null
+            if (availableContracts.length > 0) {
+              secretCard = availableContracts.pop()
+            } else {
+              const defaultContracts = resetValues?.contractCards || []
+              secretCard = defaultContracts[Math.floor(Math.random() * defaultContracts.length)]
+            }
+
+            p.secretContractCard = secretCard
+            p.secretContractCompleted = p.secretContractCompleted || false
+            modified = true
+          }
+        })
+
+        if (modified) {
+          updateDoc(roomDocRef, {
+            players: updatedPlayers,
+            z00contractCards: availableContracts
+          }).then(() => {
+            M.toast({ html: 'Infused Team Secret Contracts!' })
+          }).catch(err => {
+            console.error('Error infusing secret contract cards:', err)
+          })
+        }
+      }
+    }, { immediate: true })
 
     // Watch for room snapshot to prompt player name on first join
     watch(gameData, (newGameData) => {
@@ -1025,8 +1090,24 @@ export default {
       if (!activePlayer.value) return
       const scores = activePlayer.value.scores
 
+      if (scores.greenPerm < card.CostGreen ||
+          scores.redPerm < card.CostRed ||
+          scores.yellowPerm < card.CostYellow ||
+          scores.purplePerm < card.CostPurple ||
+          scores.blackPerm < card.CostBlack) {
+        M.toast({ html: 'Insufficient permanent resource cards to complete this contract!' })
+        return
+      }
+
       const updatedPlayers = JSON.parse(JSON.stringify(gameData.value.players))
       const pCopy = updatedPlayers[gameData.value.currentPlayer]
+
+      const isSecret = pCopy.secretContractCard && pCopy.secretContractCard.Ref === card.Ref
+
+      if (isSecret && pCopy.secretContractCompleted) {
+        M.toast({ html: 'Your team secret contract has already been completed!' })
+        return
+      }
 
       pCopy.scores.value += card.Value
       pCopy.scores.production -= card.Production
@@ -1041,15 +1122,23 @@ export default {
 
       pCopy.scores.costs += (card.Production + card.CostGreen + card.CostRed + card.CostYellow + card.CostPurple + card.CostBlack)
 
-      const contractCards = [...gameData.value.z00contractCards]
-      const index = contractCards.findIndex(c => c.Ref === card.Ref)
-      if (index !== -1) {
-        contractCards.splice(index, 1)
+      let contractCards = [...gameData.value.z00contractCards]
+
+      if (isSecret) {
+        pCopy.secretContractCompleted = true
+      } else {
+        const index = contractCards.findIndex(c => c.Ref === card.Ref)
+        if (index !== -1) {
+          contractCards.splice(index, 1)
+        }
       }
 
-      const text = `completed a contract worth ${card.Value} points`
+      const text = isSecret 
+        ? `completed Team ${pCopy.seat}'s secret contract worth ${card.Value} points` 
+        : `completed a market contract worth ${card.Value} points`
+
       const actionText = `${pCopy.name} ${text}`
-      const entry = logEntry('BUY_CONTRACT', text, { ref: card.Ref, value: card.Value })
+      const entry = logEntry('BUY_CONTRACT', text, { ref: card.Ref, value: card.Value, isSecret })
       const updatedLog = getUpdatedLog(entry)
 
       updateDoc(roomDocRef, {
@@ -1058,7 +1147,7 @@ export default {
         lastAction: actionText,
         gameLog: updatedLog
       }).then(() => {
-        M.toast({ html: `Completed a Contract!` })
+        M.toast({ html: isSecret ? `Completed Team Secret Contract!` : `Completed Market Contract!` })
         nextPlayer()
       })
     }
@@ -1327,6 +1416,58 @@ export default {
   -webkit-overflow-scrolling: touch;
   scrollbar-width: none;
   -ms-overflow-style: none;
+}
+
+.secret-contract-card-wrapper {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  border: 2px dashed #00796b;
+  border-radius: 10px;
+  padding: 4px;
+  background: rgba(0, 121, 107, 0.08);
+  flex-shrink: 0;
+}
+
+.secret-card-badge {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 0.68rem;
+  font-weight: 800;
+  color: #004d40;
+  background: #e0f2f1;
+  padding: 2px 6px;
+  border-radius: 4px;
+  margin-bottom: 4px;
+  text-transform: uppercase;
+}
+
+.secret-completed-box {
+  width: 140px;
+  height: 180px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  background: #ffffff;
+  border-radius: 8px;
+  border: 2px solid #00796b;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+}
+
+.completed-text {
+  font-weight: 800;
+  color: #004d40;
+  font-size: 0.85rem;
+}
+
+.completed-pts {
+  font-weight: 800;
+  color: #b78103;
+  font-size: 0.8rem;
 }
 
 .last-action-card {

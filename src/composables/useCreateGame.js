@@ -135,12 +135,18 @@ export default function useCreateGame() {
 
       const playersArray = []
       for (let i = 1; i <= 4; i++) {
+        const secretCard = (shuffledContractCards && shuffledContractCards.length > 0)
+          ? shuffledContractCards.pop()
+          : null
+
         playersArray.push({
           seat: i,
           joined: false,
           name: '',
           online: false,
           uid: '',
+          secretContractCard: secretCard,
+          secretContractCompleted: false,
           scores: makePlayerScore()
         })
       }

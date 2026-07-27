@@ -7,8 +7,8 @@
         <span>Team Standings</span>
       </div>
       <div class="matrix-legend">
-        <span class="legend-item" title="Permanent Cards"><i class="material-icons micro-icon">style</i> Cards</span>
-        <span class="legend-item" title="Temporary Tokens"><i class="material-icons micro-icon">hexagon</i> Tokens</span>
+        <span class="legend-item" title="Permanent Resource Cards">Cards</span>
+        <span class="legend-item" title="Temporary Resource Tokens">Tokens</span>
       </div>
     </div>
 
@@ -45,20 +45,20 @@
           </div>
         </div>
 
-        <!-- Line 3: 5 Official Resource Colour Boxes with Hexagon Token Icons -->
+        <!-- Line 3: 5 Official Resource Colour Boxes with Asset Images -->
         <div class="row-line-3">
           <div class="row-resource-matrix">
             <div v-for="c in resourceColors" :key="c.key" class="color-matrix-box" :class="c.key">
               <div class="color-box-values">
-                <!-- Permanent Cards Icon + Number -->
+                <!-- Permanent Cards Asset Image + Number -->
                 <div class="res-sub-val cards-val" title="Permanent Resource Cards">
-                  <i class="material-icons micro-icon">style</i>
+                  <img :src="c.cardIcon" class="mini-card-icon" :alt="c.label + ' Cards'" />
                   <strong class="sub-num">{{ p.scores[c.key + 'Perm'] || 0 }}</strong>
                 </div>
 
-                <!-- Temporary Tokens Icon (Hexagon) + Number -->
+                <!-- Temporary Tokens Asset Image + Number -->
                 <div class="res-sub-val tokens-val" title="Temporary Resource Tokens">
-                  <i class="material-icons micro-icon">hexagon</i>
+                  <img :src="c.tokenIcon" class="mini-token-icon" :alt="c.label + ' Tokens'" />
                   <strong class="sub-num">{{ p.scores[c.key + 'Temp'] || 0 }}</strong>
                 </div>
               </div>
@@ -72,6 +72,18 @@
 
 <script>
 import { computed } from 'vue'
+
+import greenCardicon from '../assets/img/greenCardicon.png'
+import redCardicon from '../assets/img/redCardicon.png'
+import yellowCardicon from '../assets/img/yellowCardicon.png'
+import purpleCardicon from '../assets/img/purpleCardicon.png'
+import blackCardicon from '../assets/img/blackCardicon.png'
+
+import greenToken from '../assets/img/greenToken.png'
+import redToken from '../assets/img/redToken.png'
+import yellowToken from '../assets/img/yellowToken.png'
+import purpleToken from '../assets/img/purpleToken.png'
+import blackToken from '../assets/img/blackToken.png'
 
 export default {
   name: 'ScoreboardColorMatrix',
@@ -95,11 +107,11 @@ export default {
   },
   setup(props) {
     const resourceColors = [
-      { key: 'green', label: 'Green' },
-      { key: 'red', label: 'Red' },
-      { key: 'yellow', label: 'Yellow' },
-      { key: 'purple', label: 'Purple' },
-      { key: 'black', label: 'Black' }
+      { key: 'green', label: 'Green', cardIcon: greenCardicon, tokenIcon: greenToken },
+      { key: 'red', label: 'Red', cardIcon: redCardicon, tokenIcon: redToken },
+      { key: 'yellow', label: 'Yellow', cardIcon: yellowCardicon, tokenIcon: yellowToken },
+      { key: 'purple', label: 'Purple', cardIcon: purpleCardicon, tokenIcon: purpleToken },
+      { key: 'black', label: 'Black', cardIcon: blackCardicon, tokenIcon: blackToken }
     ]
 
     const formattedTeams = computed(() => {
@@ -177,11 +189,20 @@ export default {
   gap: 2px;
 }
 
-.micro-icon {
-  font-size: 13px !important;
-  line-height: 1;
-  opacity: 0.9;
+.mini-card-icon {
+  width: 28px;
+  height: 28px;
+  object-fit: contain;
   flex-shrink: 0;
+  filter: drop-shadow(0 1px 2px rgba(0,0,0,0.3));
+}
+
+.mini-token-icon {
+  width: 18px;
+  height: 18px;
+  object-fit: contain;
+  flex-shrink: 0;
+  filter: drop-shadow(0 1px 1px rgba(0,0,0,0.2));
 }
 
 .matrix-rows-container {
@@ -312,7 +333,10 @@ export default {
 }
 
 .color-matrix-box {
-  border-radius: 5px;
+  background: #f5f5f5 !important;
+  color: #000000 !important;
+  border: 1px solid #e0e0e0 !important;
+  border-radius: 6px;
   padding: 5px 6px;
   display: flex;
   flex-direction: column;
@@ -322,10 +346,16 @@ export default {
   overflow: hidden;
 }
 
+.color-matrix-box .sub-num {
+  color: #000000 !important;
+  font-weight: 800;
+  font-size: 0.9rem;
+}
+
 .color-box-values {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 3px;
   width: 100%;
 }
 
@@ -336,68 +366,5 @@ export default {
   line-height: 1.2;
   white-space: nowrap;
   width: 100%;
-}
-
-.sub-num {
-  font-weight: 800;
-  font-size: 0.88rem;
-  margin-left: 2px;
-}
-
-/* Official Gadol Game Color Hex Themes & High-Contrast Text */
-
-/* Green (#007b46) */
-.color-matrix-box.green {
-  background: #007b46 !important;
-  color: #ffffff !important;
-  border: 1px solid #005a33;
-}
-.color-matrix-box.green .micro-icon,
-.color-matrix-box.green .sub-num {
-  color: #ffffff !important;
-}
-
-/* Red (#e21234) */
-.color-matrix-box.red {
-  background: #e21234 !important;
-  color: #ffffff !important;
-  border: 1px solid #b80c27;
-}
-.color-matrix-box.red .micro-icon,
-.color-matrix-box.red .sub-num {
-  color: #ffffff !important;
-}
-
-/* Yellow (#fdb410) */
-.color-matrix-box.yellow {
-  background: #fdb410 !important;
-  color: #000000 !important;
-  border: 1px solid #d4950b;
-}
-.color-matrix-box.yellow .micro-icon,
-.color-matrix-box.yellow .sub-num {
-  color: #000000 !important;
-}
-
-/* Purple (#692586) */
-.color-matrix-box.purple {
-  background: #692586 !important;
-  color: #ffffff !important;
-  border: 1px solid #4a1960;
-}
-.color-matrix-box.purple .micro-icon,
-.color-matrix-box.purple .sub-num {
-  color: #ffffff !important;
-}
-
-/* Black (#000000) */
-.color-matrix-box.black {
-  background: #000000 !important;
-  color: #ffffff !important;
-  border: 1px solid #333333;
-}
-.color-matrix-box.black .micro-icon,
-.color-matrix-box.black .sub-num {
-  color: #ffffff !important;
 }
 </style>
