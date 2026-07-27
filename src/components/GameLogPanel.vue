@@ -1,0 +1,251 @@
+<template>
+  <teleport to="#modals">
+    <div class="log-overlay" @click.self="$emit('close')">
+      <div class="log-panel">
+        <div class="log-header">
+          <div class="log-title">
+            <i class="material-icons">history</i>
+            <span>Game Log</span>
+          </div>
+          <button class="log-close-btn" @click="$emit('close')" aria-label="Close log">&times;</button>
+        </div>
+
+        <div class="log-body">
+          <div v-if="groupedTurns.length === 0" class="empty-log">
+            <i class="material-icons large grey-text">assignment</i>
+            <p class="grey-text">No actions yet — Team 1 to play.</p>
+          </div>
+
+          <div 
+            v-else 
+            v-for="group in groupedTurns" 
+            :key="group.turn" 
+            class="turn-group"
+          >
+            <!-- Turn Header -->
+            <div class="turn-header" :style="getSeatHeaderStyle(group.seat)">
+              <span>Turn {{ group.turn }} — {{ group.actorName }}</span>
+            </div>
+
+            <!-- Turn Entries -->
+            <div class="turn-entries">
+              <div 
+                v-for="(entry, idx) in group.entries" 
+                :key="idx" 
+                class="log-entry-row"
+                :class="entry.type"
+              >
+                <span class="entry-dot" :style="{ backgroundColor: getSeatDotColor(entry.seat) }"></span>
+                <span class="entry-text">{{ entry.text }}</span>
+                <span class="entry-time">{{ formatTime(entry.ts) }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </teleport>
+</template>
+
+<script>
+import { computed } from 'vue'
+
+export default {
+  name: 'GameLogPanel',
+  props: {
+    log: {
+      type: Array,
+      default: () => []
+    },
+    players: {
+      type: Array,
+      default: () => []
+    }
+  },
+  emits: ['close'],
+  setup(props) {
+    const seatPalette = {
+      1: { dot: '#BA7517', bg: '#FAEEDA', border: '#BA7517', text: '#633806' },
+      2: { dot: '#639922', bg: '#EAF3DE', border: '#639922', text: '#27500A' },
+      3: { dot: '#185FA5', bg: '#E3F2FD', border: '#185FA5', text: '#0D47A1' },
+      4: { dot: '#D85A30', bg: '#FBE9E7', border: '#D85A30', text: '#BF360C' }
+    }
+
+    const getSeatDotColor = (seatNum) => {
+      const s = seatPalette[seatNum] || seatPalette[1]
+      return s.dot
+    }
+
+    const getSeatHeaderStyle = (seatNum) => {
+      const s = seatPalette[seatNum] || seatPalette[1]
+      return {
+        backgroundColor: s.bg,
+        borderLeft: `4px solid ${s.border}`,
+        color: s.text
+      }
+    }
+
+    const formatTime = (ts) => {
+      if (!ts) return ''
+      const d = new Date(ts)
+      return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })
+    }
+
+    // Group log entries by turn, newest turn first
+    const groupedTurns = computed(() => {
+      if (!props.log || props.log.length === 0) return []
+
+      const turnMap = new Map()
+
+      props.log.forEach(entry => {
+        const turnNum = entry.turn || 1
+        if (!turnMap.has(turnNum)) {
+          turnMap.set(turnNum, {
+            turn: turnNum,
+            seat: entry.seat || 1,
+            actorName: entry.name || `Seat ${entry.seat || 1}`,
+            entries: []
+          })
+        }
+        if (entry.type !== 'TURN_END') {
+          turnMap.get(turnNum).entries.push(entry)
+        }
+      })
+
+      // Convert map to array and sort descending by turn
+      return Array.from(turnMap.values()).sort((a, b) => b.turn - a.turn)
+    })
+
+    return {
+      groupedTurns,
+      getSeatDotColor,
+      getSeatHeaderStyle,
+      formatTime
+    }
+  }
+}
+</script>
+
+<style scoped>
+.log-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(2px);
+  z-index: 9999;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.log-panel {
+  width: 100%;
+  max-width: 380px;
+  height: 100%;
+  background-color: #ffffff;
+  box-shadow: -4px 0 20px rgba(0, 0, 0, 0.25);
+  display: flex;
+  flex-direction: column;
+  animation: slideInRight 0.25s ease-out;
+}
+
+@keyframes slideInRight {
+  from { transform: translateX(100%); }
+  to { transform: translateX(0); }
+}
+
+.log-header {
+  height: 54px;
+  background-color: #004d40;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 16px;
+}
+
+.log-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.log-close-btn {
+  background: none;
+  border: none;
+  color: #ffffff;
+  font-size: 28px;
+  cursor: pointer;
+  line-height: 1;
+}
+
+.log-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.empty-log {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  gap: 12px;
+}
+
+.turn-group {
+  border-radius: 8px;
+  border: 1px solid #e0e0e0;
+  overflow: hidden;
+}
+
+.turn-header {
+  padding: 8px 12px;
+  font-weight: 700;
+  font-size: 0.85rem;
+}
+
+.turn-entries {
+  display: flex;
+  flex-direction: column;
+  background-color: #fafafa;
+}
+
+.log-entry-row {
+  display: flex;
+  align-items: center;
+  padding: 8px 12px;
+  border-bottom: 1px solid #eeeeee;
+  font-size: 0.85rem;
+  gap: 8px;
+}
+
+.log-entry-row:last-child {
+  border-bottom: none;
+}
+
+.entry-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.entry-text {
+  flex: 1;
+  color: #212121;
+}
+
+.entry-time {
+  font-size: 0.72rem;
+  color: #757575;
+}
+</style>

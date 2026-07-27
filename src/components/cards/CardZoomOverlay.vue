@@ -30,8 +30,8 @@
         <!-- Action / Info Panel -->
         <div class="zoom-panel">
           <h5 class="zoom-title">
-            <span v-if="zoomType === 'upcoming'">Upcoming Resource Card</span>
-            <span v-else-if="zoomType === 'resource'">Permanent Resource Card</span>
+            <span v-if="zoomType === 'upcoming'">Upcoming {{ cardCategoryName }} Card</span>
+            <span v-else-if="zoomType === 'resource'">{{ cardCategoryName }} Card</span>
             <span v-else>Contract Card</span>
           </h5>
 
@@ -139,10 +139,21 @@ export default {
       window.removeEventListener('resize', handleResize)
     })
 
+    const cardCategoryName = computed(() => {
+      const col = (zoomColor.value || zoomedCard.value?.Colour || '').toLowerCase()
+      if (col === 'green') return 'Property'
+      if (col === 'yellow') return 'Equipment'
+      if (col === 'red') return 'People'
+      if (col === 'purple') return 'Operations'
+      if (col === 'black') return 'Outsource'
+      return 'Resource'
+    })
+
     return {
       zoomedCard,
       zoomType,
       zoomColor,
+      cardCategoryName,
       closeZoom,
       onAction,
       cardScale

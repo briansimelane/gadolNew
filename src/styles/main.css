@@ -1,5 +1,12 @@
 :root {
   --card-scale: 1;
+  --g-green: #639922;  --g-green-bg: #EAF3DE;  --g-green-text: #27500A;
+  --g-yellow: #BA7517; --g-yellow-bg: #FAEEDA; --g-yellow-text: #633806;
+  --g-red: #E24B4A;    --g-red-bg: #FCEBEB;    --g-red-text: #791F1F;
+  --g-purple: #534AB7; --g-purple-bg: #EEEDFE; --g-purple-text: #26215C;
+  --g-black: #444441;  --g-black-bg: #F1EFE8;  --g-black-text: #2C2C2A;
+  --seat1: var(--g-yellow); --seat2: var(--g-green);
+  --seat3: #185FA5;         --seat4: #D85A30;
 }
 
 @media only screen and (max-width: 1439px) {

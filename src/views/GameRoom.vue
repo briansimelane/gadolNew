@@ -1,270 +1,260 @@
 <template>
-  <div class="container-fluid gameRoomBg" v-if="gameData">
-    
-    <NavbarInRoom />
+  <div class="game-room-page gameRoomBg" v-if="gameData">
+    <!-- Slim Navigation Bar -->
+    <NavbarInRoom :roomId="id" />
 
-    <div class="container-fluid">
-      <div class="col s12 space-left margin-bottom-small center pageHeadingSmall">
-        <h6 class="white-text"> Welcome to <span style="font-weight: bold;">{{ gameData.name }}</span></h6>
-      </div>
-    </div>
+    <!-- Sticky Turn Bar -->
+    <TurnBar 
+      :roomName="gameData.name"
+      :activePlayerName="activePlayerName" 
+      :isMyTurn="isMyTurn" 
+      :isFacilitator="role === 'FACILITATOR' || role === 'ADMIN'" 
+      :isSpectator="isSpectator" 
+      :activeSeat="(gameData.currentPlayer || 0) + 1"
+      :unreadCount="unreadLogCount"
+      @openLog="openLogPanel"
+    />
 
-    <div class="gameArea">
+    <!-- Main Game Container: Mobile 1-col | Desktop 2-col -->
+    <div class="game-layout-container" :class="{ 'desktop-layout': isDesktop }">
+      <!-- Main Board Column -->
+      <div class="board-column">
+        
+        <!-- Contracts Row (Horizontal Scroll Snap) -->
+        <div class="contracts-section" v-if="gameData.rules === 'contracts'">
+          <div class="section-label white-text">
+            <i class="material-icons tiny">description</i>Contract Cards
+          </div>
+          <div class="contracts-scroll-row">
+            <ContractCard 
+              v-for="card in gameData.z00contractCards.slice(0, 4)" 
+              :key="card.Ref" 
+              :card="card" 
+              :interactive="true" 
+              @select="c => handleCardClick(c, 'contract')"
+            />
+          </div>
+        </div>
 
-      <div class="gameNotifications">
-        <span class="left">ACTIVE PLAYER IS: {{ activePlayerName }}</span>  
-        <span class="right white-text" v-if="isSpectator">You are in Spectator view</span>
-        <span class="right white-text" v-if="role === 'FACILITATOR' || role === 'ADMIN'">You are in Facilitator view</span> 
-        <span class="right white-text" v-if="role === 'PLAYER' && seat">You are playing in Seat {{ seat }}</span>
-      </div>
-
-      <div class="gameAreaLeft">
-      
-        <!-- Contracts Market -->
-        <div class="onTableContracts" v-if="gameData.rules === 'contracts'">
-          <h5 class="white-text hide-on-med-and-down"><i class="material-icons right">send</i>Contract Cards</h5>
-          
-          <ContractCard
-            v-for="contract in gameData.z00contractCards.slice(0, 4)"
-            :key="contract.Ref"
-            :card="contract"
-            @select="c => handleCardClick(c, 'contract')"
+        <!-- Token Market Bar (Placed ABOVE resource cards) -->
+        <div class="market-section">
+          <TokenMarket 
+            :gameData="gameData" 
+            @acquireClick="handleAcquireClick"
           />
         </div>
 
-        <!-- Resource Cards Market -->
-        <div class="onTableRow1">
-          <ResourceCard
-            v-for="card in gameData.z01greenCards.slice(0, 2)"
-            :key="card.Ref"
-            :card="card"
-            color="green"
+        <!-- Resource Cards Grid (Colour Pair Tiles) -->
+        <div class="resource-pairs-grid">
+          <ResourcePairTile 
+            color="green" 
+            :cards="gameData.z01greenCards.slice(0, 2)" 
+            :interactive="true"
             @select="c => handleCardClick(c, 'resource', 'green')"
           />
-          <ResourceCard
-            v-for="card in gameData.z02yellowCards.slice(0, 2)"
-            :key="card.Ref"
-            :card="card"
-            color="yellow"
+          <ResourcePairTile 
+            color="yellow" 
+            :cards="gameData.z02yellowCards.slice(0, 2)" 
+            :interactive="true"
             @select="c => handleCardClick(c, 'resource', 'yellow')"
           />
-        </div>
-
-        <div class="onTableRow2">
-          <ResourceCard
-            v-for="card in gameData.z03redCards.slice(0, 2)"
-            :key="card.Ref"
-            :card="card"
-            color="red"
+          <ResourcePairTile 
+            color="red" 
+            :cards="gameData.z03redCards.slice(0, 2)" 
+            :interactive="true"
             @select="c => handleCardClick(c, 'resource', 'red')"
           />
-          <ResourceCard
-            v-for="card in gameData.z04purpleCards.slice(0, 2)"
-            :key="card.Ref"
-            :card="card"
-            color="purple"
+          <ResourcePairTile 
+            color="purple" 
+            :cards="gameData.z04purpleCards.slice(0, 2)" 
+            :interactive="true"
             @select="c => handleCardClick(c, 'resource', 'purple')"
           />
-        </div>
-
-        <div class="onTableRow3">
-          <ResourceCard
-            v-for="card in gameData.z05blackCards.slice(0, 2)"
-            :key="card.Ref"
-            :card="card"
-            color="black"
+          <ResourcePairTile 
+            color="black" 
+            :cards="gameData.z05blackCards.slice(0, 2)" 
+            :interactive="true"
             @select="c => handleCardClick(c, 'resource', 'black')"
           />
         </div>
 
-        <!-- Upcoming Cards -->
-        <div class="upComingCards">
-          <h5 class="white-text hide-on-med-and-down"><i class="material-icons right">send</i>Upcoming cards</h5>
-          
-          <ResourceCard
-            v-for="card in gameData.z01greenCards.slice(2, 3)"
-            :key="card.Ref"
-            :card="card"
-            color="green"
-            :interactive="true"
-            :dimmed="true"
-            @select="c => handleCardClick(c, 'upcoming', 'green')"
-          />
-          <ResourceCard
-            v-for="card in gameData.z02yellowCards.slice(2, 3)"
-            :key="card.Ref"
-            :card="card"
-            color="yellow"
-            :interactive="true"
-            :dimmed="true"
-            @select="c => handleCardClick(c, 'upcoming', 'yellow')"
-          />
-          <ResourceCard
-            v-for="card in gameData.z03redCards.slice(2, 3)"
-            :key="card.Ref"
-            :card="card"
-            color="red"
-            :interactive="true"
-            :dimmed="true"
-            @select="c => handleCardClick(c, 'upcoming', 'red')"
-          />
-          <ResourceCard
-            v-for="card in gameData.z04purpleCards.slice(2, 3)"
-            :key="card.Ref"
-            :card="card"
-            color="purple"
-            :interactive="true"
-            :dimmed="true"
-            @select="c => handleCardClick(c, 'upcoming', 'purple')"
-          />
-          <ResourceCard
-            v-for="card in gameData.z05blackCards.slice(2, 3)"
-            :key="card.Ref"
-            :card="card"
-            color="black"
-            :interactive="true"
-            :dimmed="true"
-            @select="c => handleCardClick(c, 'upcoming', 'black')"
-          />
+        <!-- Upcoming Cards Collapsible -->
+        <div class="upcoming-section">
+          <button class="upcoming-toggle-btn" @click="upcomingOpen = !upcomingOpen">
+            <span>Show Upcoming Cards</span>
+            <i class="material-icons">{{ upcomingOpen ? 'expand_less' : 'expand_more' }}</i>
+          </button>
+
+          <div v-if="upcomingOpen" class="upcoming-cards-row">
+            <ResourceCard
+              v-for="card in gameData.z01greenCards.slice(2, 3)"
+              :key="card.Ref"
+              :card="card"
+              color="green"
+              :interactive="true"
+              :dimmed="true"
+              @select="c => handleCardClick(c, 'upcoming', 'green')"
+            />
+            <ResourceCard
+              v-for="card in gameData.z02yellowCards.slice(2, 3)"
+              :key="card.Ref"
+              :card="card"
+              color="yellow"
+              :interactive="true"
+              :dimmed="true"
+              @select="c => handleCardClick(c, 'upcoming', 'yellow')"
+            />
+            <ResourceCard
+              v-for="card in gameData.z03redCards.slice(2, 3)"
+              :key="card.Ref"
+              :card="card"
+              color="red"
+              :interactive="true"
+              :dimmed="true"
+              @select="c => handleCardClick(c, 'upcoming', 'red')"
+            />
+            <ResourceCard
+              v-for="card in gameData.z04purpleCards.slice(2, 3)"
+              :key="card.Ref"
+              :card="card"
+              color="purple"
+              :interactive="true"
+              :dimmed="true"
+              @select="c => handleCardClick(c, 'upcoming', 'purple')"
+            />
+            <ResourceCard
+              v-for="card in gameData.z05blackCards.slice(2, 3)"
+              :key="card.Ref"
+              :card="card"
+              color="black"
+              :interactive="true"
+              :dimmed="true"
+              @select="c => handleCardClick(c, 'upcoming', 'black')"
+            />
+          </div>
         </div>
 
-        <!-- Token Market component -->
-        <TokenMarket
-          :gameData="gameData"
-          @acquireClick="handleAcquireClick"
+      </div> <!-- end board-column -->
+
+      <!-- Right Column: Mobile Footer Stack | Desktop Static Rail -->
+      <div class="teams-column">
+        <!-- Own Team Sticky Bar (Mobile Only) -->
+        <OwnTeamBar 
+          v-if="!isDesktop && ownPlayer" 
+          :player="ownPlayer" 
+          :isActive="(ownPlayer.seat - 1) === gameData.currentPlayer"
         />
 
-        <!-- Last Action -->
-        <div class="tempLastActionsArea">
-          <h6 class="white-text" style="display: inline-block;">Last Action:</h6>
-          <p class="white multipadding-5 lastAction" v-if="gameData.lastAction">{{ gameData.lastAction }}</p>
-        </div>
-
+        <!-- Team Sheet: Mobile Bottom Sheet | Desktop Static Rail -->
+        <TeamSheet 
+          :players="otherPlayers" 
+          :ownPlayer="ownPlayer"
+          :currentPlayer="gameData.currentPlayer"
+          :isDesktop="isDesktop"
+          @takeSeat="JoinPlayer"
+        />
       </div>
-
-      <!-- Player Panels Column -->
-      <div class="gameAreaRight">
-        <div class="gameScoring">
-          <PlayerPanel
-            v-for="player in displayedPlayers"
-            :key="player.seat"
-            :player="player"
-            :isActive="gameData.currentPlayer === (player.seat - 1)"
-            :joinable="!hasJoinedAnySeat"
-            :headerColor="getPlayerHeaderColor(player.seat)"
-            @takeSeat="JoinPlayer"
-          />
-        </div>
-      </div>
-
     </div>
 
-    <!-- Zoom Overlay (Teleported) -->
-    <CardZoomOverlay
-      :isMyTurn="isMyTurn"
-      :afford="affordZoomedCard"
-      @action="handleZoomAction"
+    <!-- OVERLAYS (TELEPORTED TO #MODALS) -->
+
+    <!-- Card Zoom Overlay -->
+    <CardZoomOverlay 
+      :isMyTurn="isMyTurn" 
+      :afford="affordZoomedCard" 
+      @action="handleZoomAction" 
     />
 
-    <!-- Modal: TempResources -->
-    <teleport to='#modals'>
-      <div id="modalTempResources" v-if="ModalTempResources">
-        <div class="modal-content">
-          <h4 class="center">Acquire temporary resources</h4>
+    <!-- Game Log Slide-Over Panel -->
+    <GameLogPanel 
+      v-if="logOpen" 
+      :log="gameData.gameLog || []" 
+      :players="gameData.players || []" 
+      @close="closeLogPanel"
+    />
 
-          <div class="row">
-            <div class="col s12 m7">
-              <table>
-                <tbody>
-                  <tr class="boldTempResources">
-                    <td class="center">{{ gameData.z08marketGreenTokens }}</td>
-                    <td class="center">{{ gameData.z07marketRedTokens }}</td>
-                    <td class="center">{{ gameData.z09marketYellowTokens }}</td>
-                    <td class="center">{{ gameData.z10marketPurpleTokens }}</td>
-                    <td class="center">{{ gameData.z11marketBlackTokens }}</td>
-                  </tr>
-                  <tr>
-                    <td class="center"><img src="../assets/img/greenToken.png" class="tempResourceIcon"/> </td>
-                    <td class="center"><img src="../assets/img/redToken.png" class="tempResourceIcon" /></td>
-                    <td class="center"><img src="../assets/img/yellowToken.png" class="tempResourceIcon"/></td>
-                    <td class="center"><img src="../assets/img/purpleToken.png" class="tempResourceIcon" /></td>
-                    <td class="center"><img src="../assets/img/blackToken.png" class="tempResourceIcon" /></td>
-                  </tr>
+    <!-- Acquire Resources Modal (Restyled Single Column Rows) -->
+    <teleport to="#modals">
+      <div v-if="ModalTempResources" class="custom-modal-overlay" @click.self="ModalTempResources = false">
+        <div class="custom-modal-content card white acquire-modal-card">
+          <div class="card-content">
+            <span class="card-title teal-text text-darken-4 bold center">Acquire Temporary Tokens</span>
+            <p class="center grey-text text-darken-1" style="font-size: 0.85rem; margin-bottom: 15px;">
+              Get 2 of 1 colour OR up to 3 different singles ($1 each)
+            </p>
 
-                  <tr>
-                    <td class="center"><button class="btn-small waves-effect waves-light tempResourceActionBtn" @click="getTwoTokens('green')" :class="{ disabled: tempTokensCount > 0 }">Get 2</button></td>
-                    <td class="center"><button class="btn-small waves-effect waves-light tempResourceActionBtn" @click="getTwoTokens('red')" :class="{ disabled: tempTokensCount > 0  }">Get 2</button></td>
-                    <td class="center"><button class="btn-small waves-effect waves-light tempResourceActionBtn" @click="getTwoTokens('yellow')" :class="{ disabled: tempTokensCount > 0  }">Get 2</button></td>
-                    <td class="center"><button class="btn-small waves-effect waves-light tempResourceActionBtn" @click="getTwoTokens('purple')" :class="{ disabled: tempTokensCount > 0  }">Get 2</button></td>
-                    <td class="center"><button class="btn-small waves-effect waves-light tempResourceActionBtn" @click="getTwoTokens('black')" :class="{ disabled: tempTokensCount > 0  }">Get 2</button></td>
-                  </tr>
-
-                  <tr>
-                    <td class="center"><button class="btn-small waves-effect waves-light cyan darken-2 tempResourceActionBtn" @click="getOneToken('green')" :class="{ disabled: tokenTakenGreen }">Get 1</button></td>
-                    <td class="center"><button class="btn-small waves-effect waves-light cyan darken-2 tempResourceActionBtn" @click="getOneToken('red')" :class="{ disabled: tokenTakenRed }">Get 1</button></td>
-                    <td class="center"><button class="btn-small waves-effect waves-light cyan darken-2 tempResourceActionBtn" @click="getOneToken('yellow')" :class="{ disabled: tokenTakenYellow }">Get 1</button></td>
-                    <td class="center"><button class="btn-small waves-effect waves-light cyan darken-2 tempResourceActionBtn" @click="getOneToken('purple')" :class="{ disabled: tokenTakenPurple }">Get 1</button></td>
-                    <td class="center"><button class="btn-small waves-effect waves-light cyan darken-2 tempResourceActionBtn" @click="getOneToken('black')" :class="{ disabled: tokenTakenBlack }">Get 1</button></td>
-                  </tr>
-                  
-                  <tr>
-                    <td colspan="5" v-if="tempTokensCount === 0 "><p class="green-text center">Make your selection</p></td>
-                    <td colspan="5" v-if="tempTokensCount > 0"><p class="green-text center">You have taken {{ tempTokensCount }} token<span v-if="tempTokensCount > 1">/s</span>. Maximum is 3 tokens.</p></td>
-                  </tr>
-                </tbody>
-              </table>
-
-              <br>
-              
-              <div class="center">
-                <button class="btn waves-effect waves-light red darken-3" @click="ModalTempResources = !ModalTempResources">Close</button>
+            <div class="acquire-color-list">
+              <!-- Green -->
+              <div class="acquire-item-row">
+                <div class="item-left">
+                  <img src="../assets/img/greenToken.png" class="token-mini-img" alt="Green token" />
+                  <span>Stock: <strong>{{ gameData.z08marketGreenTokens }}</strong></span>
+                </div>
+                <div class="item-actions">
+                  <button class="btn-small waves-effect green darken-2" @click="getTwoTokens('green')" :disabled="tempTokensCount > 0 || gameData.z08marketGreenTokens < 4">Get 2</button>
+                  <button class="btn-small waves-effect cyan darken-3" @click="getOneToken('green')" :disabled="tokenTakenGreen || gameData.z08marketGreenTokens < 1">Get 1</button>
+                </div>
               </div>
 
-            </div>
-          </div>
-        </div>
-      </div>
-    </teleport>
+              <!-- Yellow -->
+              <div class="acquire-item-row">
+                <div class="item-left">
+                  <img src="../assets/img/yellowToken.png" class="token-mini-img" alt="Yellow token" />
+                  <span>Stock: <strong>{{ gameData.z09marketYellowTokens }}</strong></span>
+                </div>
+                <div class="item-actions">
+                  <button class="btn-small waves-effect yellow darken-3" @click="getTwoTokens('yellow')" :disabled="tempTokensCount > 0 || gameData.z09marketYellowTokens < 4">Get 2</button>
+                  <button class="btn-small waves-effect cyan darken-3" @click="getOneToken('yellow')" :disabled="tokenTakenYellow || gameData.z09marketYellowTokens < 1">Get 1</button>
+                </div>
+              </div>
 
-    <!-- Modal: Game End POINTS -->
-    <teleport to='#modals'>
-      <div id="ModalGameEndPoints" v-if="ModalGameEndPoints">
-        <div class="modal-content">
-          <div class="row">
-            <div class="col s12 center">
-              <br><br>
-              <h4 class="center">Game Over! Highest points.</h4>
-              <br><br>  
-              <h6>{{ activePlayerName }} has won.</h6>
-            </div>
-          </div>
-          <hr>
-        </div>
-        <div class="center">
-          <button class="btn waves-effect waves-light red darken-3" @click="ModalGameEndPoints = !ModalGameEndPoints">Close</button>
-        </div>
-        <hr>
-      </div>
-    </teleport>
+              <!-- Red -->
+              <div class="acquire-item-row">
+                <div class="item-left">
+                  <img src="../assets/img/redToken.png" class="token-mini-img" alt="Red token" />
+                  <span>Stock: <strong>{{ gameData.z07marketRedTokens }}</strong></span>
+                </div>
+                <div class="item-actions">
+                  <button class="btn-small waves-effect red darken-2" @click="getTwoTokens('red')" :disabled="tempTokensCount > 0 || gameData.z07marketRedTokens < 4">Get 2</button>
+                  <button class="btn-small waves-effect cyan darken-3" @click="getOneToken('red')" :disabled="tokenTakenRed || gameData.z07marketRedTokens < 1">Get 1</button>
+                </div>
+              </div>
 
-    <!-- Modal: Game End CONTRACTS -->
-    <teleport to='#modals'>
-      <div id="ModalGameEndContracts" v-if="ModalGameEndContracts">
-        <div class="modal-content">
-          <div class="row">
-            <div class="col s12 center">
-              <br><br>
-              <h4 class="center">Game Over! Contract completed.</h4>
-              <br><br>  
-              <h6>{{ activePlayerName }} has won.</h6>
+              <!-- Purple -->
+              <div class="acquire-item-row">
+                <div class="item-left">
+                  <img src="../assets/img/purpleToken.png" class="token-mini-img" alt="Purple token" />
+                  <span>Stock: <strong>{{ gameData.z10marketPurpleTokens }}</strong></span>
+                </div>
+                <div class="item-actions">
+                  <button class="btn-small waves-effect purple darken-2" @click="getTwoTokens('purple')" :disabled="tempTokensCount > 0 || gameData.z10marketPurpleTokens < 4">Get 2</button>
+                  <button class="btn-small waves-effect cyan darken-3" @click="getOneToken('purple')" :disabled="tokenTakenPurple || gameData.z10marketPurpleTokens < 1">Get 1</button>
+                </div>
+              </div>
+
+              <!-- Black -->
+              <div class="acquire-item-row">
+                <div class="item-left">
+                  <img src="../assets/img/blackToken.png" class="token-mini-img" alt="Black token" />
+                  <span>Stock: <strong>{{ gameData.z11marketBlackTokens }}</strong></span>
+                </div>
+                <div class="item-actions">
+                  <button class="btn-small waves-effect grey darken-3" @click="getTwoTokens('black')" :disabled="tempTokensCount > 0 || gameData.z11marketBlackTokens < 4">Get 2</button>
+                  <button class="btn-small waves-effect cyan darken-3" @click="getOneToken('black')" :disabled="tokenTakenBlack || gameData.z11marketBlackTokens < 1">Get 1</button>
+                </div>
+              </div>
+            </div>
+
+            <div class="center" style="margin-top: 15px;">
+              <p class="teal-text text-darken-3 bold" v-if="tempTokensCount === 0">Make your selection</p>
+              <p class="teal-text text-darken-3 bold" v-else>Taken {{ tempTokensCount }} token<span v-if="tempTokensCount > 1">s</span> (max 3 singles).</p>
+            </div>
+
+            <div class="center" style="margin-top: 15px;">
+              <button class="btn grey lighten-1 black-text waves-effect" @click="ModalTempResources = false">Done / Close</button>
             </div>
           </div>
-          <hr>
         </div>
-        <div class="center">
-          <button class="btn waves-effect waves-light red darken-3" @click="ModalGameEndContracts = !ModalGameEndContracts">Close</button>
-        </div>
-        <hr>
       </div>
     </teleport>
 
@@ -296,14 +286,8 @@
               </div>
 
               <div class="center" style="margin-top: 25px; display: flex; gap: 12px; justify-content: center;">
-                <button type="button" class="btn grey lighten-1 black-text waves-effect" @click="cancelClaimSeat">
-                  Cancel
-                </button>
-                <button 
-                  type="submit" 
-                  class="waves-effect waves-light btn teal darken-3" 
-                  :disabled="!claimInputName.trim()"
-                >
+                <button type="button" class="btn grey lighten-1 black-text waves-effect" @click="cancelClaimSeat">Cancel</button>
+                <button type="submit" class="waves-effect waves-light btn teal darken-3" :disabled="!claimInputName.trim()">
                   <i class="material-icons left">check_circle</i>Join Game
                 </button>
               </div>
@@ -313,19 +297,103 @@
       </div>
     </teleport>
 
+    <!-- Modal: Game End POINTS -->
+    <teleport to="#modals">
+      <div v-if="ModalGameEndPoints" class="custom-modal-overlay">
+        <div class="custom-modal-content card white">
+          <div class="card-content center">
+            <i class="material-icons large amber-text">emoji_events</i>
+            <h4 class="teal-text text-darken-4 bold" style="margin: 10px 0;">Game Over!</h4>
+            <h6 class="grey-text text-darken-3">Winner: <strong>{{ activePlayerName }}</strong></h6>
+
+            <!-- Final Scores Summary Table -->
+            <div class="end-game-scores" style="margin-top: 20px;">
+              <h6 class="left-align bold">Final Standings:</h6>
+              <table class="striped condensed">
+                <thead>
+                  <tr>
+                    <th>Team</th>
+                    <th>Points</th>
+                    <th>Cash</th>
+                    <th>Prod</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr v-for="p in displayedPlayers" :key="p.seat">
+                    <td>{{ p.joined ? p.name : 'Seat ' + p.seat }}</td>
+                    <td><strong>{{ p.scores.value }}</strong></td>
+                    <td>${{ p.scores.cash }}</td>
+                    <td>{{ p.scores.production }}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <div class="center" style="margin-top: 25px;">
+              <button class="btn red darken-3 waves-effect" @click="ModalGameEndPoints = false">Close</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </teleport>
+
+    <!-- Modal: Game End CONTRACTS -->
+    <teleport to="#modals">
+      <div v-if="ModalGameEndContracts" class="custom-modal-overlay">
+        <div class="card-content center custom-modal-content card white">
+          <div class="card-content center">
+            <i class="material-icons large amber-text">emoji_events</i>
+            <h4 class="teal-text text-darken-4 bold" style="margin: 10px 0;">Game Over!</h4>
+            <h6 class="grey-text text-darken-3">Winner: <strong>{{ activePlayerName }}</strong> (Contract Completed)</h6>
+
+            <!-- Final Scores Summary Table -->
+            <div class="end-game-scores" style="margin-top: 20px;">
+              <h6 class="left-align bold">Final Standings:</h6>
+              <table class="striped condensed">
+                <thead>
+                  <tr>
+                    <th>Team</th>
+                    <th>Points</th>
+                    <th>Cash</th>
+                    <th>Prod</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr v-for="p in displayedPlayers" :key="p.seat">
+                    <td>{{ p.joined ? p.name : 'Seat ' + p.seat }}</td>
+                    <td><strong>{{ p.scores.value }}</strong></td>
+                    <td>${{ p.scores.cash }}</td>
+                    <td>{{ p.scores.production }}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <div class="center" style="margin-top: 25px;">
+              <button class="btn red darken-3 waves-effect" @click="ModalGameEndContracts = false">Close</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </teleport>
+
   </div>
 </template>
 
 <script>
-import { ref, computed, onMounted, watch } from 'vue'
+import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
 import useRoom from '../composables/useRoom'
 import useCardZoom from '../composables/useCardZoom'
 import useSession from '../composables/useSession'
 import NavbarInRoom from '../components/NavbarInRoom.vue'
+import TurnBar from '../components/TurnBar.vue'
+import ResourcePairTile from '../components/ResourcePairTile.vue'
+import TokenMarket from '../components/TokenMarket.vue'
+import OwnTeamBar from '../components/OwnTeamBar.vue'
+import TeamSheet from '../components/TeamSheet.vue'
+import GameLogPanel from '../components/GameLogPanel.vue'
 import ResourceCard from '../components/cards/ResourceCard.vue'
 import ContractCard from '../components/cards/ContractCard.vue'
-import PlayerPanel from '../components/PlayerPanel.vue'
-import TokenMarket from '../components/TokenMarket.vue'
 import CardZoomOverlay from '../components/cards/CardZoomOverlay.vue'
 import { updateDoc } from 'firebase/firestore'
 import M from 'materialize-css'
@@ -334,10 +402,14 @@ export default {
   name: 'GameRoom',
   components: {
     NavbarInRoom,
+    TurnBar,
+    ResourcePairTile,
+    TokenMarket,
+    OwnTeamBar,
+    TeamSheet,
+    GameLogPanel,
     ResourceCard,
     ContractCard,
-    PlayerPanel,
-    TokenMarket,
     CardZoomOverlay
   },
   props: {
@@ -359,9 +431,59 @@ export default {
     const claimSeatNumber = ref(1)
     const claimInputName = ref('')
 
+    const upcomingOpen = ref(false)
+    const logOpen = ref(false)
+    const lastSeenLogCount = ref(0)
+
+    const isDesktop = ref(window.innerWidth >= 900)
+
+    const handleResize = () => {
+      isDesktop.value = window.innerWidth >= 900
+    }
+
     onMounted(() => {
       M.AutoInit()
+      window.addEventListener('resize', handleResize)
     })
+
+    onUnmounted(() => {
+      window.removeEventListener('resize', handleResize)
+    })
+
+    // Log Entry Helper (§6.3)
+    const logEntry = (type, text, detail = {}) => ({
+      turn: gameData.value?.turnNumber || 1,
+      seat: activePlayer.value ? activePlayer.value.seat : 1,
+      name: activePlayer.value ? (activePlayer.value.joined ? activePlayer.value.name : `Seat ${activePlayer.value.seat}`) : 'Player',
+      type,
+      text,
+      detail,
+      ts: Date.now()
+    })
+
+    const getUpdatedLog = (newEntry) => {
+      const currentLog = Array.isArray(gameData.value?.gameLog) ? gameData.value.gameLog : []
+      const combined = [...currentLog, newEntry]
+      return combined.slice(-300) // Cap at 300 entries
+    }
+
+    const unreadLogCount = computed(() => {
+      const currentCount = (gameData.value?.gameLog || []).length
+      if (logOpen.value) {
+        return 0
+      }
+      return Math.max(0, currentCount - lastSeenLogCount.value)
+    })
+
+    const openLogPanel = () => {
+      logOpen.value = true
+      lastSeenLogCount.value = (gameData.value?.gameLog || []).length
+    }
+
+    const closeLogPanel = () => {
+      logOpen.value = false
+      lastSeenLogCount.value = (gameData.value?.gameLog || []).length
+    }
 
     const openClaimModal = (seatNum) => {
       claimSeatNumber.value = seatNum || 1
@@ -386,8 +508,20 @@ export default {
       pCopy.online = true
       pCopy.uid = 'player-' + seatNum
 
+      const joinEntry = {
+        turn: gameData.value?.turnNumber || 1,
+        seat: seatNum,
+        name: name,
+        type: 'SEAT_JOIN',
+        text: 'joined the game',
+        detail: {},
+        ts: Date.now()
+      }
+      const updatedLog = getUpdatedLog(joinEntry)
+
       updateDoc(roomDocRef, {
-        players: updatedPlayers
+        players: updatedPlayers,
+        gameLog: updatedLog
       }).then(() => {
         M.toast({ html: `Welcome, ${name}! You claimed Seat ${seatNum}.` })
       })
@@ -427,6 +561,24 @@ export default {
       return gameData.value.players.slice(0, parseInt(gameData.value.numPlayers))
     })
 
+    const ownPlayer = computed(() => {
+      if (!gameData.value || !gameData.value.players) return null
+      if (role.value === 'PLAYER' && seat.value) {
+        return gameData.value.players[seat.value - 1] || null
+      }
+      return null
+    })
+
+    const otherPlayers = computed(() => {
+      if (!gameData.value || !gameData.value.players) return []
+      const max = parseInt(gameData.value.numPlayers) || 4
+      const activeList = gameData.value.players.slice(0, max)
+      if (ownPlayer.value) {
+        return activeList.filter(p => p.seat !== ownPlayer.value.seat)
+      }
+      return activeList
+    })
+
     const activePlayer = computed(() => {
       if (!gameData.value || !gameData.value.players) return null
       return gameData.value.players[gameData.value.currentPlayer]
@@ -458,16 +610,16 @@ export default {
       return activePlayer.value.scores.TempTokensTakenCounter
     })
 
-    const tokenTakenGreen = computed(() => activePlayer.value ? activePlayer.value.scores.greenTokenTaken : false)
-    const tokenTakenRed = computed(() => activePlayer.value ? activePlayer.value.scores.redTokenTaken : false)
-    const tokenTakenYellow = computed(() => activePlayer.value ? activePlayer.value.scores.yellowTokenTaken : false)
-    const tokenTakenPurple = computed(() => activePlayer.value ? activePlayer.value.scores.purpleTokenTaken : false)
-    const tokenTakenBlack = computed(() => activePlayer.value ? activePlayer.value.scores.blackTokenTaken : false)
+    const tokenTakenGreen = computed(() => activePlayer.value?.scores.greenTokenTaken)
+    const tokenTakenRed = computed(() => activePlayer.value?.scores.redTokenTaken)
+    const tokenTakenYellow = computed(() => activePlayer.value?.scores.yellowTokenTaken)
+    const tokenTakenPurple = computed(() => activePlayer.value?.scores.purpleTokenTaken)
+    const tokenTakenBlack = computed(() => activePlayer.value?.scores.blackTokenTaken)
 
     const affordZoomedCard = computed(() => {
-      if (!zoomedCard.value || !activePlayer.value) return false
-      const card = zoomedCard.value
+      if (!activePlayer.value || !zoomedCard.value) return false
       const scores = activePlayer.value.scores
+      const card = zoomedCard.value
 
       if (zoomType.value === 'resource') {
         return (
@@ -514,6 +666,52 @@ export default {
       M.toast({ html: 'You are not the active player' })
     }
 
+    const nextPlayer = () => {
+      const numPlayers = parseInt(gameData.value.numPlayers) || 4
+      const winScore = parseInt(gameData.value.reserve) || 15
+      const currentPScore = activePlayer.value.scores
+
+      let winPoints = false
+      let winContracts = false
+
+      if (gameData.value.rules === 'points') {
+        if (currentPScore.value >= winScore) winPoints = true
+      } else if (gameData.value.rules === 'contracts') {
+        if (gameData.value.z00contractCards.length === 0) winContracts = true
+      }
+
+      if (winPoints) {
+        updateDoc(roomDocRef, { modalPoints: true })
+        return
+      }
+      if (winContracts) {
+        updateDoc(roomDocRef, { modalContracts: true })
+        return
+      }
+
+      const nextSeat = (gameData.value.currentPlayer + 1) % numPlayers
+
+      const updatedPlayers = JSON.parse(JSON.stringify(gameData.value.players))
+      const currentP = updatedPlayers[gameData.value.currentPlayer]
+      currentP.scores.TempTokensTakenCounter = 0
+      currentP.scores.greenTokenTaken = false
+      currentP.scores.redTokenTaken = false
+      currentP.scores.yellowTokenTaken = false
+      currentP.scores.purpleTokenTaken = false
+      currentP.scores.blackTokenTaken = false
+
+      const turnEndEntry = logEntry('TURN_END', 'ended their turn')
+      const updatedLog = getUpdatedLog(turnEndEntry)
+      const currentTurn = gameData.value?.turnNumber || 1
+
+      updateDoc(roomDocRef, {
+        players: updatedPlayers,
+        currentPlayer: nextSeat,
+        turnNumber: currentTurn + 1,
+        gameLog: updatedLog
+      })
+    }
+
     const BuyPermResource = (card) => {
       if (!activePlayer.value) return
       const scores = activePlayer.value.scores
@@ -523,29 +721,34 @@ export default {
       const yellowTokensAdjust = Math.max(0, card.CostYellow - scores.yellowPerm)
       const purpleTokensAdjust = Math.max(0, card.CostPurple - scores.purplePerm)
       const blackTokensAdjust = Math.max(0, card.CostBlack - scores.blackPerm)
-
-      const cashAdjustment = greenTokensAdjust + redTokensAdjust + yellowTokensAdjust + purpleTokensAdjust + blackTokensAdjust
-      const permCardColour = card.Colour
-      const color = card.Colour.toLowerCase()
+      const totalTempSpent = greenTokensAdjust + redTokensAdjust + yellowTokensAdjust + purpleTokensAdjust + blackTokensAdjust
 
       const updatedPlayers = JSON.parse(JSON.stringify(gameData.value.players))
       const pCopy = updatedPlayers[gameData.value.currentPlayer]
+
+      pCopy.scores.production += card.Production
+
+      if (card.Colour === 'green') pCopy.scores.greenPerm += 1
+      else if (card.Colour === 'yellow') pCopy.scores.yellowPerm += 1
+      else if (card.Colour === 'red') pCopy.scores.redPerm += 1
+      else if (card.Colour === 'purple') pCopy.scores.purplePerm += 1
+      else if (card.Colour === 'black') pCopy.scores.blackPerm += 1
 
       pCopy.scores.greenTemp -= greenTokensAdjust
       pCopy.scores.redTemp -= redTokensAdjust
       pCopy.scores.yellowTemp -= yellowTokensAdjust
       pCopy.scores.purpleTemp -= purpleTokensAdjust
       pCopy.scores.blackTemp -= blackTokensAdjust
-      
-      pCopy.scores.cash += cashAdjustment
 
-      if (color === 'green') pCopy.scores.greenPerm += 1
-      else if (color === 'red') pCopy.scores.redPerm += 1
-      else if (color === 'yellow') pCopy.scores.yellowPerm += 1
-      else if (color === 'purple') pCopy.scores.purplePerm += 1
-      else if (color === 'black') pCopy.scores.blackPerm += 1
-
-      pCopy.scores.production += card.Production
+      const color = card.Colour
+      const categoryMap = {
+        green: 'Property',
+        yellow: 'Equipment',
+        red: 'People',
+        purple: 'Operations',
+        black: 'Outsource'
+      }
+      const categoryName = categoryMap[color.toLowerCase()] || color.toUpperCase()
 
       let marketKey = ''
       if (color === 'green') marketKey = 'z01greenCards'
@@ -560,7 +763,14 @@ export default {
         marketCards.splice(index, 1)
       }
 
-      const actionText = `${pCopy.name} bought a ${permCardColour} permanent resource`
+      let text = `bought a ${categoryName} card (+${card.Production} prod)`
+      if (totalTempSpent > 0) {
+        text += `, paying with ${totalTempSpent} temp token${totalTempSpent > 1 ? 's' : ''}`
+      }
+      const actionText = `${pCopy.name} ${text}`
+
+      const entry = logEntry('BUY_PERM', text, { colour: categoryName, ref: card.Ref })
+      const updatedLog = getUpdatedLog(entry)
 
       updateDoc(roomDocRef, {
         z08marketGreenTokens: gameData.value.z08marketGreenTokens + greenTokensAdjust,
@@ -570,9 +780,10 @@ export default {
         z11marketBlackTokens: gameData.value.z11marketBlackTokens + blackTokensAdjust,
         players: updatedPlayers,
         [marketKey]: marketCards,
-        lastAction: actionText
+        lastAction: actionText,
+        gameLog: updatedLog
       }).then(() => {
-        M.toast({ html: `You have bought a ${permCardColour} permanent resource` })
+        M.toast({ html: `Bought a ${categoryName} card` })
         nextPlayer()
       })
     }
@@ -603,14 +814,18 @@ export default {
         contractCards.splice(index, 1)
       }
 
-      const actionText = `${pCopy.name} completed a contract`
+      const text = `completed a contract worth ${card.Value} points`
+      const actionText = `${pCopy.name} ${text}`
+      const entry = logEntry('BUY_CONTRACT', text, { ref: card.Ref, value: card.Value })
+      const updatedLog = getUpdatedLog(entry)
 
       updateDoc(roomDocRef, {
         players: updatedPlayers,
         z00contractCards: contractCards,
-        lastAction: actionText
+        lastAction: actionText,
+        gameLog: updatedLog
       }).then(() => {
-        M.toast({ html: `You completed a Contract` })
+        M.toast({ html: `Completed a Contract!` })
         nextPlayer()
       })
     }
@@ -643,14 +858,18 @@ export default {
           pCopy.scores[colour + 'Temp'] += 2
           pCopy.scores.cash -= 2
 
-          const actionText = `${pCopy.name} bought 2 ${colour.toUpperCase()} tokens`
+          const text = `bought 2 ${colour.toUpperCase()} tokens`
+          const actionText = `${pCopy.name} ${text}`
+          const entry = logEntry('TOKENS_2', text, { colour })
+          const updatedLog = getUpdatedLog(entry)
 
           updateDoc(roomDocRef, {
             [marketField]: marketCount - 2,
             players: updatedPlayers,
-            lastAction: actionText
+            lastAction: actionText,
+            gameLog: updatedLog
           }).then(() => {
-            M.toast({ html: `You bought 2 ${colour} tokens` })
+            M.toast({ html: `Bought 2 ${colour} tokens` })
             ModalTempResources.value = false
             nextPlayer()
           })
@@ -682,15 +901,22 @@ export default {
           pCopy.scores.TempTokensTakenCounter += 1
           pCopy.scores[colour + 'TokenTaken'] = true
 
-          const actionText = `${pCopy.name} bought 1 ${colour.toUpperCase()} token`
-          const finishedTurn = pCopy.scores.TempTokensTakenCounter === 3
+          const counter = pCopy.scores.TempTokensTakenCounter
+          const text = `bought 1 ${colour.toUpperCase()} token (${counter}/3)`
+          const actionText = `${pCopy.name} ${text}`
+
+          const entry = logEntry('TOKEN_1', text, { colour })
+          const updatedLog = getUpdatedLog(entry)
+
+          const finishedTurn = counter === 3
 
           updateDoc(roomDocRef, {
             [marketField]: marketCount - 1,
             players: updatedPlayers,
-            lastAction: actionText
+            lastAction: actionText,
+            gameLog: updatedLog
           }).then(() => {
-            M.toast({ html: `You bought 1 ${colour} token` })
+            M.toast({ html: `Bought 1 ${colour} token (${counter}/3)` })
             if (finishedTurn) {
               ModalTempResources.value = false
               nextPlayer()
@@ -702,49 +928,6 @@ export default {
       }
     }
 
-    const nextPlayer = () => {
-      const players = gameData.value.players
-      const numPlayers = parseInt(gameData.value.numPlayers)
-
-      let winPoints = false
-      let winContracts = false
-
-      for (let i = 0; i < numPlayers; i++) {
-        const scores = players[i].scores
-        if (gameData.value.rules === 'points' && scores.production >= 15) {
-          winPoints = true
-        }
-        if (gameData.value.rules === 'contracts' && scores.value > 0) {
-          winContracts = true
-        }
-      }
-
-      if (winPoints) {
-        updateDoc(roomDocRef, { modalPoints: true })
-        return
-      }
-      if (winContracts) {
-        updateDoc(roomDocRef, { modalContracts: true })
-        return
-      }
-
-      const nextSeat = (gameData.value.currentPlayer + 1) % numPlayers
-
-      const updatedPlayers = JSON.parse(JSON.stringify(gameData.value.players))
-      const currentP = updatedPlayers[gameData.value.currentPlayer]
-      currentP.scores.TempTokensTakenCounter = 0
-      currentP.scores.greenTokenTaken = false
-      currentP.scores.redTokenTaken = false
-      currentP.scores.yellowTokenTaken = false
-      currentP.scores.purpleTokenTaken = false
-      currentP.scores.blackTokenTaken = false
-
-      updateDoc(roomDocRef, {
-        players: updatedPlayers,
-        currentPlayer: nextSeat
-      })
-    }
-
     return {
       role,
       seat,
@@ -754,10 +937,18 @@ export default {
       ModalGameEndPoints,
       ModalGameEndContracts,
       displayedPlayers,
+      ownPlayer,
+      otherPlayers,
       activePlayerName,
       isMyTurn,
       hasJoinedAnySeat,
       isSpectator,
+      isDesktop,
+      upcomingOpen,
+      logOpen,
+      unreadLogCount,
+      openLogPanel,
+      closeLogPanel,
       tempTokensCount,
       tokenTakenGreen,
       tokenTakenRed,
@@ -769,6 +960,7 @@ export default {
       handleAcquireClick,
       getPlayerHeaderColor,
       getTwoTokens,
+      getOneToken,
       JoinPlayer,
       showClaimModal,
       claimSeatNumber,
@@ -781,28 +973,174 @@ export default {
 </script>
 
 <style scoped>
-.custom-modal-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
-  background: rgba(0, 0, 0, 0.65);
-  backdrop-filter: blur(5px);
-  z-index: 9999;
+.game-room-page {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  color: #212121;
+}
+
+.game-layout-container {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  padding: 12px;
+  gap: 16px;
+  padding-bottom: 90px; /* space for sticky footer elements */
+}
+
+/* Desktop layout (>=900px) */
+.game-layout-container.desktop-layout {
+  flex-direction: row;
+  padding-bottom: 24px;
+  max-width: 1300px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.board-column {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.teams-column {
+  width: 100%;
+}
+
+.desktop-layout .teams-column {
+  width: 320px;
+  flex-shrink: 0;
+}
+
+.section-label {
+  font-size: 0.9rem;
+  font-weight: 700;
+  margin-bottom: 6px;
   display: flex;
   align-items: center;
-  justify-content: center;
+  gap: 4px;
+  text-shadow: 0 1px 3px rgba(0,0,0,0.5);
 }
-.custom-modal-content {
-  width: 90%;
-  max-width: 440px;
-  border-radius: 12px;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.35);
-  animation: modalFadeIn 0.25s ease-out;
+
+/* Contracts Row Horizontal Scroll */
+.contracts-section {
+  display: flex;
+  flex-direction: column;
 }
-@keyframes modalFadeIn {
-  from { opacity: 0; transform: translateY(-20px) scale(0.95); }
-  to { opacity: 1; transform: translateY(0) scale(1); }
+
+.contracts-scroll-row {
+  display: flex;
+  gap: 10px;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  padding-bottom: 8px;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.contracts-scroll-row::-webkit-scrollbar {
+  display: none;
+}
+
+.contracts-scroll-row > * {
+  scroll-snap-align: start;
+  flex-shrink: 0;
+}
+
+/* Resource Pairs 2-col Grid */
+.resource-pairs-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+@media only screen and (max-width: 500px) {
+  .resource-pairs-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Upcoming Cards Section */
+.upcoming-section {
+  margin-top: 4px;
+}
+
+.upcoming-toggle-btn {
+  background: rgba(255, 255, 255, 0.15);
+  border: 1px dashed rgba(255, 255, 255, 0.4);
+  color: #ffffff;
+  border-radius: 8px;
+  padding: 8px 14px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.upcoming-toggle-btn:hover {
+  background: rgba(255, 255, 255, 0.25);
+}
+
+.upcoming-cards-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 12px;
+  background: rgba(0, 0, 0, 0.2);
+  padding: 12px;
+  border-radius: 8px;
+}
+
+/* Acquire Modal Single-Column List */
+.acquire-modal-card {
+  max-width: 480px;
+}
+
+.acquire-color-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-height: 380px;
+  overflow-y: auto;
+}
+
+.acquire-item-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+  border-radius: 8px;
+  background: #f5f5f5;
+  border: 1px solid #e0e0e0;
+}
+
+.item-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.9rem;
+}
+
+.token-mini-img {
+  width: 26px;
+  height: 26px;
+  object-fit: contain;
+}
+
+.item-actions {
+  display: flex;
+  gap: 6px;
+}
+
+.item-actions button {
+  border-radius: 4px;
+  font-weight: 600;
 }
 </style>

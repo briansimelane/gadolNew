@@ -158,6 +158,8 @@ export default function useCreateGame() {
         rules: gameWinCondition,
         maxnumberofplayers: resetValues.numberOfPlayers,
         lastAction: '',
+        turnNumber: 1,
+        gameLog: [],
 
         gstate: 0,
         modalPoints: false,
