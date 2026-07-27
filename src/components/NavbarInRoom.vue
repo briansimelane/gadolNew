@@ -9,14 +9,15 @@
           <i class="material-icons tiny">account_circle</i>
           <span>{{ displayUser }}</span>
         </li>
-        <li v-if="roomId">
-          <button class="btn-flat white-text share-id-btn" @click="copyRoomId" title="Copy Room ID">
-            <i class="material-icons">share</i>
+        <li v-if="isFacilitatorOrAdmin">
+          <button class="btn-flat white-text hub-btn" @click="goToHub" title="Facilitator Dashboard">
+            <i class="material-icons" style="font-size: 1.1rem; margin-right: 4px;">dashboard</i>
+            <span class="hide-on-small-only">Hub</span>
           </button>
         </li>
         <li>
           <a @click="handleExit" class="exit-link" title="Exit Game">
-            <i class="material-icons right">highlight_off</i>
+            <i class="material-icons" style="font-size: 1.1rem; margin-right: 4px;">highlight_off</i>
             <span class="hide-on-small-only">Exit</span>
           </a>
         </li> 
@@ -49,6 +50,10 @@ export default {
     const { role, seat, userName, logout } = useSession()
     const router = useRouter()
 
+    const isFacilitatorOrAdmin = computed(() => {
+      return role.value === 'ADMIN' || role.value === 'FACILITATOR'
+    })
+
     const displayUser = computed(() => {
       if (role.value === 'ADMIN' || role.value === 'FACILITATOR') {
         return userName.value || 'Facilitator'
@@ -65,14 +70,8 @@ export default {
       return user.value?.displayName || user.value?.email || 'Player'
     })
 
-    const copyRoomId = () => {
-      if (!props.roomId) return
-      if (navigator.clipboard) {
-        navigator.clipboard.writeText(props.roomId)
-        M.toast({ html: 'Room ID copied to clipboard!' })
-      } else {
-        M.toast({ html: `Room ID: ${props.roomId}` })
-      }
+    const goToHub = () => {
+      router.push({ name: 'FacilitatorHub' })
     }
 
     const handleExit = async () => {
@@ -81,7 +80,7 @@ export default {
       M.toast({ html: 'You exited the game' })
     }
 
-    return { displayUser, copyRoomId, handleExit }
+    return { displayUser, isFacilitatorOrAdmin, goToHub, handleExit }
   }
 }
 </script>
@@ -96,33 +95,19 @@ export default {
   padding-left: 12px;
   padding-right: 12px;
 }
-.room-nav-brand {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  height: 48px;
-}
-.brand-title {
-  color: #ffffff;
+.brand-logo {
   font-weight: 700;
 }
-.room-name-chip {
-  background: rgba(255, 255, 255, 0.2);
-  color: #ffffff;
-  padding: 2px 10px;
-  border-radius: 12px;
-  font-size: 0.85rem;
+.brand-logo-small {
+  font-size: 1.2rem;
   font-weight: 700;
-  max-width: 200px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  border: 1px solid rgba(255, 255, 255, 0.3);
+  color: #fff;
+  line-height: 48px;
 }
 .nav-items-list {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
   height: 48px;
 }
 .user-display-item {
@@ -135,26 +120,38 @@ export default {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  margin-right: 4px;
 }
-.share-id-btn {
+.hub-btn {
   padding: 0 10px;
   height: 32px;
   line-height: 32px;
-  display: flex;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
   border-radius: 6px;
-  background: rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.18);
+  font-weight: 600;
+  text-transform: none;
+  font-size: 0.85rem;
+}
+.hub-btn:hover {
+  background: rgba(255, 255, 255, 0.3);
 }
 .exit-link {
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  gap: 4px;
   height: 32px;
   line-height: 32px;
   padding: 0 10px;
   border-radius: 6px;
   cursor: pointer;
   background: rgba(255, 255, 255, 0.12);
+  color: #ffffff;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+.exit-link:hover {
+  background: rgba(255, 255, 255, 0.25);
 }
 </style>
