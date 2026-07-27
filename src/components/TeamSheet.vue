@@ -25,69 +25,27 @@
 
       <!-- Sheet Body Content -->
       <div class="sheet-content">
-        <div v-if="players.length === 0" class="center grey-text padding-small">
-          No other teams in this room.
-        </div>
-        <div 
-          v-else 
-          v-for="p in players" 
-          :key="p.seat"
-          class="team-card-item"
-          :class="{ 'active-highlight': (p.seat - 1) === currentPlayer }"
-        >
-          <PlayerPanel 
-            :player="p" 
-            :isActive="(p.seat - 1) === currentPlayer"
-            :joinable="!p.joined"
-            :headerColor="getSeatColor(p.seat)"
-            @takeSeat="$emit('takeSeat', $event)"
-          />
-        </div>
+        <!-- Team Status & Colour Matrix Overview -->
+        <ScoreboardColorMatrix :teams="allTeams" :currentTurnIndex="currentPlayer" :roomName="roomName" />
       </div>
     </div>
   </div>
 
   <!-- Desktop Static Rail -->
   <div v-else class="desktop-teams-rail">
-    <h5 class="rail-title">
-      <i class="material-icons left">groups</i>All Teams ({{ players.length + (ownPlayer ? 1 : 0) }})
-    </h5>
-    
-    <!-- Own Team first on rail if present -->
-    <div v-if="ownPlayer" class="team-card-item own-rail-item">
-      <PlayerPanel 
-        :player="ownPlayer"
-        :isActive="(ownPlayer.seat - 1) === currentPlayer"
-        :joinable="false"
-        :headerColor="getSeatColor(ownPlayer.seat)"
-      />
-    </div>
-
-    <!-- Other Teams -->
-    <div 
-      v-for="p in players" 
-      :key="p.seat"
-      class="team-card-item"
-      :class="{ 'active-highlight': (p.seat - 1) === currentPlayer }"
-    >
-      <PlayerPanel 
-        :player="p" 
-        :isActive="(p.seat - 1) === currentPlayer"
-        :joinable="!p.joined"
-        :headerColor="getSeatColor(p.seat)"
-        @takeSeat="$emit('takeSeat', $event)"
-      />
-    </div>
+    <!-- Team Status & Colour Matrix Overview -->
+    <ScoreboardColorMatrix :teams="allTeams" :currentTurnIndex="currentPlayer" :roomName="roomName" />
   </div>
 </template>
 
 <script>
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import PlayerPanel from './PlayerPanel.vue'
+import ScoreboardColorMatrix from './ScoreboardColorMatrix.vue'
 
 export default {
   name: 'TeamSheet',
-  components: { PlayerPanel },
+  components: { PlayerPanel, ScoreboardColorMatrix },
   props: {
     players: {
       type: Array,
@@ -104,11 +62,28 @@ export default {
     isDesktop: {
       type: Boolean,
       default: false
+    },
+    roomName: {
+      type: String,
+      default: ''
     }
   },
   emits: ['takeSeat'],
-  setup() {
+  setup(props) {
     const isOpen = ref(false)
+
+    const allTeams = computed(() => {
+      const list = []
+      if (props.ownPlayer) list.push(props.ownPlayer)
+      if (props.players && props.players.length > 0) {
+        props.players.forEach(p => {
+          if (!props.ownPlayer || p.seat !== props.ownPlayer.seat) {
+            list.push(p)
+          }
+        })
+      }
+      return list.sort((a, b) => a.seat - b.seat)
+    })
 
     const getSeatColor = (seatVal) => {
       if (seatVal === 1) return 'yellow'
@@ -120,6 +95,7 @@ export default {
 
     return {
       isOpen,
+      allTeams,
       getSeatColor
     }
   }

@@ -60,14 +60,6 @@
                   </select>
                 </div>
 
-                <div class="input-field col s12 no-padding">
-                  <select id="gameReserve" v-model="gameReserve" class="browser-default" required style="margin-top: 5px; margin-bottom: 20px;">
-                    <option value="" disabled selected>Reserve Game</option>
-                    <option value="no">No Reserve</option>
-                    <option value="yes">Reserve</option>
-                  </select>
-                </div>
-
                 <button 
                   type="submit" 
                   class="btn-large waves-effect waves-light teal darken-3 btn-block"
@@ -297,7 +289,6 @@ export default {
     const numberPlayers = ref('')
     const gameTimed = ref('')
     const turnDurationSeconds = ref(60)
-    const gameReserve = ref('')
     const gameWinCondition = ref('')
 
     const creating = ref(false)
@@ -372,7 +363,7 @@ export default {
         roomName.value,
         parseInt(numberPlayers.value),
         gameTimed.value,
-        gameReserve.value,
+        'no',
         gameWinCondition.value,
         currentUid,
         currentEmail,
@@ -388,7 +379,6 @@ export default {
         numberPlayers.value = ''
         gameTimed.value = ''
         turnDurationSeconds.value = 60
-        gameReserve.value = ''
         gameWinCondition.value = ''
         M.toast({ html: 'Game room initialized!' })
       } else {
@@ -565,7 +555,6 @@ export default {
       numberPlayers,
       gameTimed,
       turnDurationSeconds,
-      gameReserve,
       gameWinCondition,
       creating,
       loadingGames,

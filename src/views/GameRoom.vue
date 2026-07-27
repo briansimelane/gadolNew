@@ -193,6 +193,7 @@
           :ownPlayer="ownPlayer"
           :currentPlayer="gameData.currentPlayer"
           :isDesktop="isDesktop"
+          :roomName="gameData.name"
           @takeSeat="JoinPlayer"
         />
       </div>
@@ -1269,9 +1270,11 @@ export default {
 .game-layout-container.desktop-layout {
   flex-direction: row;
   padding-bottom: 24px;
-  max-width: 1300px;
+  max-width: 1440px;
   margin: 0 auto;
   width: 100%;
+  padding-left: 10px;
+  padding-right: 10px;
 }
 
 .board-column {
@@ -1279,6 +1282,7 @@ export default {
   display: flex;
   flex-direction: column;
   gap: 16px;
+  min-width: 0;
 }
 
 .teams-column {
@@ -1286,7 +1290,7 @@ export default {
 }
 
 .desktop-layout .teams-column {
-  width: 320px;
+  width: 380px;
   flex-shrink: 0;
 }
 

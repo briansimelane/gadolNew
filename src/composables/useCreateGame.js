@@ -33,7 +33,7 @@ const shuffle = (array) => {
 }
 
 export default function useCreateGame() {
-  const createGame = async (roomName, numberPlayers, gameTimed, gameReserve, gameWinCondition, facilitatorUid, facilitatorEmail, facilitatorName, turnDurationSeconds = 60) => {
+  const createGame = async (roomName, numberPlayers, gameTimed, gameReserve = 'no', gameWinCondition, facilitatorUid, facilitatorEmail, facilitatorName, turnDurationSeconds = 60) => {
     try {
       // 0. Ensure Firebase Auth session is active
       await ensureCodeAuth()
