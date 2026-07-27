@@ -10,16 +10,16 @@
           <span>{{ displayUser }}</span>
         </li>
         <li v-if="isFacilitatorOrAdmin">
-          <button class="btn-flat white-text hub-btn" @click="goToHub" title="Facilitator Dashboard">
-            <i class="material-icons" style="font-size: 1.1rem; margin-right: 4px;">dashboard</i>
+          <button class="nav-action-btn" @click="goToHub" title="Facilitator Dashboard">
+            <i class="material-icons btn-icon">dashboard</i>
             <span class="hide-on-small-only">Hub</span>
           </button>
         </li>
         <li>
-          <a @click="handleExit" class="exit-link" title="Exit Game">
-            <i class="material-icons" style="font-size: 1.1rem; margin-right: 4px;">highlight_off</i>
+          <button class="nav-action-btn" @click="handleExit" title="Exit Game">
+            <i class="material-icons btn-icon">highlight_off</i>
             <span class="hide-on-small-only">Exit</span>
-          </a>
+          </button>
         </li> 
       </ul>
     </div>
@@ -107,7 +107,13 @@ export default {
 .nav-items-list {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
+  height: 48px;
+  margin: 0;
+}
+.nav-items-list > li {
+  display: flex;
+  align-items: center;
   height: 48px;
 }
 .user-display-item {
@@ -122,36 +128,37 @@ export default {
   text-overflow: ellipsis;
   margin-right: 4px;
 }
-.hub-btn {
-  padding: 0 10px;
+.nav-action-btn {
+  background: rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  color: #ffffff !important;
   height: 32px;
-  line-height: 32px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 6px;
-  background: rgba(255, 255, 255, 0.18);
-  font-weight: 600;
-  text-transform: none;
-  font-size: 0.85rem;
-}
-.hub-btn:hover {
-  background: rgba(255, 255, 255, 0.3);
-}
-.exit-link {
-  display: inline-flex;
-  align-items: center;
-  height: 32px;
-  line-height: 32px;
-  padding: 0 10px;
+  padding: 0 12px;
   border-radius: 6px;
   cursor: pointer;
-  background: rgba(255, 255, 255, 0.12);
-  color: #ffffff;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 4px;
   font-size: 0.85rem;
   font-weight: 600;
+  text-transform: none;
+  box-shadow: none;
+  outline: none;
+  transition: background-color 0.2s, border-color 0.2s;
 }
-.exit-link:hover {
-  background: rgba(255, 255, 255, 0.25);
+.nav-action-btn:hover {
+  background: rgba(255, 255, 255, 0.28);
+  border-color: rgba(255, 255, 255, 0.4);
+}
+.nav-action-btn .btn-icon,
+.nav-action-btn .material-icons {
+  float: none !important;
+  display: inline-block !important;
+  font-size: 1.1rem !important;
+  height: auto !important;
+  line-height: 1 !important;
+  margin: 0 !important;
+  vertical-align: middle !important;
 }
 </style>

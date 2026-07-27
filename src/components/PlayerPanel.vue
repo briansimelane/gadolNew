@@ -4,14 +4,7 @@
       <p>
         <i class="material-icons" v-if="isActive">send</i>
         <span v-if="!player.joined">
-          <span class="playerName">Waiting for Player {{ player.seat }}</span>
-          <span 
-            class="right takeAseat" 
-            v-if="joinable" 
-            @click="$emit('takeSeat', player.seat)"
-          >
-            Take this seat
-          </span>
+          <span class="playerName">Waiting for Team {{ player.seat }}</span>
         </span>
         <span v-else>
           <span class="playerName">{{ player.name }}</span>

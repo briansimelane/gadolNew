@@ -44,7 +44,19 @@
                   <select id="gameTimed" v-model="gameTimed" class="browser-default" required style="margin-top: 5px; margin-bottom: 15px;">
                     <option value="" disabled selected>Timed Game</option>
                     <option value="no">No Timer</option>
-                    <option value="yes">Timed</option>
+                    <option value="yes">Timed Game</option>
+                  </select>
+                </div>
+
+                <div v-if="gameTimed === 'yes'" class="input-field col s12 no-padding">
+                  <select id="turnDurationSeconds" v-model="turnDurationSeconds" class="browser-default" required style="margin-top: 5px; margin-bottom: 15px;">
+                    <option value="" disabled>Turn Duration</option>
+                    <option value="30">30 seconds per turn</option>
+                    <option value="60">60 seconds (1 min)</option>
+                    <option value="90">90 seconds (1.5 min)</option>
+                    <option value="120">120 seconds (2 min)</option>
+                    <option value="180">180 seconds (3 min)</option>
+                    <option value="300">300 seconds (5 min)</option>
                   </select>
                 </div>
 
@@ -94,7 +106,7 @@
                 </div>
                 <hr style="border-top: 1px solid #e0e0e0;">
                 <div v-for="seatNum in parseInt(newlyCreatedGame.numPlayers)" :key="seatNum" style="display: flex; align-items: center; justify-content: space-between; margin-top: 8px;">
-                  <span><strong>Seat {{ seatNum }} Code:</strong> <code class="code-badge">{{ newlyCreatedGame.seatCodes[seatNum] }}</code></span>
+                  <span><strong>Team {{ seatNum }} Code:</strong> <code class="code-badge">{{ newlyCreatedGame.seatCodes[seatNum] }}</code></span>
                   <button class="btn-flat btn-small" @click="copyText(newlyCreatedGame.seatCodes[seatNum])">
                     <i class="material-icons teal-text">content_copy</i>
                   </button>
@@ -158,19 +170,19 @@
                       </div>
                     </div>
 
-                    <!-- Seat Codes Table -->
+                    <!-- Team Codes Table -->
                     <table class="striped responsive-table">
                       <thead>
                         <tr>
-                          <th>Seat</th>
+                          <th>Team</th>
                           <th>Access Code</th>
-                          <th>Player Status</th>
+                          <th>Team Status</th>
                           <th class="center">Actions</th>
                         </tr>
                       </thead>
                       <tbody>
                         <tr v-for="seatNum in parseInt(game.numPlayers)" :key="seatNum">
-                          <td><strong>Seat {{ seatNum }}</strong></td>
+                          <td><strong>Team {{ seatNum }}</strong></td>
                           <td><code class="code-badge">{{ game.seatCodes[seatNum] }}</code></td>
                           <td>
                             <span v-if="game.players[seatNum - 1] && game.players[seatNum - 1].joined" class="green-text text-darken-2 bold">
@@ -189,6 +201,58 @@
                         </tr>
                       </tbody>
                     </table>
+
+                    <!-- Timed Game Quick Time & Timer Controls -->
+                    <div v-if="game.timed === 'yes' || game.timed === true" style="margin-top: 15px; padding: 12px; background: #fff3e0; border-left: 4px solid #ff9800; border-radius: 4px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;">
+                      <div>
+                        <strong style="color: #e65100; display: flex; align-items: center; gap: 4px;">
+                          <i class="material-icons tiny">timer</i> Timed Game ({{ game.turnDurationSeconds || 60 }}s / turn)
+                        </strong>
+                        <span style="font-size: 0.85rem; color: #ef6c00;">
+                          Status: <strong>{{ getTimerStatusLabel(game) }}</strong>
+                        </span>
+                      </div>
+                      <div style="display: flex; flex-wrap: wrap; gap: 6px; align-items: center;">
+                        <!-- Primary Timer Control -->
+                        <button 
+                          v-if="!game.gameStarted && (game.timerStatus === 'paused' || game.timerStatus === 'not_started' || !game.timerStatus)" 
+                          class="btn-small waves-effect waves-light green darken-2 bold" 
+                          @click="handleStartTimer(game)"
+                        >
+                          <i class="material-icons left">play_arrow</i>Start Game
+                        </button>
+                        <button 
+                          v-else-if="game.timerStatus === 'running'" 
+                          class="btn-small waves-effect waves-light amber darken-3" 
+                          @click="handlePauseTimer(game)"
+                        >
+                          <i class="material-icons left">pause</i>Pause Timer
+                        </button>
+                        <button 
+                          v-else-if="game.timerStatus === 'paused'" 
+                          class="btn-small waves-effect waves-light green darken-3" 
+                          @click="handleResumeTimer(game)"
+                        >
+                          <i class="material-icons left">play_arrow</i>Resume Timer
+                        </button>
+
+                        <!-- Adjust Time Buttons (+30s, +60s, -30s, -60s) -->
+                        <div style="display: inline-flex; gap: 4px; border-left: 1px solid rgba(255,152,0,0.4); padding-left: 6px; margin-left: 4px;">
+                          <button class="btn-small waves-effect waves-light orange darken-2" @click="handleAdjustTurnTime(game, 30)" title="Add 30 seconds">
+                            +30s
+                          </button>
+                          <button class="btn-small waves-effect waves-light orange darken-4" @click="handleAdjustTurnTime(game, 60)" title="Add 60 seconds">
+                            +60s
+                          </button>
+                          <button class="btn-small waves-effect waves-light blue-grey darken-2" @click="handleAdjustTurnTime(game, -30)" title="Remove 30 seconds">
+                            -30s
+                          </button>
+                          <button class="btn-small waves-effect waves-light blue-grey darken-3" @click="handleAdjustTurnTime(game, -60)" title="Remove 60 seconds">
+                            -60s
+                          </button>
+                        </div>
+                      </div>
+                    </div>
 
                     <!-- Open and Delete Actions -->
                     <div class="right-align" style="margin-top: 20px; display: flex; justify-content: flex-end; gap: 10px;">
@@ -232,6 +296,7 @@ export default {
     const roomName = ref('')
     const numberPlayers = ref('')
     const gameTimed = ref('')
+    const turnDurationSeconds = ref(60)
     const gameReserve = ref('')
     const gameWinCondition = ref('')
 
@@ -255,25 +320,26 @@ export default {
       M.AutoInit()
 
       // Fetch games
-      let q = query(collection(projectFirestore, 'rooms'), where('status', '==', 'OPEN'))
-      
-      // If facilitator (not admin), filter client-side or query-side. Query-side createdByEmail match is standard.
-      if (role.value !== 'ADMIN') {
+      let q
+      if (role.value === 'ADMIN') {
+        q = query(collection(projectFirestore, 'rooms'), where('status', '==', 'OPEN'))
+      } else {
+        const currentUid = projectAuth.currentUser ? projectAuth.currentUser.uid : ''
         q = query(
           collection(projectFirestore, 'rooms'),
           where('status', '==', 'OPEN'),
-          where('createdByEmail', '==', userEmail.value)
+          where('creator', '==', currentUid)
         )
       }
 
       unsubGames = onSnapshot(q, (snapshot) => {
-        const fetched = []
+        const docs = []
         snapshot.forEach((docSnap) => {
-          fetched.push({ ...docSnap.data(), id: docSnap.id })
+          docs.push({ id: docSnap.id, ...docSnap.data() })
         })
         // Sort by createdAt descending
-        fetched.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
-        games.value = fetched
+        docs.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+        games.value = docs
         loadingGames.value = false
 
         // Re-init collapsible when list changes
@@ -295,9 +361,12 @@ export default {
       if (creating.value) return
       creating.value = true
 
-      const currentUid = projectAuth.currentUser ? projectAuth.currentUser.uid : 'ADMIN-MASTER-UID'
-      const currentEmail = userEmail.value || 'admin@master.com'
-      const currentName = role.value === 'ADMIN' ? 'Master Admin' : userEmail.value.split('@')[0]
+      const currentUser = projectAuth.currentUser
+      const currentUid = (currentUser && currentUser.uid) ? currentUser.uid : 'ADMIN-MASTER-UID'
+      const currentEmail = userEmail.value || (currentUser && currentUser.email) || 'admin@master.com'
+      const currentName = role.value === 'ADMIN' 
+        ? 'Master Admin' 
+        : (currentEmail && currentEmail.includes('@') ? currentEmail.split('@')[0] : 'Facilitator')
 
       const res = await createGame(
         roomName.value,
@@ -307,7 +376,8 @@ export default {
         gameWinCondition.value,
         currentUid,
         currentEmail,
-        currentName
+        currentName,
+        turnDurationSeconds.value
       )
 
       creating.value = false
@@ -317,11 +387,109 @@ export default {
         roomName.value = ''
         numberPlayers.value = ''
         gameTimed.value = ''
+        turnDurationSeconds.value = 60
         gameReserve.value = ''
         gameWinCondition.value = ''
         M.toast({ html: 'Game room initialized!' })
       } else {
         M.toast({ html: `Creation failed: ${res.message}` })
+      }
+    }
+
+    const getTimerStatusLabel = (game) => {
+      if (!game.gameStarted && (game.timerStatus === 'paused' || game.timerStatus === 'not_started' || !game.timerStatus)) {
+        return 'Not Started (Paused)'
+      }
+      if (game.timerStatus === 'paused') return 'Paused'
+      if (game.timerStatus === 'running') return 'Running'
+      return 'Completed'
+    }
+
+    const handleStartTimer = async (game) => {
+      try {
+        const roomRef = doc(projectFirestore, 'rooms', game.id)
+        const durationSec = parseInt(game.turnDurationSeconds) || 60
+        const deadline = Date.now() + (durationSec * 1000)
+
+        await updateDoc(roomRef, {
+          timerStatus: 'running',
+          gameStarted: true,
+          turnDeadline: deadline,
+          turnRemainingMs: durationSec * 1000
+        })
+        M.toast({ html: `Game started for ${game.name}!` })
+      } catch (err) {
+        console.error('Error starting timer:', err)
+        M.toast({ html: 'Failed to start game' })
+      }
+    }
+
+    const handlePauseTimer = async (game) => {
+      try {
+        const roomRef = doc(projectFirestore, 'rooms', game.id)
+        const currentDeadline = game.turnDeadline || Date.now()
+        const remaining = Math.max(0, currentDeadline - Date.now())
+
+        await updateDoc(roomRef, {
+          timerStatus: 'paused',
+          turnRemainingMs: remaining
+        })
+        M.toast({ html: `Timer paused for ${game.name}` })
+      } catch (err) {
+        console.error('Error pausing timer:', err)
+        M.toast({ html: 'Failed to pause timer' })
+      }
+    }
+
+    const handleResumeTimer = async (game) => {
+      try {
+        const roomRef = doc(projectFirestore, 'rooms', game.id)
+        const durationSec = parseInt(game.turnDurationSeconds) || 60
+        const remaining = (typeof game.turnRemainingMs === 'number' && game.turnRemainingMs > 0) 
+          ? game.turnRemainingMs 
+          : (durationSec * 1000)
+        const newDeadline = Date.now() + remaining
+
+        await updateDoc(roomRef, {
+          timerStatus: 'running',
+          turnDeadline: newDeadline
+        })
+        M.toast({ html: `Timer resumed for ${game.name}` })
+      } catch (err) {
+        console.error('Error resuming timer:', err)
+        M.toast({ html: 'Failed to resume timer' })
+      }
+    }
+
+    const handleAdjustTurnTime = async (game, secondsDelta) => {
+      try {
+        const roomRef = doc(projectFirestore, 'rooms', game.id)
+        const isRunning = game.timerStatus === 'running'
+
+        if (isRunning) {
+          const currentDeadline = game.turnDeadline || Date.now()
+          const baseTime = currentDeadline > Date.now() ? currentDeadline : Date.now()
+          const newDeadline = Math.max(Date.now(), baseTime + (secondsDelta * 1000))
+
+          await updateDoc(roomRef, {
+            turnDeadline: newDeadline
+          })
+        } else {
+          const currentRemaining = typeof game.turnRemainingMs === 'number' 
+            ? game.turnRemainingMs 
+            : ((parseInt(game.turnDurationSeconds) || 60) * 1000)
+          const newRemaining = Math.max(0, currentRemaining + (secondsDelta * 1000))
+
+          await updateDoc(roomRef, {
+            turnRemainingMs: newRemaining
+          })
+        }
+
+        const label = secondsDelta > 0 ? `+${secondsDelta}s` : `${secondsDelta}s`
+        M.toast({ html: `Adjusted turn timer by ${label} for ${game.name}` })
+      } catch (err) {
+        console.error('Error adjusting time:', err)
+        M.toast({ html: 'Failed to adjust turn timer' })
       }
     }
 
@@ -334,7 +502,7 @@ export default {
     }
 
     const handleRegenerateCode = async (gameId, seatNum) => {
-      if (!confirm(`Are you sure you want to regenerate the code for Seat ${seatNum}? This will invalidate the previous code.`)) {
+      if (!confirm(`Are you sure you want to regenerate the code for Team ${seatNum}? This will invalidate the previous code.`)) {
         return
       }
 
@@ -356,7 +524,7 @@ export default {
         await updateDoc(roomRef, {
           [`seatCodes.${seatNum}`]: newCode
         })
-        M.toast({ html: `Seat ${seatNum} code updated to: ${newCode}` })
+        M.toast({ html: `Team ${seatNum} code updated to: ${newCode}` })
       } catch (err) {
         console.error('Error updating code:', err)
         M.toast({ html: 'Regeneration failed.' })
@@ -396,6 +564,7 @@ export default {
       roomName,
       numberPlayers,
       gameTimed,
+      turnDurationSeconds,
       gameReserve,
       gameWinCondition,
       creating,
@@ -403,6 +572,11 @@ export default {
       games,
       newlyCreatedGame,
       handleCreateGame,
+      getTimerStatusLabel,
+      handleStartTimer,
+      handlePauseTimer,
+      handleResumeTimer,
+      handleAdjustTurnTime,
       copyText,
       handleRegenerateCode,
       handleDeleteGame,

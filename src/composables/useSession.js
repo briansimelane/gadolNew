@@ -9,7 +9,7 @@ const seat = ref(null)
 const userEmail = ref(null)
 const userName = ref(null)
 
-const ensureCodeAuth = async () => {
+export const ensureCodeAuth = async () => {
   if (projectAuth.currentUser) return projectAuth.currentUser
   const guestEmail = 'player@gadol.com'
   const guestPassword = 'GadolPlayer123!'
@@ -92,6 +92,7 @@ const restoreSession = async () => {
         userName.value = storedName
       }
     } else {
+      await ensureCodeAuth()
       role.value = storedRole
       roomId.value = null
       seat.value = null
@@ -108,6 +109,7 @@ const loginWithCode = async (rawCode) => {
   const code = clean(rawCode)
 
   if (code === 'ADMINMASTER') {
+    await ensureCodeAuth()
     setSession('ADMIN', null, null, null, 'Master Admin')
     return { success: true }
   }

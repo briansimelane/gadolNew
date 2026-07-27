@@ -103,7 +103,7 @@ export default {
           turnMap.set(turnNum, {
             turn: turnNum,
             seat: entry.seat || 1,
-            actorName: entry.name || `Seat ${entry.seat || 1}`,
+            actorName: entry.name || `Team ${entry.seat || 1}`,
             entries: []
           })
         }
@@ -112,8 +112,13 @@ export default {
         }
       })
 
-      // Convert map to array and sort descending by turn
-      return Array.from(turnMap.values()).sort((a, b) => b.turn - a.turn)
+      // Convert map to array, reverse entries in each group so newest is top, and sort descending by turn
+      return Array.from(turnMap.values())
+        .map(group => ({
+          ...group,
+          entries: [...group.entries].reverse()
+        }))
+        .sort((a, b) => b.turn - a.turn)
     })
 
     return {
@@ -142,12 +147,14 @@ export default {
 
 .log-panel {
   width: 100%;
-  max-width: 380px;
-  height: 100%;
+  max-width: 420px;
+  height: 100vh;
+  max-height: 100vh;
   background-color: #ffffff;
   box-shadow: -4px 0 20px rgba(0, 0, 0, 0.25);
   display: flex;
   flex-direction: column;
+  overflow: hidden;
   animation: slideInRight 0.25s ease-out;
 }
 
@@ -158,6 +165,8 @@ export default {
 
 .log-header {
   height: 54px;
+  min-height: 54px;
+  flex-shrink: 0;
   background-color: #004d40;
   color: #ffffff;
   display: flex;
@@ -184,12 +193,28 @@ export default {
 }
 
 .log-body {
-  flex: 1;
-  overflow-y: auto;
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto !important;
   padding: 16px;
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 12px;
+  scrollbar-width: thin;
+  scrollbar-color: #004d40 #e0f2f1;
+}
+
+.log-body::-webkit-scrollbar {
+  width: 6px;
+}
+
+.log-body::-webkit-scrollbar-track {
+  background: #e0f2f1;
+}
+
+.log-body::-webkit-scrollbar-thumb {
+  background-color: #004d40;
+  border-radius: 3px;
 }
 
 .empty-log {
@@ -205,12 +230,15 @@ export default {
   border-radius: 8px;
   border: 1px solid #e0e0e0;
   overflow: hidden;
+  flex-shrink: 0;
+  background: #ffffff;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.06);
 }
 
 .turn-header {
   padding: 8px 12px;
   font-weight: 700;
-  font-size: 0.85rem;
+  font-size: 0.88rem;
 }
 
 .turn-entries {
@@ -221,11 +249,44 @@ export default {
 
 .log-entry-row {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   padding: 8px 12px;
   border-bottom: 1px solid #eeeeee;
-  font-size: 0.85rem;
+  font-size: 0.88rem;
   gap: 8px;
+  word-break: break-word;
+}
+
+.log-entry-row.TIMEOUT {
+  background-color: #ffebee;
+  color: #c62828;
+  font-weight: 700;
+}
+
+.log-entry-row:last-child {
+  border-bottom: none;
+}
+
+.entry-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  margin-top: 4px;
+}
+
+.entry-text {
+  flex: 1;
+  color: #212121;
+  word-break: break-word;
+  line-height: 1.4;
+}
+
+.entry-time {
+  font-size: 0.72rem;
+  color: #757575;
+  white-space: nowrap;
+  margin-left: 4px;
 }
 
 .log-entry-row:last-child {

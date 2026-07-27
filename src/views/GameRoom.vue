@@ -7,12 +7,23 @@
     <TurnBar 
       :roomName="gameData.name"
       :activePlayerName="activePlayerName" 
-      :isMyTurn="isMyTurn" 
+      :isMyTurn="isMyTurnForDisplay" 
       :isFacilitator="role === 'FACILITATOR' || role === 'ADMIN'" 
       :isSpectator="isSpectator" 
       :activeSeat="(gameData.currentPlayer || 0) + 1"
       :unreadCount="unreadLogCount"
+      :isTimed="gameData.timed === 'yes' || gameData.timed === true"
+      :gameStarted="gameData.gameStarted || false"
+      :timerStatus="gameData.timerStatus || 'not_started'"
+      :turnDeadline="gameData.turnDeadline || 0"
+      :turnRemainingMs="gameData.turnRemainingMs || 0"
+      :turnDurationSeconds="gameData.turnDurationSeconds || 60"
       @openLog="openLogPanel"
+      @startTimer="handleStartRoomTimer"
+      @pauseTimer="handlePauseRoomTimer"
+      @resumeTimer="handleResumeRoomTimer"
+      @adjustTime="handleAdjustRoomTime"
+      @toggleTimer="handleToggleRoomTimer"
     />
 
     <!-- Main Game Container: Mobile 1-col | Desktop 2-col -->
@@ -20,19 +31,50 @@
       <!-- Main Board Column -->
       <div class="board-column">
         
-        <!-- Contracts Row (Horizontal Scroll Snap) -->
+        <!-- Contracts Row & Latest Action Ticker -->
         <div class="contracts-section" v-if="gameData.rules === 'contracts'">
-          <div class="section-label white-text">
-            <i class="material-icons tiny">description</i>Contract Cards
+          <div class="contracts-header-row">
+            <div class="section-label white-text">
+              <i class="material-icons tiny">description</i>Contract Cards
+            </div>
           </div>
-          <div class="contracts-scroll-row">
-            <ContractCard 
-              v-for="card in gameData.z00contractCards.slice(0, 4)" 
-              :key="card.Ref" 
-              :card="card" 
-              :interactive="true" 
-              @select="c => handleCardClick(c, 'contract')"
-            />
+
+          <div class="contracts-flex-wrapper">
+            <div class="contracts-scroll-row">
+              <ContractCard 
+                v-for="card in gameData.z00contractCards.slice(0, 4)" 
+                :key="card.Ref" 
+                :card="card" 
+                :interactive="true" 
+                @select="c => handleCardClick(c, 'contract')"
+              />
+            </div>
+
+            <!-- Last Action Card (To the right of Contract cards) -->
+            <div 
+              class="last-action-card" 
+              :key="lastActionKey"
+              :class="{ 'pulse-anim': lastActionKey > 0 }"
+              @click="openLogPanel"
+              title="Click to view full Game Log"
+            >
+              <div class="last-action-badge">
+                <i class="material-icons tiny">history</i>
+                <span>Last Action</span>
+              </div>
+              <div v-if="lastAction" class="last-action-body">
+                <div class="action-actor" :style="{ color: lastActionSeatColor }">
+                  <span class="actor-dot" :style="{ backgroundColor: lastActionSeatColor }"></span>
+                  <strong>{{ lastAction.name || ('Team ' + lastAction.seat) }}</strong>
+                </div>
+                <div class="action-text-line">{{ lastAction.text }}</div>
+                <div class="action-time-str">{{ lastActionTime }}</div>
+              </div>
+              <div v-else class="last-action-empty">
+                <i class="material-icons tiny grey-text">hourglass_empty</i>
+                <span>Game starting soon...</span>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -320,7 +362,7 @@
                 </thead>
                 <tbody>
                   <tr v-for="p in displayedPlayers" :key="p.seat">
-                    <td>{{ p.joined ? p.name : 'Seat ' + p.seat }}</td>
+                    <td>{{ p.joined ? p.name : 'Team ' + p.seat }}</td>
                     <td><strong>{{ p.scores.value }}</strong></td>
                     <td>${{ p.scores.cash }}</td>
                     <td>{{ p.scores.production }}</td>
@@ -360,7 +402,7 @@
                 </thead>
                 <tbody>
                   <tr v-for="p in displayedPlayers" :key="p.seat">
-                    <td>{{ p.joined ? p.name : 'Seat ' + p.seat }}</td>
+                    <td>{{ p.joined ? p.name : 'Team ' + p.seat }}</td>
                     <td><strong>{{ p.scores.value }}</strong></td>
                     <td>${{ p.scores.cash }}</td>
                     <td>{{ p.scores.production }}</td>
@@ -441,20 +483,162 @@ export default {
       isDesktop.value = window.innerWidth >= 900
     }
 
+    let turnTimerChecker = null
+    let isAutoPassingTurn = false
+
     onMounted(() => {
       M.AutoInit()
       window.addEventListener('resize', handleResize)
+
+      turnTimerChecker = setInterval(() => {
+        if (!gameData.value) return
+        const isTimed = gameData.value.timed === 'yes' || gameData.value.timed === true
+        const status = gameData.value.timerStatus || 'not_started'
+        const deadline = gameData.value.turnDeadline || 0
+        
+        if (isTimed && status === 'running' && deadline > 0 && Date.now() >= deadline && !isAutoPassingTurn) {
+          const isFacilOrAdmin = role.value === 'FACILITATOR' || role.value === 'ADMIN'
+          if (isMyTurn.value || isFacilOrAdmin) {
+            isAutoPassingTurn = true
+            
+            const currentSeatNum = (gameData.value.currentPlayer || 0) + 1
+            const timeoutText = `Team ${currentSeatNum} timed out`
+            const timeoutEntry = logEntry('TIMEOUT', timeoutText, { seat: currentSeatNum })
+            const updatedLog = getUpdatedLog(timeoutEntry)
+
+            nextPlayer(updatedLog)
+            setTimeout(() => {
+              isAutoPassingTurn = false
+            }, 3000)
+          }
+        }
+      }, 1000)
     })
 
     onUnmounted(() => {
       window.removeEventListener('resize', handleResize)
+      if (turnTimerChecker) clearInterval(turnTimerChecker)
     })
+
+    const handleStartRoomTimer = async () => {
+      try {
+        const durationSec = parseInt(gameData.value.turnDurationSeconds) || 60
+        const deadline = Date.now() + (durationSec * 1000)
+
+        await updateDoc(roomDocRef, {
+          timerStatus: 'running',
+          gameStarted: true,
+          turnDeadline: deadline,
+          turnRemainingMs: durationSec * 1000
+        })
+        M.toast({ html: 'Game started!' })
+      } catch (err) {
+        console.error('Error starting room timer:', err)
+        M.toast({ html: 'Failed to start game' })
+      }
+    }
+
+    const handlePauseRoomTimer = async () => {
+      try {
+        const currentDeadline = gameData.value.turnDeadline || Date.now()
+        const remaining = Math.max(0, currentDeadline - Date.now())
+
+        await updateDoc(roomDocRef, {
+          timerStatus: 'paused',
+          turnRemainingMs: remaining
+        })
+        M.toast({ html: 'Game timer paused' })
+      } catch (err) {
+        console.error('Error pausing room timer:', err)
+        M.toast({ html: 'Failed to pause timer' })
+      }
+    }
+
+    const handleResumeRoomTimer = async () => {
+      try {
+        const durationSec = parseInt(gameData.value.turnDurationSeconds) || 60
+        const remaining = (typeof gameData.value.turnRemainingMs === 'number' && gameData.value.turnRemainingMs > 0)
+          ? gameData.value.turnRemainingMs
+          : (durationSec * 1000)
+        const newDeadline = Date.now() + remaining
+
+        await updateDoc(roomDocRef, {
+          timerStatus: 'running',
+          turnDeadline: newDeadline
+        })
+        M.toast({ html: 'Game timer resumed!' })
+      } catch (err) {
+        console.error('Error resuming room timer:', err)
+        M.toast({ html: 'Failed to resume timer' })
+      }
+    }
+
+    const handleAdjustRoomTime = async (secondsDelta) => {
+      try {
+        const isRunning = gameData.value.timerStatus === 'running'
+
+        if (isRunning) {
+          const currentDeadline = gameData.value.turnDeadline || Date.now()
+          const baseTime = currentDeadline > Date.now() ? currentDeadline : Date.now()
+          const newDeadline = Math.max(Date.now(), baseTime + (secondsDelta * 1000))
+
+          await updateDoc(roomDocRef, {
+            turnDeadline: newDeadline
+          })
+        } else {
+          const currentRemaining = typeof gameData.value.turnRemainingMs === 'number'
+            ? gameData.value.turnRemainingMs
+            : ((parseInt(gameData.value.turnDurationSeconds) || 60) * 1000)
+          const newRemaining = Math.max(0, currentRemaining + (secondsDelta * 1000))
+
+          await updateDoc(roomDocRef, {
+            turnRemainingMs: newRemaining
+          })
+        }
+
+        const label = secondsDelta > 0 ? `+${secondsDelta}s` : `${secondsDelta}s`
+        M.toast({ html: `Adjusted turn timer by ${label}` })
+      } catch (err) {
+        console.error('Error adjusting room time:', err)
+        M.toast({ html: 'Failed to adjust turn timer' })
+      }
+    }
+
+    const handleToggleRoomTimer = async () => {
+      try {
+        const currentlyTimed = gameData.value.timed === 'yes' || gameData.value.timed === true
+
+        if (currentlyTimed) {
+          await updateDoc(roomDocRef, {
+            timed: 'no',
+            timerStatus: 'none',
+            turnDeadline: 0,
+            turnRemainingMs: 0
+          })
+          M.toast({ html: 'Turn timer removed from game!' })
+        } else {
+          const defaultDuration = parseInt(gameData.value.turnDurationSeconds) || 60
+          await updateDoc(roomDocRef, {
+            timed: 'yes',
+            turnDurationSeconds: defaultDuration,
+            timerStatus: 'paused',
+            gameStarted: false,
+            turnRemainingMs: defaultDuration * 1000,
+            turnDeadline: 0
+          })
+          M.toast({ html: 'Turn timer added to game!' })
+        }
+      } catch (err) {
+        console.error('Error toggling room timer:', err)
+        M.toast({ html: 'Failed to update timer setting' })
+      }
+    }
 
     // Log Entry Helper (§6.3)
     const logEntry = (type, text, detail = {}) => ({
       turn: gameData.value?.turnNumber || 1,
       seat: activePlayer.value ? activePlayer.value.seat : 1,
-      name: activePlayer.value ? (activePlayer.value.joined ? activePlayer.value.name : `Seat ${activePlayer.value.seat}`) : 'Player',
+      name: activePlayer.value ? (activePlayer.value.joined ? activePlayer.value.name : `Team ${activePlayer.value.seat}`) : 'Team 1',
       type,
       text,
       detail,
@@ -556,6 +740,42 @@ export default {
       if (newVal !== undefined) ModalGameEndContracts.value = newVal
     })
 
+    // Watch when turn advances to next team and notify "It is now Team X's turn"
+    watch(() => gameData.value?.currentPlayer, (newSeatIndex, oldSeatIndex) => {
+      if (oldSeatIndex === undefined || newSeatIndex === undefined || newSeatIndex === oldSeatIndex) return
+      const teamNumber = newSeatIndex + 1
+      M.toast({ html: `It is now Team ${teamNumber}'s turn` })
+    })
+
+    // Real-time notification watcher for timer status changes (all participants)
+    watch(() => [gameData.value?.timerStatus, gameData.value?.timed], (newVals, oldVals) => {
+      if (!oldVals || !newVals) return
+      const [newStatus, newTimed] = newVals
+      const [oldStatus, oldTimed] = oldVals
+
+      if (oldStatus === undefined && oldTimed === undefined) return
+
+      if (newTimed !== oldTimed && oldTimed !== undefined) {
+        const isNowTimed = newTimed === 'yes' || newTimed === true
+        if (isNowTimed) {
+          M.toast({ html: '⏱️ Turn timer added to game!' })
+        } else {
+          M.toast({ html: '🚫 Turn timer removed from game.' })
+        }
+        return
+      }
+
+      if (newStatus !== oldStatus && oldStatus !== undefined) {
+        if (newStatus === 'running' && oldStatus === 'paused') {
+          M.toast({ html: '▶ Turn timer resumed!' })
+        } else if (newStatus === 'running' && (oldStatus === 'not_started' || !oldStatus)) {
+          M.toast({ html: '▶ Facilitator started the game!' })
+        } else if (newStatus === 'paused') {
+          M.toast({ html: '⏸ Turn timer paused by Facilitator.' })
+        }
+      }
+    })
+
     const displayedPlayers = computed(() => {
       if (!gameData.value || !gameData.value.players) return []
       return gameData.value.players.slice(0, parseInt(gameData.value.numPlayers))
@@ -592,9 +812,16 @@ export default {
       return false
     })
 
+    const isMyTurnForDisplay = computed(() => {
+      if (role.value === 'PLAYER' && seat.value) {
+        return (seat.value - 1) === gameData.value?.currentPlayer
+      }
+      return false
+    })
+
     const activePlayerName = computed(() => {
       if (!activePlayer.value) return ''
-      return activePlayer.value.joined ? activePlayer.value.name : `Seat ${activePlayer.value.seat}`
+      return activePlayer.value.joined ? activePlayer.value.name : `Team ${activePlayer.value.seat}`
     })
 
     const hasJoinedAnySeat = computed(() => true)
@@ -666,7 +893,7 @@ export default {
       M.toast({ html: 'You are not the active player' })
     }
 
-    const nextPlayer = () => {
+    const nextPlayer = (overrideLog = null) => {
       const numPlayers = parseInt(gameData.value.numPlayers) || 4
       const winScore = parseInt(gameData.value.reserve) || 15
       const currentPScore = activePlayer.value.scores
@@ -701,13 +928,18 @@ export default {
       currentP.scores.blackTokenTaken = false
 
       const turnEndEntry = logEntry('TURN_END', 'ended their turn')
-      const updatedLog = getUpdatedLog(turnEndEntry)
+      const updatedLog = overrideLog || getUpdatedLog(turnEndEntry)
       const currentTurn = gameData.value?.turnNumber || 1
+
+      const isTimedGame = gameData.value.timed === 'yes' || gameData.value.timed === true
+      const turnDuration = parseInt(gameData.value.turnDurationSeconds) || 60
+      const nextDeadline = isTimedGame ? Date.now() + (turnDuration * 1000) : 0
 
       updateDoc(roomDocRef, {
         players: updatedPlayers,
         currentPlayer: nextSeat,
         turnNumber: currentTurn + 1,
+        turnDeadline: nextDeadline,
         gameLog: updatedLog
       })
     }
@@ -928,7 +1160,45 @@ export default {
       }
     }
 
+    const lastAction = computed(() => {
+      if (!gameData.value || !Array.isArray(gameData.value.gameLog) || gameData.value.gameLog.length === 0) {
+        return null
+      }
+      const log = gameData.value.gameLog
+      return log[log.length - 1] || null
+    })
+
+    const lastActionKey = ref(0)
+
+    watch(lastAction, (newVal) => {
+      if (newVal) {
+        lastActionKey.value = Date.now()
+      }
+    })
+
+    const lastActionSeatColor = computed(() => {
+      if (!lastAction.value) return '#00796b'
+      const seatVal = lastAction.value.seat || 1
+      const seatColors = {
+        1: '#b78103', // Gold/Yellow
+        2: '#2e7d32', // Green
+        3: '#1565c0', // Blue
+        4: '#d84315'  // Orange
+      }
+      return seatColors[seatVal] || '#00796b'
+    })
+
+    const lastActionTime = computed(() => {
+      if (!lastAction.value || !lastAction.value.ts) return ''
+      const d = new Date(lastAction.value.ts)
+      return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })
+    })
+
     return {
+      lastAction,
+      lastActionKey,
+      lastActionSeatColor,
+      lastActionTime,
       role,
       seat,
       gameData,
@@ -941,6 +1211,7 @@ export default {
       otherPlayers,
       activePlayerName,
       isMyTurn,
+      isMyTurnForDisplay,
       hasJoinedAnySeat,
       isSpectator,
       isDesktop,
@@ -966,7 +1237,12 @@ export default {
       claimSeatNumber,
       claimInputName,
       cancelClaimSeat,
-      confirmClaimSeat
+      confirmClaimSeat,
+      handleStartRoomTimer,
+      handlePauseRoomTimer,
+      handleResumeRoomTimer,
+      handleAdjustRoomTime,
+      handleToggleRoomTimer
     }
   }
 }
@@ -1024,21 +1300,131 @@ export default {
   text-shadow: 0 1px 3px rgba(0,0,0,0.5);
 }
 
-/* Contracts Row Horizontal Scroll */
+/* Contracts Row & Last Action Ticker */
 .contracts-section {
   display: flex;
   flex-direction: column;
 }
 
+.contracts-flex-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+}
+
 .contracts-scroll-row {
+  flex: 1;
   display: flex;
   gap: 10px;
   overflow-x: auto;
   scroll-snap-type: x mandatory;
-  padding-bottom: 8px;
+  padding-bottom: 4px;
   -webkit-overflow-scrolling: touch;
   scrollbar-width: none;
   -ms-overflow-style: none;
+}
+
+.last-action-card {
+  width: 220px;
+  min-width: 190px;
+  flex-shrink: 0;
+  align-self: center;
+  background: #ffffff;
+  border: 1px solid #e0e0e0;
+  border-left: 4px solid #00796b;
+  border-radius: 8px;
+  padding: 6px 10px;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.last-action-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 77, 64, 0.18);
+  border-color: #00796b;
+}
+
+.last-action-card.pulse-anim {
+  animation: mildActionPulse 0.5s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+@keyframes mildActionPulse {
+  0% {
+    transform: scale(0.96);
+    box-shadow: 0 0 12px rgba(0, 150, 136, 0.5);
+    border-color: #00796b;
+  }
+  50% {
+    transform: scale(1.02);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.last-action-badge {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.7rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #00796b;
+  margin-bottom: 2px;
+}
+
+.last-action-body {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.action-actor {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+.actor-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.action-text-line {
+  font-size: 0.78rem;
+  color: #37474f;
+  font-weight: 600;
+  line-height: 1.25;
+  word-break: break-word;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.action-time-str {
+  font-size: 0.68rem;
+  color: #78909c;
+  margin-top: 1px;
+  text-align: right;
+}
+
+.last-action-empty {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.76rem;
+  color: #78909c;
+  padding: 4px 0;
 }
 
 .contracts-scroll-row::-webkit-scrollbar {

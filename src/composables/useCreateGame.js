@@ -1,6 +1,7 @@
 import { collection, query, where, getDocs, addDoc } from 'firebase/firestore'
 import { projectFirestore } from '../firebase/config'
 import resetData from '../assets/reset.json'
+import { ensureCodeAuth } from './useSession'
 
 const randAlpha4 = () => {
   const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
@@ -32,8 +33,11 @@ const shuffle = (array) => {
 }
 
 export default function useCreateGame() {
-  const createGame = async (roomName, numberPlayers, gameTimed, gameReserve, gameWinCondition, facilitatorUid, facilitatorEmail, facilitatorName) => {
+  const createGame = async (roomName, numberPlayers, gameTimed, gameReserve, gameWinCondition, facilitatorUid, facilitatorEmail, facilitatorName, turnDurationSeconds = 60) => {
     try {
+      // 0. Ensure Firebase Auth session is active
+      await ensureCodeAuth()
+
       // 1. Get existing codes of OPEN rooms to prevent collisions
       const q = query(collection(projectFirestore, 'rooms'), where('status', '==', 'OPEN'))
       const querySnapshot = await getDocs(q)
@@ -141,22 +145,30 @@ export default function useCreateGame() {
         })
       }
 
+      const isTimedBool = gameTimed === 'yes' || gameTimed === true
+      const parsedDuration = parseInt(turnDurationSeconds) || 60
+
       // Complete roomDetails payload
       const roomDetails = {
-        creator: facilitatorUid,
-        createdByUid: facilitatorUid,
-        createdByEmail: facilitatorEmail,
-        createdByName: facilitatorName,
+        creator: facilitatorUid || 'FACILITATOR-UID',
+        createdByUid: facilitatorUid || 'FACILITATOR-UID',
+        createdByEmail: facilitatorEmail || 'facilitator@gadol.com',
+        createdByName: facilitatorName || 'Facilitator',
         createdAt: new Date().toISOString(),
         status: 'OPEN',
         schemaVersion: 3,
 
-        name: roomName,
-        numPlayers: String(numberPlayers),
-        timed: gameTimed,
-        reserve: gameReserve,
-        rules: gameWinCondition,
-        maxnumberofplayers: resetValues.numberOfPlayers,
+        name: roomName || 'Game Room',
+        numPlayers: String(numberPlayers || 4),
+        timed: gameTimed || 'no',
+        turnDurationSeconds: parsedDuration,
+        turnDeadline: 0,
+        turnRemainingMs: parsedDuration * 1000,
+        timerStatus: isTimedBool ? 'paused' : 'none',
+        gameStarted: false,
+        reserve: gameReserve || 'no',
+        rules: gameWinCondition || 'points',
+        maxnumberofplayers: resetValues?.numberOfPlayers || 4,
         lastAction: '',
         turnNumber: 1,
         gameLog: [],
@@ -164,29 +176,32 @@ export default function useCreateGame() {
         gstate: 0,
         modalPoints: false,
         modalContracts: false,
-        facilitator: facilitatorUid,
+        facilitator: facilitatorUid || 'FACILITATOR-UID',
         currentPlayer: 0,
-        z00contractCards: shuffledContractCards,
-        z01greenCards: shuffledGreenCards,
-        z02yellowCards: shuffledYellowCards,
-        z03redCards: shuffledRedCards,
-        z04purpleCards: shuffledPurpleCards,
-        z05blackCards: shuffledBlackCards,
+        z00contractCards: shuffledContractCards || [],
+        z01greenCards: shuffledGreenCards || [],
+        z02yellowCards: shuffledYellowCards || [],
+        z03redCards: shuffledRedCards || [],
+        z04purpleCards: shuffledPurpleCards || [],
+        z05blackCards: shuffledBlackCards || [],
         z06holderCards: [0, 0, 0],
-        z07marketRedTokens: resetValues.temporaryResources.red,
-        z08marketGreenTokens: resetValues.temporaryResources.green,
-        z09marketYellowTokens: resetValues.temporaryResources.yellow,
-        z10marketPurpleTokens: resetValues.temporaryResources.purple,
-        z11marketBlackTokens: resetValues.temporaryResources.black,
+        z07marketRedTokens: resetValues?.temporaryResources?.red || 12,
+        z08marketGreenTokens: resetValues?.temporaryResources?.green || 12,
+        z09marketYellowTokens: resetValues?.temporaryResources?.yellow || 12,
+        z10marketPurpleTokens: resetValues?.temporaryResources?.purple || 12,
+        z11marketBlackTokens: resetValues?.temporaryResources?.black || 12,
         
         players: playersArray,
-        facilitatorCode,
-        spectatorCode,
-        seatCodes
+        facilitatorCode: facilitatorCode || `FAC-0000`,
+        spectatorCode: spectatorCode || `SPEC-0000`,
+        seatCodes: seatCodes || {}
       }
 
-      const docRef = await addDoc(collection(projectFirestore, 'rooms'), roomDetails)
-      return { success: true, id: docRef.id, data: roomDetails }
+      // Sanitize payload to strip any undefined properties before Firestore insertion
+      const cleanPayload = JSON.parse(JSON.stringify(roomDetails))
+
+      const docRef = await addDoc(collection(projectFirestore, 'rooms'), cleanPayload)
+      return { success: true, id: docRef.id, data: cleanPayload }
     } catch (err) {
       console.error('Error creating game:', err)
       return { success: false, message: err.message }
