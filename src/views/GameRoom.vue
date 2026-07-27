@@ -19,6 +19,8 @@
       :turnRemainingMs="gameData.turnRemainingMs || 0"
       :turnDurationSeconds="gameData.turnDurationSeconds || 60"
       @openLog="openLogPanel"
+      @openFinancials="openFinancialsPanel"
+      @openFacilitatorGrant="ModalFacilitatorGrant = true"
       @startTimer="handleStartRoomTimer"
       @pauseTimer="handlePauseRoomTimer"
       @resumeTimer="handleResumeRoomTimer"
@@ -26,13 +28,23 @@
       @toggleTimer="handleToggleRoomTimer"
     />
 
+    <!-- Dedicated Full Page Financial Statements View -->
+    <FinancialsPanel 
+      v-if="financialsOpen" 
+      :gameData="gameData" 
+      :roomDocRef="roomDocRef" 
+      :role="role" 
+      :seat="seat" 
+      @close="closeFinancialsPanel" 
+    />
+
     <!-- Main Game Container: Mobile 1-col | Desktop 2-col -->
-    <div class="game-layout-container" :class="{ 'desktop-layout': isDesktop }">
+    <div v-else class="game-layout-container" :class="{ 'desktop-layout': isDesktop }">
       <!-- Main Board Column -->
       <div class="board-column">
         
         <!-- Contracts Row & Latest Action Ticker -->
-        <div class="contracts-section" v-if="gameData.rules === 'contracts'">
+        <div class="contracts-section">
           <div class="contracts-header-row">
             <div class="section-label white-text">
               <i class="material-icons tiny">description</i>Contract Cards
@@ -215,7 +227,9 @@
           :currentPlayer="gameData.currentPlayer"
           :isDesktop="isDesktop"
           :roomName="gameData.name"
+          :isFacilitator="role === 'FACILITATOR' || role === 'ADMIN'"
           @takeSeat="JoinPlayer"
+          @openFacilitatorGrant="ModalFacilitatorGrant = true"
         />
       </div>
     </div>
@@ -393,7 +407,10 @@
               </table>
             </div>
 
-            <div class="center" style="margin-top: 25px;">
+            <div class="center" style="margin-top: 25px; display: flex; justify-content: center; gap: 10px;">
+              <button class="btn teal darken-2 waves-effect" @click="openFinancialsPanel">
+                <i class="material-icons left tiny">assessment</i>View Financial Statements
+              </button>
               <button class="btn red darken-3 waves-effect" @click="ModalGameEndPoints = false">Close</button>
             </div>
           </div>
@@ -433,8 +450,175 @@
               </table>
             </div>
 
-            <div class="center" style="margin-top: 25px;">
+            <div class="center" style="margin-top: 25px; display: flex; justify-content: center; gap: 10px;">
+              <button class="btn teal darken-2 waves-effect" @click="openFinancialsPanel">
+                <i class="material-icons left tiny">assessment</i>View Financial Statements
+              </button>
               <button class="btn red darken-3 waves-effect" @click="ModalGameEndContracts = false">Close</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </teleport>
+
+    <!-- Modal: Facilitator Free Resource Card Allocation (§ Speed Up Game) -->
+    <teleport to="#modals">
+      <div v-if="ModalFacilitatorGrant" class="custom-modal-overlay" @click.self="ModalFacilitatorGrant = false">
+        <div class="card-content custom-modal-content card white grant-modal-content">
+          <div class="modal-header amber darken-3 white-text">
+            <h5 class="bold flex-header">
+              <i class="material-icons left">card_membership</i> Facilitator Resource Allocation
+            </h5>
+            <button class="btn-flat white-text close-modal-btn" @click="ModalFacilitatorGrant = false">
+              <i class="material-icons">close</i>
+            </button>
+          </div>
+
+          <div class="grant-modal-body">
+            <!-- Facilitator Secret Cards Overview Section -->
+            <div class="facilitator-secret-cards-section margin-bottom-15">
+              <h6 class="bold text-darken-4 amber-text text-darken-3 section-sub-title margin-0 margin-bottom-8">
+                <i class="material-icons tiny left">lock</i> Teams' Secret Contract Cards &amp; Missing Requirements
+              </h6>
+              
+              <div class="team-secret-grid">
+                <div 
+                  v-for="p in teamSecretCardsSummary" 
+                  :key="p.seat" 
+                  class="secret-card-panel card-panel grey lighten-4"
+                  :style="{ borderLeft: '4px solid ' + p.seatColor }"
+                >
+                  <div class="secret-panel-header">
+                    <strong class="team-heading" :style="{ color: p.seatColor }">
+                      Team {{ p.seat }} {{ p.joined ? ('(' + p.name + ')') : '' }}
+                    </strong>
+                    <span v-if="p.completed" class="badge green white-text bold custom-badge">
+                      ✅ Completed (+{{ p.points }} pts)
+                    </span>
+                    <span v-else-if="!p.card" class="badge grey white-text custom-badge">No Secret Card</span>
+                    <span v-else class="badge amber darken-3 white-text bold custom-badge">
+                      🔒 In Progress (+{{ p.points }} pts)
+                    </span>
+                  </div>
+
+                  <!-- Secret Card Details & Missing Requirements -->
+                  <div v-if="p.card" class="secret-details-body">
+                    <div class="card-ref-title">
+                      <strong>{{ p.card.Ref }}</strong>: {{ p.card.Description || ('Contract ' + p.card.Ref) }}
+                    </div>
+                    
+                    <!-- Requirements & Missing Breakdown -->
+                    <div v-if="!p.completed" class="requirements-box margin-top-5">
+                      <div class="req-title grey-text text-darken-2"><small>Resource Progress (Held / Needed):</small></div>
+                      <div class="req-chips-row">
+                        <span class="req-chip" :class="p.missing.green > 0 ? 'red lighten-5 red-text text-darken-3 fw-bold' : 'green lighten-5 green-text text-darken-3'">
+                          🟢 Green: {{ p.held.green }}/{{ p.card.CostGreen }}
+                          <span v-if="p.missing.green > 0"> (Needs +{{ p.missing.green }})</span>
+                        </span>
+                        <span class="req-chip" :class="p.missing.red > 0 ? 'red lighten-5 red-text text-darken-3 fw-bold' : 'green lighten-5 green-text text-darken-3'">
+                          🔴 Red: {{ p.held.red }}/{{ p.card.CostRed }}
+                          <span v-if="p.missing.red > 0"> (Needs +{{ p.missing.red }})</span>
+                        </span>
+                        <span class="req-chip" :class="p.missing.yellow > 0 ? 'red lighten-5 red-text text-darken-3 fw-bold' : 'green lighten-5 green-text text-darken-3'">
+                          🟡 Yellow: {{ p.held.yellow }}/{{ p.card.CostYellow }}
+                          <span v-if="p.missing.yellow > 0"> (Needs +{{ p.missing.yellow }})</span>
+                        </span>
+                        <span class="req-chip" :class="p.missing.purple > 0 ? 'red lighten-5 red-text text-darken-3 fw-bold' : 'green lighten-5 green-text text-darken-3'">
+                          🟣 Purple: {{ p.held.purple }}/{{ p.card.CostPurple }}
+                          <span v-if="p.missing.purple > 0"> (Needs +{{ p.missing.purple }})</span>
+                        </span>
+                        <span class="req-chip" :class="p.missing.black > 0 ? 'red lighten-5 red-text text-darken-3 fw-bold' : 'green lighten-5 green-text text-darken-3'">
+                          ⬛ Black: {{ p.held.black }}/{{ p.card.CostBlack }}
+                          <span v-if="p.missing.black > 0"> (Needs +{{ p.missing.black }})</span>
+                        </span>
+                        <span class="req-chip" :class="p.missing.prod > 0 ? 'red lighten-5 red-text text-darken-3 fw-bold' : 'green lighten-5 green-text text-darken-3'">
+                          ⚡ Prod: {{ p.held.prod }}/{{ p.card.Production }}
+                          <span v-if="p.missing.prod > 0"> (Needs +{{ p.missing.prod }})</span>
+                        </span>
+                      </div>
+
+                      <div class="quick-grant-actions margin-top-5">
+                        <button class="btn-small teal darken-2 waves-effect fill-btn" @click="selectTeamForGrant(p)">
+                          <i class="material-icons tiny left">add_circle</i> Select Team {{ p.seat }} for Allocation
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <hr class="grant-divider margin-top-10 margin-bottom-15" />
+
+            <p class="grey-text text-darken-2 font-weight-bold margin-bottom-8">
+              Allocate Free Resource Card to Team:
+            </p>
+
+            <div class="row margin-bottom-10">
+              <!-- Select Target Team -->
+              <div class="col s12 m4">
+                <label class="bold grey-text text-darken-3">1. Target Team</label>
+                <select v-model="grantForm.seat" class="browser-default grant-select">
+                  <option v-for="p in gameData.players" :key="p.seat" :value="p.seat">
+                    Team {{ p.seat }} {{ p.joined ? ('(' + p.name + ')') : '(Empty)' }}
+                  </option>
+                </select>
+              </div>
+
+              <!-- Select Card Color -->
+              <div class="col s12 m4">
+                <label class="bold grey-text text-darken-3">2. Card Color</label>
+                <select v-model="grantForm.color" class="browser-default grant-select">
+                  <option value="green">🟢 Green (Property)</option>
+                  <option value="red">🔴 Red (People)</option>
+                  <option value="yellow">🟡 Yellow (Equipment)</option>
+                  <option value="purple">🟣 Purple (Operations)</option>
+                  <option value="black">⬛ Black (Outsourced)</option>
+                </select>
+              </div>
+
+              <!-- Select Production Value -->
+              <div class="col s12 m4">
+                <label class="bold grey-text text-darken-3">3. Production Value</label>
+                <input v-model.number="grantForm.production" type="number" min="0" max="20" class="grant-input-box" />
+              </div>
+            </div>
+
+            <div class="center margin-top-15">
+              <button class="btn green darken-2 waves-effect bold" @click="confirmGrantCard">
+                <i class="material-icons left">add_circle</i> Grant Free Resource Card (G$ 0)
+              </button>
+            </div>
+
+            <hr class="grant-divider" />
+
+            <!-- Facilitator Granted Cards History & Revoke List -->
+            <div class="granted-list-section">
+              <h6 class="bold text-darken-3 teal-text">
+                <i class="material-icons tiny left">history</i> Allocated Cards History (Click to Revoke)
+              </h6>
+
+              <div v-if="allGrantedCards.length === 0" class="grey-text center padding-10">
+                <em>No free resource cards allocated by facilitator yet.</em>
+              </div>
+
+              <div v-else class="granted-cards-grid">
+                <div v-for="card in allGrantedCards" :key="card.id" class="granted-card-chip card-panel grey lighten-4">
+                  <div class="chip-info">
+                    <span class="team-badge" :style="{ backgroundColor: getSeatColor(card.seat) }">
+                      Team {{ card.seat }}
+                    </span>
+                    <strong class="color-tag text-uppercase">
+                      {{ card.color }} Card
+                    </strong>
+                    <span class="prod-tag badge green white-text">Prod: +{{ card.production }}</span>
+                    <small class="grey-text">({{ card.timeAgo }})</small>
+                  </div>
+                  <button class="btn-small red darken-2 waves-effect revoke-btn" @click="confirmRevokeCard(card)">
+                    <i class="material-icons tiny left">delete</i> Revoke
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -459,6 +643,7 @@ import GameLogPanel from '../components/GameLogPanel.vue'
 import ResourceCard from '../components/cards/ResourceCard.vue'
 import ContractCard from '../components/cards/ContractCard.vue'
 import CardZoomOverlay from '../components/cards/CardZoomOverlay.vue'
+import FinancialsPanel from '../components/FinancialsPanel.vue'
 import resetValues from '../assets/reset.json'
 import { updateDoc } from 'firebase/firestore'
 import M from 'materialize-css'
@@ -473,6 +658,7 @@ export default {
     OwnTeamBar,
     TeamSheet,
     GameLogPanel,
+    FinancialsPanel,
     ResourceCard,
     ContractCard,
     CardZoomOverlay
@@ -488,9 +674,171 @@ export default {
     const { gameData, error, roomDocRef } = useRoom(props.id)
     const { zoomedCard, zoomType, zoomColor, openZoom, closeZoom } = useCardZoom()
 
+    const financialsOpen = ref(false)
+
     const ModalTempResources = ref(false)
     const ModalGameEndPoints = ref(false)
     const ModalGameEndContracts = ref(false)
+    const ModalFacilitatorGrant = ref(false)
+
+    const grantForm = ref({
+      seat: 1,
+      color: 'green',
+      production: 2
+    })
+
+    const getSeatColor = (seatVal) => {
+      if (seatVal === 1) return '#fdb410'
+      if (seatVal === 2) return '#007b46'
+      if (seatVal === 3) return '#1565c0'
+      if (seatVal === 4) return '#e21234'
+      return '#007b46'
+    }
+
+    const teamSecretCardsSummary = computed(() => {
+      if (!gameData.value?.players) return []
+      return gameData.value.players.map(p => {
+        const card = p.secretContractCard || null
+        const completed = p.secretContractCompleted || false
+        const scores = p.scores || {}
+
+        const held = {
+          green: scores.greenPerm || 0,
+          red: scores.redPerm || 0,
+          yellow: scores.yellowPerm || 0,
+          purple: scores.purplePerm || 0,
+          black: scores.blackPerm || 0,
+          prod: scores.production || 0
+        }
+
+        const missing = card ? {
+          green: Math.max(0, (card.CostGreen || 0) - held.green),
+          red: Math.max(0, (card.CostRed || 0) - held.red),
+          yellow: Math.max(0, (card.CostYellow || 0) - held.yellow),
+          purple: Math.max(0, (card.CostPurple || 0) - held.purple),
+          black: Math.max(0, (card.CostBlack || 0) - held.black),
+          prod: Math.max(0, (card.Production || 0) - held.prod)
+        } : { green: 0, red: 0, yellow: 0, purple: 0, black: 0, prod: 0 }
+
+        return {
+          seat: p.seat,
+          name: p.name,
+          joined: p.joined,
+          card,
+          completed,
+          points: card ? card.Points : 0,
+          held,
+          missing,
+          seatColor: getSeatColor(p.seat)
+        }
+      })
+    })
+
+    const selectTeamForGrant = (teamSummary) => {
+      grantForm.value.seat = teamSummary.seat
+      if (teamSummary.missing.green > 0) grantForm.value.color = 'green'
+      else if (teamSummary.missing.red > 0) grantForm.value.color = 'red'
+      else if (teamSummary.missing.yellow > 0) grantForm.value.color = 'yellow'
+      else if (teamSummary.missing.purple > 0) grantForm.value.color = 'purple'
+      else if (teamSummary.missing.black > 0) grantForm.value.color = 'black'
+      
+      if (teamSummary.missing.prod > 0) grantForm.value.production = teamSummary.missing.prod
+      else grantForm.value.production = 2
+    }
+
+    const allGrantedCards = computed(() => {
+      if (!gameData.value?.players) return []
+      const cards = []
+      gameData.value.players.forEach(p => {
+        if (p.scores?.facilitatorCards?.length) {
+          p.scores.facilitatorCards.forEach(c => {
+            const diffMs = Date.now() - (c.grantedAt || Date.now())
+            const minsAgo = Math.floor(diffMs / 60000)
+            const timeAgo = minsAgo <= 0 ? 'just now' : `${minsAgo}m ago`
+            cards.push({ ...c, timeAgo })
+          })
+        }
+      })
+      return cards.sort((a, b) => (b.grantedAt || 0) - (a.grantedAt || 0))
+    })
+
+    const confirmGrantCard = async () => {
+      if (!gameData.value || !roomDocRef) return
+      const targetSeat = grantForm.value.seat
+      const color = (grantForm.value.color || 'green').toLowerCase()
+      const prod = parseInt(grantForm.value.production) || 0
+
+      const updatedPlayers = JSON.parse(JSON.stringify(gameData.value.players))
+      const targetP = updatedPlayers[targetSeat - 1]
+      if (!targetP) return
+
+      if (!targetP.scores.facilitatorCards) {
+        targetP.scores.facilitatorCards = []
+      }
+
+      const cardId = 'fc_' + Date.now() + '_' + Math.random().toString(36).substring(2, 6)
+      const newCard = {
+        id: cardId,
+        seat: targetSeat,
+        color: color,
+        production: prod,
+        grantedAt: Date.now()
+      }
+
+      targetP.scores.facilitatorCards.push(newCard)
+      targetP.scores.production = (targetP.scores.production || 0) + prod
+      targetP.scores.value = (targetP.scores.value || 0) + 5
+
+      if (color === 'green') targetP.scores.greenPerm = (targetP.scores.greenPerm || 0) + 1
+      else if (color === 'red') targetP.scores.redPerm = (targetP.scores.redPerm || 0) + 1
+      else if (color === 'yellow') targetP.scores.yellowPerm = (targetP.scores.yellowPerm || 0) + 1
+      else if (color === 'purple') targetP.scores.purplePerm = (targetP.scores.purplePerm || 0) + 1
+      else if (color === 'black') targetP.scores.blackPerm = (targetP.scores.blackPerm || 0) + 1
+
+      const entry = logEntry('FACILITATOR_GRANT', `Facilitator granted a free ${color.toUpperCase()} Card (Prod: +${prod}) to Team ${targetSeat}`)
+      const updatedLog = getUpdatedLog(entry)
+
+      await updateDoc(roomDocRef, {
+        players: updatedPlayers,
+        gameLog: updatedLog
+      })
+
+      M.toast({ html: `Allocated ${color.toUpperCase()} Card (Prod: +${prod}) to Team ${targetSeat}!`, displayLength: 3000 })
+    }
+
+    const confirmRevokeCard = async (card) => {
+      if (!gameData.value || !roomDocRef) return
+      const targetSeat = card.seat
+      const color = (card.color || 'green').toLowerCase()
+      const prod = card.production || 0
+
+      const updatedPlayers = JSON.parse(JSON.stringify(gameData.value.players))
+      const targetP = updatedPlayers[targetSeat - 1]
+      if (!targetP) return
+
+      if (targetP.scores.facilitatorCards) {
+        targetP.scores.facilitatorCards = targetP.scores.facilitatorCards.filter(c => c.id !== card.id)
+      }
+
+      targetP.scores.production = Math.max(0, (targetP.scores.production || 0) - prod)
+      targetP.scores.value = Math.max(0, (targetP.scores.value || 0) - 5)
+
+      if (color === 'green') targetP.scores.greenPerm = Math.max(0, (targetP.scores.greenPerm || 0) - 1)
+      else if (color === 'red') targetP.scores.redPerm = Math.max(0, (targetP.scores.redPerm || 0) - 1)
+      else if (color === 'yellow') targetP.scores.yellowPerm = Math.max(0, (targetP.scores.yellowPerm || 0) - 1)
+      else if (color === 'purple') targetP.scores.purplePerm = Math.max(0, (targetP.scores.purplePerm || 0) - 1)
+      else if (color === 'black') targetP.scores.blackPerm = Math.max(0, (targetP.scores.blackPerm || 0) - 1)
+
+      const entry = logEntry('FACILITATOR_REVOKE', `Facilitator revoked ${color.toUpperCase()} Card (Prod: -${prod}) from Team ${targetSeat}`)
+      const updatedLog = getUpdatedLog(entry)
+
+      await updateDoc(roomDocRef, {
+        players: updatedPlayers,
+        gameLog: updatedLog
+      })
+
+      M.toast({ html: `Revoked ${color.toUpperCase()} Card from Team ${targetSeat}.`, displayLength: 3000 })
+    }
 
     const showClaimModal = ref(false)
     const claimSeatNumber = ref(1)
@@ -692,6 +1040,14 @@ export default {
       lastSeenLogCount.value = (gameData.value?.gameLog || []).length
     }
 
+    const openFinancialsPanel = () => {
+      financialsOpen.value = true
+    }
+
+    const closeFinancialsPanel = () => {
+      financialsOpen.value = false
+    }
+
     const openClaimModal = (seatNum) => {
       claimSeatNumber.value = seatNum || 1
       claimInputName.value = ''
@@ -749,6 +1105,7 @@ export default {
     let hasAttemptedInfusion = false
     watch(gameData, (data) => {
       if (!data || !data.players || !data.players.length || hasAttemptedInfusion) return
+      if (role.value !== 'FACILITATOR' && role.value !== 'ADMIN') return
 
       const missingSecret = data.players.some(p => !p.secretContractCard)
       if (missingSecret) {
@@ -757,6 +1114,12 @@ export default {
 
         const updatedPlayers = JSON.parse(JSON.stringify(data.players))
         const availableContracts = [...(data.z00contractCards || [])]
+        const defaultContracts = resetValues?.ResetTable?.contractCards || resetValues?.contractCards || []
+
+        const usedRefs = new Set([
+          ...availableContracts.map(c => c?.Ref).filter(Boolean),
+          ...updatedPlayers.map(p => p?.secretContractCard?.Ref).filter(Boolean)
+        ])
 
         let modified = false
         updatedPlayers.forEach(p => {
@@ -765,13 +1128,19 @@ export default {
             if (availableContracts.length > 0) {
               secretCard = availableContracts.pop()
             } else {
-              const defaultContracts = resetValues?.contractCards || []
-              secretCard = defaultContracts[Math.floor(Math.random() * defaultContracts.length)]
+              const unusedDefaults = defaultContracts.filter(c => c && !usedRefs.has(c.Ref))
+              const pool = unusedDefaults.length > 0 ? unusedDefaults : defaultContracts
+              if (pool.length > 0) {
+                secretCard = pool[Math.floor(Math.random() * pool.length)]
+              }
             }
 
-            p.secretContractCard = secretCard
-            p.secretContractCompleted = p.secretContractCompleted || false
-            modified = true
+            if (secretCard) {
+              usedRefs.add(secretCard.Ref)
+              p.secretContractCard = secretCard
+              p.secretContractCompleted = p.secretContractCompleted || false
+              modified = true
+            }
           }
         })
 
@@ -1024,13 +1393,14 @@ export default {
       const updatedPlayers = JSON.parse(JSON.stringify(gameData.value.players))
       const pCopy = updatedPlayers[gameData.value.currentPlayer]
 
+      const colorLower = (card.Colour || '').toLowerCase()
       pCopy.scores.production += card.Production
 
-      if (card.Colour === 'green') pCopy.scores.greenPerm += 1
-      else if (card.Colour === 'yellow') pCopy.scores.yellowPerm += 1
-      else if (card.Colour === 'red') pCopy.scores.redPerm += 1
-      else if (card.Colour === 'purple') pCopy.scores.purplePerm += 1
-      else if (card.Colour === 'black') pCopy.scores.blackPerm += 1
+      if (colorLower === 'green') pCopy.scores.greenPerm += 1
+      else if (colorLower === 'yellow') pCopy.scores.yellowPerm += 1
+      else if (colorLower === 'red') pCopy.scores.redPerm += 1
+      else if (colorLower === 'purple') pCopy.scores.purplePerm += 1
+      else if (colorLower === 'black') pCopy.scores.blackPerm += 1
 
       pCopy.scores.greenTemp -= greenTokensAdjust
       pCopy.scores.redTemp -= redTokensAdjust
@@ -1038,7 +1408,6 @@ export default {
       pCopy.scores.purpleTemp -= purpleTokensAdjust
       pCopy.scores.blackTemp -= blackTokensAdjust
 
-      const color = card.Colour
       const categoryMap = {
         green: 'Property',
         yellow: 'Equipment',
@@ -1046,16 +1415,16 @@ export default {
         purple: 'Operations',
         black: 'Outsource'
       }
-      const categoryName = categoryMap[color.toLowerCase()] || color.toUpperCase()
+      const categoryName = categoryMap[colorLower] || colorLower.toUpperCase()
 
       let marketKey = ''
-      if (color === 'green') marketKey = 'z01greenCards'
-      else if (color === 'yellow') marketKey = 'z02yellowCards'
-      else if (color === 'red') marketKey = 'z03redCards'
-      else if (color === 'purple') marketKey = 'z04purpleCards'
-      else if (color === 'black') marketKey = 'z05blackCards'
+      if (colorLower === 'green') marketKey = 'z01greenCards'
+      else if (colorLower === 'yellow') marketKey = 'z02yellowCards'
+      else if (colorLower === 'red') marketKey = 'z03redCards'
+      else if (colorLower === 'purple') marketKey = 'z04purpleCards'
+      else if (colorLower === 'black') marketKey = 'z05blackCards'
 
-      const marketCards = [...gameData.value[marketKey]]
+      const marketCards = [...(gameData.value[marketKey] || [])]
       const index = marketCards.findIndex(c => c.Ref === card.Ref)
       if (index !== -1) {
         marketCards.splice(index, 1)
@@ -1094,8 +1463,9 @@ export default {
           scores.redPerm < card.CostRed ||
           scores.yellowPerm < card.CostYellow ||
           scores.purplePerm < card.CostPurple ||
-          scores.blackPerm < card.CostBlack) {
-        M.toast({ html: 'Insufficient permanent resource cards to complete this contract!' })
+          scores.blackPerm < card.CostBlack ||
+          scores.production < card.Production) {
+        M.toast({ html: 'Insufficient permanent resource cards or production capacity to complete this contract!' })
         return
       }
 
@@ -1122,7 +1492,7 @@ export default {
 
       pCopy.scores.costs += (card.Production + card.CostGreen + card.CostRed + card.CostYellow + card.CostPurple + card.CostBlack)
 
-      let contractCards = [...gameData.value.z00contractCards]
+      let contractCards = [...(gameData.value.z00contractCards || [])]
 
       if (isSecret) {
         pCopy.secretContractCompleted = true
@@ -1131,6 +1501,10 @@ export default {
         if (index !== -1) {
           contractCards.splice(index, 1)
         }
+        pCopy.contractsCompleted = [
+          ...(pCopy.contractsCompleted || []),
+          { ...card, completedOnTurn: gameData.value?.turnNumber || 1 }
+        ]
       }
 
       const text = isSecret 
@@ -1296,6 +1670,14 @@ export default {
       ModalTempResources,
       ModalGameEndPoints,
       ModalGameEndContracts,
+      ModalFacilitatorGrant,
+      grantForm,
+      allGrantedCards,
+      teamSecretCardsSummary,
+      selectTeamForGrant,
+      confirmGrantCard,
+      confirmRevokeCard,
+      getSeatColor,
       displayedPlayers,
       ownPlayer,
       otherPlayers,
@@ -1310,6 +1692,11 @@ export default {
       unreadLogCount,
       openLogPanel,
       closeLogPanel,
+      financialsOpen,
+      openFinancialsPanel,
+      closeFinancialsPanel,
+      roomDocRef,
+      handleZoomAction,
       tempTokensCount,
       tokenTakenGreen,
       tokenTakenRed,
@@ -1673,5 +2060,154 @@ export default {
 .item-actions button {
   border-radius: 4px;
   font-weight: 600;
+}
+
+.grant-modal-content {
+  max-width: 680px;
+  width: 95%;
+  border-radius: 10px;
+  overflow: hidden;
+  padding: 0 !important;
+}
+
+.modal-header {
+  padding: 12px 18px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.flex-header {
+  margin: 0;
+  font-size: 1.2rem;
+  display: flex;
+  align-items: center;
+}
+
+.close-modal-btn {
+  padding: 0;
+  margin: 0;
+  min-width: 36px;
+}
+
+.grant-modal-body {
+  padding: 18px;
+}
+
+.grant-select {
+  border: 1px solid #cfd8dc;
+  border-radius: 6px;
+  height: 38px;
+  padding: 0 10px;
+  background: #ffffff;
+}
+
+.grant-input-box {
+  border: 1px solid #cfd8dc !important;
+  border-radius: 6px !important;
+  height: 38px !important;
+  padding: 0 10px !important;
+  box-sizing: border-box !important;
+  margin-bottom: 0 !important;
+}
+
+.grant-divider {
+  border: 0;
+  border-top: 1px solid #e0e0e0;
+  margin: 18px 0;
+}
+
+.granted-cards-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: 220px;
+  overflow-y: auto;
+}
+
+.granted-card-chip {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 12px;
+  margin: 0;
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
+}
+
+.chip-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.85rem;
+}
+
+.team-badge {
+  color: #fff;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-weight: 700;
+  font-size: 0.75rem;
+}
+
+.revoke-btn {
+  padding: 0 10px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  border-radius: 4px;
+}
+
+.team-secret-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-height: 240px;
+  overflow-y: auto;
+}
+
+.secret-card-panel {
+  padding: 10px 12px;
+  margin: 0;
+  border-radius: 6px;
+  border: 1px solid #e0e0e0;
+}
+
+.secret-panel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 4px;
+}
+
+.custom-badge {
+  font-size: 0.75rem;
+  padding: 2px 8px;
+  border-radius: 12px;
+}
+
+.card-ref-title {
+  font-size: 0.85rem;
+  color: #263238;
+}
+
+.req-chips-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 4px;
+}
+
+.req-chip {
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  border: 1px solid rgba(0,0,0,0.08);
+}
+
+.fill-btn {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: none;
+  border-radius: 4px;
 }
 </style>

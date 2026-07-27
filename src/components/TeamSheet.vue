@@ -26,7 +26,7 @@
       <!-- Sheet Body Content -->
       <div class="sheet-content">
         <!-- Team Status & Colour Matrix Overview -->
-        <ScoreboardColorMatrix :teams="allTeams" :currentTurnIndex="currentPlayer" :roomName="roomName" />
+        <ScoreboardColorMatrix :teams="allTeams" :currentTurnIndex="currentPlayer" :roomName="roomName" :isFacilitator="isFacilitator" @openFacilitatorGrant="$emit('openFacilitatorGrant')" />
       </div>
     </div>
   </div>
@@ -34,7 +34,7 @@
   <!-- Desktop Static Rail -->
   <div v-else class="desktop-teams-rail">
     <!-- Team Status & Colour Matrix Overview -->
-    <ScoreboardColorMatrix :teams="allTeams" :currentTurnIndex="currentPlayer" :roomName="roomName" />
+    <ScoreboardColorMatrix :teams="allTeams" :currentTurnIndex="currentPlayer" :roomName="roomName" :isFacilitator="isFacilitator" @openFacilitatorGrant="$emit('openFacilitatorGrant')" />
   </div>
 </template>
 
@@ -66,9 +66,13 @@ export default {
     roomName: {
       type: String,
       default: ''
+    },
+    isFacilitator: {
+      type: Boolean,
+      default: false
     }
   },
-  emits: ['takeSeat'],
+  emits: ['takeSeat', 'openFacilitatorGrant'],
   setup(props) {
     const isOpen = ref(false)
 

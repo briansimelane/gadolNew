@@ -179,6 +179,14 @@ export default function useCreateGame() {
         turnNumber: 1,
         gameLog: [],
 
+        financialsConfig: {
+          interestRate: 0.20,
+          taxRate: 0.27,
+          longTermDebt: 5,
+          taxLossPolicy: 'NO_CREDIT',
+          periodDays: 365
+        },
+
         gstate: 0,
         modalPoints: false,
         modalContracts: false,

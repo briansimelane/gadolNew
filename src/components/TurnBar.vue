@@ -90,13 +90,29 @@
 
       <span v-if="isFacilitator" class="role-badge facilitator">Facilitator</span>
       <span v-if="isSpectator" class="role-badge spectator">Spectator</span>
+
+      <button 
+        v-if="isFacilitator" 
+        class="timer-ctrl-btn grant-card-btn" 
+        @click="$emit('openFacilitatorGrant')"
+        title="Facilitator: Allocate Free Resource Card to Team"
+      >
+        <i class="material-icons tiny">add_card</i>Allocate Card
+      </button>
     </div>
 
-    <button class="log-btn" @click="$emit('openLog')" title="View Game Log" aria-label="Game log">
-      <i class="material-icons">history</i>
-      <span class="log-btn-label">Game Log</span>
-      <span v-if="unreadCount > 0" class="log-unread-badge">{{ unreadCount }}</span>
-    </button>
+    <div class="turn-bar-actions">
+      <button class="financials-btn" @click="$emit('openFinancials')" title="View Financial Statements" aria-label="Financial statements">
+        <i class="material-icons">assessment</i>
+        <span class="btn-label hide-on-small-only">Financials</span>
+      </button>
+
+      <button class="log-btn" @click="$emit('openLog')" title="View Game Log" aria-label="Game log">
+        <i class="material-icons">history</i>
+        <span class="log-btn-label">Game Log</span>
+        <span v-if="unreadCount > 0" class="log-unread-badge">{{ unreadCount }}</span>
+      </button>
+    </div>
   </div>
 </template>
 
@@ -159,7 +175,7 @@ export default {
       default: 60
     }
   },
-  emits: ['openLog', 'startTimer', 'pauseTimer', 'resumeTimer', 'adjustTime', 'toggleTimer'],
+  emits: ['openLog', 'openFinancials', 'openFacilitatorGrant', 'startTimer', 'pauseTimer', 'resumeTimer', 'adjustTime', 'toggleTimer'],
   setup(props) {
     const nowMs = ref(Date.now())
     let timerInterval = null
@@ -378,6 +394,17 @@ export default {
   background-color: #37474f;
 }
 
+.timer-ctrl-btn.grant-card-btn {
+  background: #ff9800;
+  color: #fff;
+  font-weight: 700;
+  margin-left: 6px;
+}
+
+.timer-ctrl-btn.grant-card-btn:hover {
+  background: #f57c00;
+}
+
 .timer-ctrl-btn.remove-timer {
   background-color: #c62828;
   margin-left: 6px;
@@ -420,6 +447,32 @@ export default {
 
 .role-badge.spectator {
   background-color: #5c6bc0;
+}
+
+.turn-bar-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.financials-btn {
+  background: #607d8b;
+  border: 1px solid #455a64;
+  color: #ffffff;
+  cursor: pointer;
+  padding: 4px 12px;
+  height: 32px;
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-weight: 700;
+  font-size: 0.82rem;
+  transition: background-color 0.2s, transform 0.1s;
+}
+
+.financials-btn:hover {
+  background-color: #455a64;
 }
 
 .log-btn {

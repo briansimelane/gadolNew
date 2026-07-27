@@ -1,14 +1,10 @@
 <template>
   <div class="scoreboard-matrix-card">
     <!-- Header Bar -->
-    <div class="matrix-header">
+    <div v-if="!hideHeader" class="matrix-header">
       <div class="matrix-title">
         <i class="material-icons tiny">grid_on</i>
         <span>Team Standings</span>
-      </div>
-      <div class="matrix-legend">
-        <span class="legend-item" title="Permanent Resource Cards">Cards</span>
-        <span class="legend-item" title="Temporary Resource Tokens">Tokens</span>
       </div>
     </div>
 
@@ -52,13 +48,17 @@
               <div class="color-box-values">
                 <!-- Permanent Cards Asset Image + Number -->
                 <div class="res-sub-val cards-val" title="Permanent Resource Cards">
-                  <img :src="c.cardIcon" class="mini-card-icon" :alt="c.label + ' Cards'" />
+                  <div class="icon-center-box">
+                    <img :src="c.cardIcon" class="mini-card-icon" :alt="c.label + ' Cards'" />
+                  </div>
                   <strong class="sub-num">{{ p.scores[c.key + 'Perm'] || 0 }}</strong>
                 </div>
 
                 <!-- Temporary Tokens Asset Image + Number -->
                 <div class="res-sub-val tokens-val" title="Temporary Resource Tokens">
-                  <img :src="c.tokenIcon" class="mini-token-icon" :alt="c.label + ' Tokens'" />
+                  <div class="icon-center-box">
+                    <img :src="c.tokenIcon" class="mini-token-icon" :alt="c.label + ' Tokens'" />
+                  </div>
                   <strong class="sub-num">{{ p.scores[c.key + 'Temp'] || 0 }}</strong>
                 </div>
               </div>
@@ -103,8 +103,17 @@ export default {
     testMode: {
       type: Boolean,
       default: false
+    },
+    isFacilitator: {
+      type: Boolean,
+      default: false
+    },
+    hideHeader: {
+      type: Boolean,
+      default: false
     }
   },
+  emits: ['openFacilitatorGrant'],
   setup(props) {
     const resourceColors = [
       { key: 'green', label: 'Green', cardIcon: greenCardicon, tokenIcon: greenToken },
@@ -175,6 +184,16 @@ export default {
   font-weight: 700;
 }
 
+.grant-btn-header {
+  font-weight: 700;
+  text-transform: none;
+  border-radius: 4px;
+  height: 26px;
+  line-height: 26px;
+  padding: 0 8px;
+  margin-right: 8px;
+}
+
 .matrix-legend {
   display: flex;
   align-items: center;
@@ -187,6 +206,15 @@ export default {
   display: flex;
   align-items: center;
   gap: 2px;
+}
+
+.icon-center-box {
+  width: 28px;
+  height: 28px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-shrink: 0;
 }
 
 .mini-card-icon {
