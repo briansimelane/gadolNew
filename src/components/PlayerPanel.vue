@@ -20,25 +20,29 @@
 
     <div class="scorePlayerTempResources">
       <table>
-        <tr>
-          <td><img src="../assets/img/greenToken.png" class="playerIconsSizing"/> <p>{{ player.scores.greenTemp }}</p></td>
-          <td><img src="../assets/img/redToken.png" class="playerIconsSizing"/> <p>{{ player.scores.redTemp }}</p></td>
-          <td><img src="../assets/img/yellowToken.png" class="playerIconsSizing"/> <p>{{ player.scores.yellowTemp }}</p></td>
-          <td><img src="../assets/img/purpleToken.png" class="playerIconsSizing"/> <p>{{ player.scores.purpleTemp }}</p></td>
-          <td><img src="../assets/img/blackToken.png" class="playerIconsSizing"/> <p>{{ player.scores.blackTemp }}</p></td>
-        </tr>
+        <tbody>
+          <tr>
+            <td><img src="../assets/img/greenToken.png" class="playerIconsSizing"/> <p>{{ player.scores.greenTemp }}</p></td>
+            <td><img src="../assets/img/redToken.png" class="playerIconsSizing"/> <p>{{ player.scores.redTemp }}</p></td>
+            <td><img src="../assets/img/yellowToken.png" class="playerIconsSizing"/> <p>{{ player.scores.yellowTemp }}</p></td>
+            <td><img src="../assets/img/purpleToken.png" class="playerIconsSizing"/> <p>{{ player.scores.purpleTemp }}</p></td>
+            <td><img src="../assets/img/blackToken.png" class="playerIconsSizing"/> <p>{{ player.scores.blackTemp }}</p></td>
+          </tr>
+        </tbody>
       </table>
     </div>
 
     <div class="scorePlayerPermResources">
       <table>
-        <tr>
-          <td><img src="../assets/img/greenCardicon.png" class="playerIconsSizing"/> <p>{{ player.scores.greenPerm }}</p></td>
-          <td><img src="../assets/img/redCardicon.png" class="playerIconsSizing"/> <p>{{ player.scores.redPerm }}</p></td>
-          <td><img src="../assets/img/yellowCardicon.png" class="playerIconsSizing"/> <p>{{ player.scores.yellowPerm }}</p></td>
-          <td><img src="../assets/img/purpleCardicon.png" class="playerIconsSizing"/> <p>{{ player.scores.purplePerm }}</p></td>
-          <td><img src="../assets/img/blackCardicon.png" class="playerIconsSizing"/> <p>{{ player.scores.blackPerm }}</p></td>
-        </tr>
+        <tbody>
+          <tr>
+            <td><img src="../assets/img/greenCardicon.png" class="playerIconsSizing"/> <p>{{ player.scores.greenPerm }}</p></td>
+            <td><img src="../assets/img/redCardicon.png" class="playerIconsSizing"/> <p>{{ player.scores.redPerm }}</p></td>
+            <td><img src="../assets/img/yellowCardicon.png" class="playerIconsSizing"/> <p>{{ player.scores.yellowPerm }}</p></td>
+            <td><img src="../assets/img/purpleCardicon.png" class="playerIconsSizing"/> <p>{{ player.scores.purplePerm }}</p></td>
+            <td><img src="../assets/img/blackCardicon.png" class="playerIconsSizing"/> <p>{{ player.scores.blackPerm }}</p></td>
+          </tr>
+        </tbody>
       </table>
     </div>
 
