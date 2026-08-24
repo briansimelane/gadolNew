@@ -106,6 +106,8 @@ export default {
 }
 .brand-logo {
   font-weight: 700;
+  position: static !important;
+  float: left !important;
 }
 .brand-logo-small {
   font-size: 1.2rem;
@@ -113,14 +115,16 @@ export default {
   color: #fff;
   line-height: 48px;
   white-space: nowrap;
+  position: static !important;
+  float: left !important;
 }
 .nav-items-list {
   display: flex;
   align-items: center;
   gap: 6px;
   height: 48px;
-  margin: 0;
-  float: none !important;
+  margin: 0 0 0 auto !important;
+  float: right !important;
 }
 .nav-items-list > li {
   display: flex;
