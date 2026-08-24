@@ -696,6 +696,8 @@ export default {
 
     const { role, roomId, seat } = useSession()
     const { gameData, error, roomDocRef } = useRoom(props.id)
+    const { zoomedCard, zoomType, zoomColor, openZoom, closeZoom } = useCardZoom()
+
     const computeExpectedCash = (p) => {
       if (!p || !p.scores) return 10
       const s = p.scores
@@ -1876,6 +1878,11 @@ export default {
       tokenTakenYellow,
       tokenTakenPurple,
       tokenTakenBlack,
+      zoomedCard,
+      zoomType,
+      zoomColor,
+      openZoom,
+      closeZoom,
       affordZoomedCard,
       handleCardClick,
       handleAcquireClick,
