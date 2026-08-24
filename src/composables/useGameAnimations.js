@@ -407,11 +407,174 @@ export function useGameAnimations() {
     }
   }
 
+  const getSeatColor = (seatVal) => {
+    if (seatVal === 1) return '#fdb410'
+    if (seatVal === 2) return '#007b46'
+    if (seatVal === 3) return '#1565c0'
+    if (seatVal === 4) return '#e21234'
+    return '#007b46'
+  }
+
+  /**
+   * Action D: Allocating Managers to a Resource Card
+   * Meeples fly from Team Supply to target Resource Card with a pop/drop landing effect.
+   */
+  const animateManagerAllocation = async ({
+    cardRef,
+    seat = 1,
+    count = 1,
+    stateUpdateCallback = null
+  }) => {
+    const cardEl = document.querySelector(`[data-card-ref="${cardRef}"]`)
+    const sourceSupply = document.querySelector(`.PlayerScoreArea[data-is-active="true"] .player-managers-bar`) ||
+      document.querySelector(`.team-matrix-row[data-is-active="true"] .team-managers-matrix`) ||
+      document.querySelector(`.player-managers-bar, .team-managers-matrix`)
+
+    if (!cardEl || !sourceSupply) {
+      if (stateUpdateCallback) await stateUpdateCallback()
+      return
+    }
+
+    const sourceRect = sourceSupply.getBoundingClientRect()
+    const targetRect = cardEl.getBoundingClientRect()
+    const teamColor = getSeatColor(seat)
+
+    const meeples = []
+    for (let i = 0; i < count; i++) {
+      const meeple = document.createElement('div')
+      meeple.innerHTML = '<i class="material-icons">person</i>'
+      meeple.style.cssText = `
+        position: fixed;
+        left: ${sourceRect.left + sourceRect.width / 2 - 16}px;
+        top: ${sourceRect.top + sourceRect.height / 2 - 16}px;
+        width: 32px;
+        height: 32px;
+        color: ${teamColor};
+        z-index: 100000;
+        pointer-events: none;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 28px;
+        filter: drop-shadow(0 4px 8px rgba(0,0,0,0.4));
+        will-change: transform, opacity;
+      `
+      document.body.appendChild(meeple)
+      meeples.push(meeple)
+    }
+
+    if (stateUpdateCallback) {
+      await stateUpdateCallback()
+      await nextTick()
+    }
+
+    const deltaX = targetRect.left - 4 - (sourceRect.left + sourceRect.width / 2)
+    const deltaY = targetRect.top + targetRect.height / 2 - (sourceRect.top + sourceRect.height / 2)
+
+    meeples.forEach((m, idx) => {
+      gsap.to(m, {
+        duration: 0.65,
+        x: deltaX + (idx * 6),
+        y: deltaY + (idx * 4),
+        scale: 1.3,
+        rotation: 360,
+        delay: idx * 0.08,
+        ease: 'back.out(1.7)',
+        onComplete: () => {
+          gsap.fromTo(
+            cardEl,
+            { scale: 1.08, boxShadow: `0 0 25px ${teamColor}` },
+            { scale: 1, boxShadow: 'none', duration: 0.35, ease: 'back.out(2)' }
+          )
+          m.remove()
+        }
+      })
+    })
+  }
+
+  /**
+   * Action E: Reclaiming Managers when Purchasing Card
+   * Meeples fly off the card back into Team Supply.
+   */
+  const animateManagerReturn = async ({
+    cardRef,
+    seat = 1,
+    count = 1,
+    stateUpdateCallback = null
+  }) => {
+    const cardEl = document.querySelector(`[data-card-ref="${cardRef}"]`)
+    const targetSupply = document.querySelector(`.PlayerScoreArea[data-is-active="true"] .player-managers-bar`) ||
+      document.querySelector(`.team-matrix-row[data-is-active="true"] .team-managers-matrix`) ||
+      document.querySelector(`.player-managers-bar, .team-managers-matrix`)
+
+    if (!cardEl || !targetSupply) {
+      if (stateUpdateCallback) await stateUpdateCallback()
+      return
+    }
+
+    const sourceRect = cardEl.getBoundingClientRect()
+    const targetRect = targetSupply.getBoundingClientRect()
+    const teamColor = getSeatColor(seat)
+
+    const meeples = []
+    for (let i = 0; i < count; i++) {
+      const meeple = document.createElement('div')
+      meeple.innerHTML = '<i class="material-icons">person</i>'
+      meeple.style.cssText = `
+        position: fixed;
+        left: ${sourceRect.left - 4 - 16}px;
+        top: ${sourceRect.top + sourceRect.height / 2 - 16}px;
+        width: 32px;
+        height: 32px;
+        color: ${teamColor};
+        z-index: 100000;
+        pointer-events: none;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 28px;
+        filter: drop-shadow(0 4px 8px rgba(0,0,0,0.4));
+        will-change: transform, opacity;
+      `
+      document.body.appendChild(meeple)
+      meeples.push(meeple)
+    }
+
+    if (stateUpdateCallback) {
+      await stateUpdateCallback()
+      await nextTick()
+    }
+
+    const deltaX = targetRect.left + targetRect.width / 2 - (sourceRect.left + sourceRect.width / 2)
+    const deltaY = targetRect.top + targetRect.height / 2 - (sourceRect.top + sourceRect.height / 2)
+
+    meeples.forEach((m, idx) => {
+      gsap.to(m, {
+        duration: 0.6,
+        x: deltaX,
+        y: deltaY,
+        scale: 0.8,
+        delay: idx * 0.08,
+        ease: 'power2.inOut',
+        onComplete: () => {
+          gsap.fromTo(
+            targetSupply,
+            { scale: 1.12 },
+            { scale: 1, duration: 0.35, ease: 'bounce.out' }
+          )
+          m.remove()
+        }
+      })
+    })
+  }
+
   return {
     initAnimations,
     cleanupAnimations,
     animateTokenPurchase,
     animateCardPurchase,
-    animateContractFulfillment
+    animateContractFulfillment,
+    animateManagerAllocation,
+    animateManagerReturn
   }
 }

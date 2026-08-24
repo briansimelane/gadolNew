@@ -240,7 +240,11 @@
     <CardZoomOverlay 
       :isMyTurn="isMyTurn" 
       :afford="affordZoomedCard" 
+      :activePlayer="activePlayer"
+      :activeSeat="(gameData?.currentPlayer || 0) + 1"
+      :gameData="gameData"
       @action="handleZoomAction" 
+      @allocateManagers="handleAllocateManagers"
     />
 
     <!-- Game Log Slide-Over Panel -->
@@ -269,8 +273,8 @@
                   <span>Stock: <strong>{{ gameData.z08marketGreenTokens }}</strong></span>
                 </div>
                 <div class="item-actions">
-                  <button class="btn-small waves-effect green darken-2" @click="getTwoTokens('green')" :disabled="tempTokensCount > 0 || gameData.z08marketGreenTokens < 4">Get 2</button>
-                  <button class="btn-small waves-effect cyan darken-3" @click="getOneToken('green')" :disabled="tokenTakenGreen || gameData.z08marketGreenTokens < 1">Get 1</button>
+                  <button class="btn-small waves-effect green darken-2" @click="getTwoTokens('green')" :disabled="tempTokensCount > 0 || gameData.z08marketGreenTokens < 4 || (activePlayer?.scores?.cash < 2)">Get 2</button>
+                  <button class="btn-small waves-effect cyan darken-3" @click="getOneToken('green')" :disabled="tokenTakenGreen || gameData.z08marketGreenTokens < 1 || (activePlayer?.scores?.cash < 1)">Get 1</button>
                 </div>
               </div>
 
@@ -281,8 +285,8 @@
                   <span>Stock: <strong>{{ gameData.z09marketYellowTokens }}</strong></span>
                 </div>
                 <div class="item-actions">
-                  <button class="btn-small waves-effect yellow darken-3" @click="getTwoTokens('yellow')" :disabled="tempTokensCount > 0 || gameData.z09marketYellowTokens < 4">Get 2</button>
-                  <button class="btn-small waves-effect cyan darken-3" @click="getOneToken('yellow')" :disabled="tokenTakenYellow || gameData.z09marketYellowTokens < 1">Get 1</button>
+                  <button class="btn-small waves-effect yellow darken-3" @click="getTwoTokens('yellow')" :disabled="tempTokensCount > 0 || gameData.z09marketYellowTokens < 4 || (activePlayer?.scores?.cash < 2)">Get 2</button>
+                  <button class="btn-small waves-effect cyan darken-3" @click="getOneToken('yellow')" :disabled="tokenTakenYellow || gameData.z09marketYellowTokens < 1 || (activePlayer?.scores?.cash < 1)">Get 1</button>
                 </div>
               </div>
 
@@ -293,8 +297,8 @@
                   <span>Stock: <strong>{{ gameData.z07marketRedTokens }}</strong></span>
                 </div>
                 <div class="item-actions">
-                  <button class="btn-small waves-effect red darken-2" @click="getTwoTokens('red')" :disabled="tempTokensCount > 0 || gameData.z07marketRedTokens < 4">Get 2</button>
-                  <button class="btn-small waves-effect cyan darken-3" @click="getOneToken('red')" :disabled="tokenTakenRed || gameData.z07marketRedTokens < 1">Get 1</button>
+                  <button class="btn-small waves-effect red darken-2" @click="getTwoTokens('red')" :disabled="tempTokensCount > 0 || gameData.z07marketRedTokens < 4 || (activePlayer?.scores?.cash < 2)">Get 2</button>
+                  <button class="btn-small waves-effect cyan darken-3" @click="getOneToken('red')" :disabled="tokenTakenRed || gameData.z07marketRedTokens < 1 || (activePlayer?.scores?.cash < 1)">Get 1</button>
                 </div>
               </div>
 
@@ -305,8 +309,8 @@
                   <span>Stock: <strong>{{ gameData.z10marketPurpleTokens }}</strong></span>
                 </div>
                 <div class="item-actions">
-                  <button class="btn-small waves-effect purple darken-2" @click="getTwoTokens('purple')" :disabled="tempTokensCount > 0 || gameData.z10marketPurpleTokens < 4">Get 2</button>
-                  <button class="btn-small waves-effect cyan darken-3" @click="getOneToken('purple')" :disabled="tokenTakenPurple || gameData.z10marketPurpleTokens < 1">Get 1</button>
+                  <button class="btn-small waves-effect purple darken-2" @click="getTwoTokens('purple')" :disabled="tempTokensCount > 0 || gameData.z10marketPurpleTokens < 4 || (activePlayer?.scores?.cash < 2)">Get 2</button>
+                  <button class="btn-small waves-effect cyan darken-3" @click="getOneToken('purple')" :disabled="tokenTakenPurple || gameData.z10marketPurpleTokens < 1 || (activePlayer?.scores?.cash < 1)">Get 1</button>
                 </div>
               </div>
 
@@ -317,8 +321,8 @@
                   <span>Stock: <strong>{{ gameData.z11marketBlackTokens }}</strong></span>
                 </div>
                 <div class="item-actions">
-                  <button class="btn-small waves-effect grey darken-3" @click="getTwoTokens('black')" :disabled="tempTokensCount > 0 || gameData.z11marketBlackTokens < 4">Get 2</button>
-                  <button class="btn-small waves-effect cyan darken-3" @click="getOneToken('black')" :disabled="tokenTakenBlack || gameData.z11marketBlackTokens < 1">Get 1</button>
+                  <button class="btn-small waves-effect grey darken-3" @click="getTwoTokens('black')" :disabled="tempTokensCount > 0 || gameData.z11marketBlackTokens < 4 || (activePlayer?.scores?.cash < 2)">Get 2</button>
+                  <button class="btn-small waves-effect cyan darken-3" @click="getOneToken('black')" :disabled="tokenTakenBlack || gameData.z11marketBlackTokens < 1 || (activePlayer?.scores?.cash < 1)">Get 1</button>
                 </div>
               </div>
             </div>
@@ -677,7 +681,9 @@ export default {
       cleanupAnimations,
       animateTokenPurchase,
       animateCardPurchase,
-      animateContractFulfillment
+      animateContractFulfillment,
+      animateManagerAllocation,
+      animateManagerReturn
     } = useGameAnimations()
 
     onMounted(() => {
@@ -690,7 +696,39 @@ export default {
 
     const { role, roomId, seat } = useSession()
     const { gameData, error, roomDocRef } = useRoom(props.id)
-    const { zoomedCard, zoomType, zoomColor, openZoom, closeZoom } = useCardZoom()
+    const computeExpectedCash = (p) => {
+      if (!p || !p.scores) return 10
+      const s = p.scores
+      const tempHeld = (s.greenTemp || 0) + (s.redTemp || 0) + (s.yellowTemp || 0) + (s.purpleTemp || 0) + (s.blackTemp || 0)
+      let contractCash = 0
+      if (Array.isArray(p.completedContracts)) {
+        p.completedContracts.forEach(c => { contractCash += (c.Cash || 0) })
+      }
+      if (p.secretContractCompleted && p.secretContractCard) {
+        contractCash += (p.secretContractCard.Cash || 0)
+      }
+      return Math.max(0, 10 - tempHeld + contractCash)
+    }
+
+    watch(gameData, (newRoom) => {
+      if (!newRoom || !Array.isArray(newRoom.players) || !roomDocRef) return
+      let needsFix = false
+      const updatedPlayers = JSON.parse(JSON.stringify(newRoom.players))
+
+      updatedPlayers.forEach(p => {
+        if (p && p.scores) {
+          const expected = computeExpectedCash(p)
+          if (p.scores.cash !== expected) {
+            p.scores.cash = expected
+            needsFix = true
+          }
+        }
+      })
+
+      if (needsFix) {
+        updateDoc(roomDocRef, { players: updatedPlayers })
+      }
+    }, { immediate: true })
 
     const financialsOpen = ref(false)
 
@@ -1379,6 +1417,11 @@ export default {
       currentP.scores.yellowTokenTaken = false
       currentP.scores.purpleTokenTaken = false
       currentP.scores.blackTokenTaken = false
+      
+      // Reset manager turn allocation limits
+      updatedPlayers.forEach(p => {
+        if (p && p.scores) p.scores.hasAllocatedThisTurn = false
+      })
 
       const turnEndEntry = logEntry('TURN_END', 'ended their turn')
       const updatedLog = overrideLog || getUpdatedLog(turnEndEntry)
@@ -1399,6 +1442,13 @@ export default {
 
     const BuyPermResource = (card) => {
       if (!activePlayer.value) return
+
+      // Block purchase if card is reserved by another team
+      if (card.allocatedManagersCount > 0 && card.reservedBySeat !== activePlayer.value.seat) {
+        M.toast({ html: `This card is reserved by Team ${card.reservedBySeat}!` })
+        return
+      }
+
       const cardEl = document.querySelector(`[data-card-ref="${card.Ref}"]`)
       if (cardEl) {
         animateCardPurchase({ cardEl, cardData: card, color: card.Colour })
@@ -1432,6 +1482,16 @@ export default {
       pCopy.scores.yellowTemp -= yellowTokensAdjust
       pCopy.scores.purpleTemp -= purpleTokensAdjust
       pCopy.scores.blackTemp -= blackTokensAdjust
+
+      // Return cash value of spent temporary tokens back to player's cash balance
+      pCopy.scores.cash += totalTempSpent
+
+      // Reclaim allocated managers if card was reserved by active player
+      if (card.allocatedManagersCount > 0 && card.reservedBySeat === pCopy.seat) {
+        const countToReturn = card.allocatedManagersCount
+        pCopy.scores.managersAvailable = Math.min(4, (pCopy.scores.managersAvailable ?? 0) + countToReturn)
+        animateManagerReturn({ cardRef: card.Ref, seat: pCopy.seat, count: countToReturn })
+      }
 
       const categoryMap = {
         green: 'Property',
@@ -1476,6 +1536,86 @@ export default {
         gameLog: updatedLog
       }).then(() => {
         M.toast({ html: `Bought a ${categoryName} card` })
+        nextPlayer()
+      })
+    }
+
+    const handleAllocateManagers = ({ card, count }) => {
+      if (!activePlayer.value) return
+      const pIndex = gameData.value.currentPlayer
+      const updatedPlayers = JSON.parse(JSON.stringify(gameData.value.players))
+      const pCopy = updatedPlayers[pIndex]
+
+      if (pCopy.scores.hasAllocatedThisTurn) {
+        M.toast({ html: 'You have already allocated managers on a card this turn.' })
+        return
+      }
+
+      const prevSeat = card.reservedBySeat
+      const prevCount = card.allocatedManagersCount || 0
+      const activeSeatVal = pCopy.seat
+
+      const isSteal = prevCount > 0 && prevSeat !== activeSeatVal
+      const isTopUp = prevCount > 0 && prevSeat === activeSeatVal
+
+      if (isSteal) {
+        if (count <= prevCount) {
+          M.toast({ html: `Must allocate strictly more than ${prevCount} manager(s) to steal!` })
+          return
+        }
+        // Return replaced team's managers to their supply immediately
+        if (prevSeat && updatedPlayers[prevSeat - 1]) {
+          const prevP = updatedPlayers[prevSeat - 1]
+          prevP.scores.managersAvailable = Math.min(4, (prevP.scores.managersAvailable ?? 0) + prevCount)
+        }
+      }
+
+      const additionalToDeduct = isTopUp ? (count - prevCount) : count
+      const currentAvailable = pCopy.scores.managersAvailable ?? 4
+
+      if (currentAvailable < additionalToDeduct) {
+        M.toast({ html: 'Insufficient available managers!' })
+        return
+      }
+
+      pCopy.scores.managersAvailable = currentAvailable - additionalToDeduct
+      pCopy.scores.hasAllocatedThisTurn = true
+
+      const colorLower = (card.Colour || '').toLowerCase()
+      let marketKey = ''
+      if (colorLower === 'green') marketKey = 'z01greenCards'
+      else if (colorLower === 'yellow') marketKey = 'z02yellowCards'
+      else if (colorLower === 'red') marketKey = 'z03redCards'
+      else if (colorLower === 'purple') marketKey = 'z04purpleCards'
+      else if (colorLower === 'black') marketKey = 'z05blackCards'
+
+      const marketCards = [...(gameData.value[marketKey] || [])]
+      const cardIndex = marketCards.findIndex(c => c.Ref === card.Ref)
+      if (cardIndex !== -1) {
+        marketCards[cardIndex] = {
+          ...marketCards[cardIndex],
+          reservedBySeat: activeSeatVal,
+          allocatedManagersCount: count
+        }
+      }
+
+      const logText = isSteal 
+        ? `stole reservation of ${card.Ref} with ${count} managers` 
+        : (isTopUp ? `topped up reservation on ${card.Ref} to ${count} managers` : `allocated ${count} manager(s) to reserve ${card.Ref}`)
+      
+      const actionText = `${pCopy.name} ${logText}`
+      const entry = logEntry('RESERVE_CARD', logText, { ref: card.Ref, count, isSteal, isTopUp })
+      const updatedLog = getUpdatedLog(entry)
+
+      animateManagerAllocation({ cardRef: card.Ref, seat: activeSeatVal, count })
+
+      updateDoc(roomDocRef, {
+        players: updatedPlayers,
+        [marketKey]: marketCards,
+        lastAction: actionText,
+        gameLog: updatedLog
+      }).then(() => {
+        M.toast({ html: `Manager reservation confirmed!` })
         nextPlayer()
       })
     }
@@ -1729,6 +1869,7 @@ export default {
       closeFinancialsPanel,
       roomDocRef,
       handleZoomAction,
+      handleAllocateManagers,
       tempTokensCount,
       tokenTakenGreen,
       tokenTakenRed,
@@ -1972,6 +2113,7 @@ export default {
   word-break: break-word;
   display: -webkit-box;
   -webkit-line-clamp: 2;
+  line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
 }

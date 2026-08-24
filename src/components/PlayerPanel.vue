@@ -18,6 +18,22 @@
       </p>
     </div>
 
+    <!-- Team Managers Supply Bar -->
+    <div class="player-managers-bar" title="Team Managers Supply (Available / Total)">
+      <span class="managers-title">Managers:</span>
+      <div class="managers-meeples-list">
+        <i 
+          v-for="idx in 4" 
+          :key="idx" 
+          class="material-icons tiny meeple-supply-icon"
+          :class="{ 'available': idx <= (player.scores ? (player.scores.managersAvailable ?? 4) : 4) }"
+        >
+          person
+        </i>
+      </div>
+      <span class="managers-count-str">{{ player.scores ? (player.scores.managersAvailable ?? 4) : 4 }}/4</span>
+    </div>
+
     <div class="scorePlayerTempResources">
       <table>
         <tbody>
@@ -83,3 +99,46 @@ export default {
   emits: ['takeSeat']
 }
 </script>
+
+<style scoped>
+.player-managers-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 4px 10px;
+  background-color: #eceff1;
+  border-bottom: 1px solid #cfd8dc;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #37474f;
+}
+
+.managers-title {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.managers-meeples-list {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.meeple-supply-icon {
+  font-size: 1.1rem;
+  color: #b0bec5;
+  transition: color 0.2s, transform 0.2s;
+}
+
+.meeple-supply-icon.available {
+  color: #00796b;
+  transform: scale(1.1);
+}
+
+.managers-count-str {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #004d40;
+}
+</style>

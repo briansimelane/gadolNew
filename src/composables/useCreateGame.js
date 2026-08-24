@@ -85,12 +85,18 @@ export default function useCreateGame() {
       const resetBlackCards = resetValues.resourcesCards.blackCards
       const resetContractCards = resetValues.contractCards
 
+      const initCard = (c) => ({
+        ...c,
+        reservedBySeat: null,
+        allocatedManagersCount: 0
+      })
+
       const shuffledContractCards = shuffle(resetContractCards)
-      const shuffledGreenCards = shuffle(resetGreenCards)
-      const shuffledYellowCards = shuffle(resetYellowCards)
-      const shuffledRedCards = shuffle(resetRedCards)
-      const shuffledPurpleCards = shuffle(resetPurpleCards)
-      const shuffledBlackCards = shuffle(resetBlackCards)
+      const shuffledGreenCards = shuffle(resetGreenCards).map(initCard)
+      const shuffledYellowCards = shuffle(resetYellowCards).map(initCard)
+      const shuffledRedCards = shuffle(resetRedCards).map(initCard)
+      const shuffledPurpleCards = shuffle(resetPurpleCards).map(initCard)
+      const shuffledBlackCards = shuffle(resetBlackCards).map(initCard)
 
       // Starting stats
       const playerStartCash = resetValues.playerReset.cash
@@ -130,7 +136,10 @@ export default function useCreateGame() {
         redTokenTaken: false,
         yellowTokenTaken: false,
         purpleTokenTaken: false,
-        blackTokenTaken: false
+        blackTokenTaken: false,
+        managersTotal: 4,
+        managersAvailable: 4,
+        hasAllocatedThisTurn: false
       })
 
       const playersArray = []

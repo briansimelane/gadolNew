@@ -28,6 +28,18 @@
           </div>
 
           <div class="team-status-tag">
+            <div class="team-managers-matrix" title="Available Managers / Total">
+              <i 
+                v-for="idx in 4" 
+                :key="idx" 
+                class="material-icons tiny meeple-matrix-icon"
+                :class="{ 'available': idx <= (p.scores ? (p.scores.managersAvailable ?? 4) : 4) }"
+                :style="{ color: idx <= (p.scores ? (p.scores.managersAvailable ?? 4) : 4) ? getSeatAccentColor(p.seat) : '#b0bec5' }"
+              >
+                person
+              </i>
+              <span class="matrix-managers-str">{{ p.scores ? (p.scores.managersAvailable ?? 4) : 4 }}/4</span>
+            </div>
             <span v-if="p.joined" class="status-badge joined">Joined</span>
             <span v-else class="status-badge waiting">Waiting...</span>
           </div>
