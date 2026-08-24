@@ -246,6 +246,90 @@ export default {
   min-height: 48px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
   font-family: inherit;
+  width: 100%;
+  max-width: 100vw;
+  box-sizing: border-box;
+}
+
+@media only screen and (max-width: 650px) {
+  .turn-bar {
+    flex-wrap: wrap;
+    gap: 6px;
+    padding: 6px 10px;
+    height: auto;
+    min-height: auto;
+  }
+
+  .turn-info {
+    flex-wrap: wrap;
+    gap: 4px;
+    max-width: 100%;
+    flex: 1 1 auto;
+  }
+
+  .room-tag {
+    max-width: 110px;
+    font-size: 0.78rem;
+    padding: 2px 6px;
+    margin-right: 2px;
+  }
+
+  .room-name-text {
+    max-width: 70px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    display: inline-block;
+    vertical-align: bottom;
+  }
+
+  .turn-text {
+    font-size: 0.78rem;
+    white-space: nowrap;
+  }
+
+  .timer-section,
+  .facilitator-timer-controls {
+    flex-wrap: wrap;
+    gap: 4px;
+  }
+
+  .timer-adjust-group {
+    display: none;
+  }
+
+  .turn-bar-actions {
+    margin-left: auto;
+    gap: 4px;
+    flex-shrink: 0;
+  }
+}
+
+@media only screen and (max-width: 420px) {
+  .turn-bar {
+    padding: 4px 6px;
+  }
+
+  .log-btn-label {
+    display: none;
+  }
+
+  .financials-btn {
+    padding: 4px 8px;
+    height: 28px;
+    font-size: 0.75rem;
+  }
+
+  .log-btn {
+    padding: 4px 8px;
+    height: 28px;
+    font-size: 0.75rem;
+  }
+
+  .timer-ctrl-btn {
+    padding: 2px 6px;
+    font-size: 0.7rem;
+  }
 }
 
 .turn-info {

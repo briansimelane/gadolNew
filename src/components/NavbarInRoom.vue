@@ -90,10 +90,19 @@ export default {
   height: 48px;
   line-height: 48px;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+  width: 100%;
+  max-width: 100vw;
+  box-sizing: border-box;
+  overflow: hidden;
 }
 .padding-left {
   padding-left: 12px;
   padding-right: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  box-sizing: border-box;
 }
 .brand-logo {
   font-weight: 700;
@@ -103,13 +112,15 @@ export default {
   font-weight: 700;
   color: #fff;
   line-height: 48px;
+  white-space: nowrap;
 }
 .nav-items-list {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
   height: 48px;
   margin: 0;
+  float: none !important;
 }
 .nav-items-list > li {
   display: flex;
@@ -162,14 +173,22 @@ export default {
   vertical-align: middle !important;
 }
 
-@media only screen and (max-width: 420px) {
+@media only screen and (max-width: 480px) {
+  .brand-logo-small {
+    font-size: 1rem;
+  }
   .user-display-item {
-    max-width: 100px;
-    font-size: 0.78rem;
+    max-width: 75px;
+    font-size: 0.75rem;
   }
   .padding-left {
     padding-left: 6px;
     padding-right: 6px;
+  }
+  .nav-action-btn {
+    padding: 0 8px;
+    height: 28px;
+    font-size: 0.78rem;
   }
 }
 </style>

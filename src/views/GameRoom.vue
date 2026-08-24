@@ -2327,6 +2327,10 @@ export default {
   display: flex;
   flex-direction: column;
   color: #212121;
+  width: 100%;
+  max-width: 100vw;
+  overflow-x: hidden;
+  box-sizing: border-box;
 }
 
 .game-layout-container {
@@ -2336,6 +2340,10 @@ export default {
   padding: 12px;
   gap: 16px;
   padding-bottom: 90px; /* space for sticky footer elements */
+  width: 100%;
+  max-width: 100vw;
+  overflow-x: hidden;
+  box-sizing: border-box;
 }
 
 /* Desktop layout (>=900px) */

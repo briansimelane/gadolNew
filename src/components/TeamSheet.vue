@@ -17,8 +17,8 @@
       <div class="sheet-handle-bar" @click="isOpen = !isOpen">
         <div class="drag-pill"></div>
         <div class="handle-title">
-          <i class="material-icons tiny">groups</i>
-          <span>Other Teams ({{ players.length }})</span>
+          <i class="material-icons tiny">leaderboard</i>
+          <span>Team Standings</span>
         </div>
         <i class="material-icons handle-chevron">{{ isOpen ? 'expand_more' : 'expand_less' }}</i>
       </div>
