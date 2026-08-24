@@ -127,4 +127,22 @@ export default {
   font-weight: 600;
   text-transform: none;
 }
+
+@media only screen and (max-width: 500px) {
+  .token-market-bar {
+    padding: 8px 10px;
+  }
+  .token-items-row {
+    gap: 4px;
+    flex-wrap: wrap;
+  }
+  .token-pill {
+    padding: 3px 8px;
+    font-size: 0.95rem;
+  }
+  .token-icon {
+    width: 20px;
+    height: 20px;
+  }
+}
 </style>

@@ -161,6 +161,8 @@ export default {
 .own-team-summary {
   display: flex;
   align-items: center;
+  flex-wrap: wrap;
+  gap: 4px;
   padding: 4px 14px 8px;
   font-size: 0.8rem;
   cursor: pointer;

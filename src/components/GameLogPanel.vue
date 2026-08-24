@@ -7,7 +7,9 @@
             <i class="material-icons">history</i>
             <span>Game Log</span>
           </div>
-          <button class="log-close-btn" @click="$emit('close')" aria-label="Close log">&times;</button>
+          <button class="universal-close-btn" @click="$emit('close')" aria-label="Close log" title="Close panel">
+            <i class="material-icons">close</i>
+          </button>
         </div>
 
         <div class="log-body">

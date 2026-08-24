@@ -161,4 +161,15 @@ export default {
   margin: 0 !important;
   vertical-align: middle !important;
 }
+
+@media only screen and (max-width: 420px) {
+  .user-display-item {
+    max-width: 100px;
+    font-size: 0.78rem;
+  }
+  .padding-left {
+    padding-left: 6px;
+    padding-right: 6px;
+  }
+}
 </style>

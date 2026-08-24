@@ -517,4 +517,37 @@ export default {
   justify-content: center;
   padding: 0 4px;
 }
+
+@media only screen and (max-width: 600px) {
+  .room-name-text {
+    max-width: 75px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    display: inline-block;
+    vertical-align: bottom;
+  }
+
+  .turn-text {
+    font-size: 0.78rem;
+  }
+
+  .timer-adjust-group {
+    display: none;
+  }
+}
+
+@media only screen and (max-width: 420px) {
+  .log-btn-label {
+    display: none;
+  }
+
+  .financials-btn {
+    padding: 4px 8px;
+  }
+
+  .log-btn {
+    padding: 4px 8px;
+  }
+}
 </style>

@@ -167,4 +167,12 @@ export default {
   font-weight: 600;
   color: rgba(0, 0, 0, 0.4);
 }
+
+@media only screen and (max-width: 380px) {
+  .empty-card-placeholder {
+    width: 80px;
+    height: 80px;
+    font-size: 0.7rem;
+  }
+}
 </style>

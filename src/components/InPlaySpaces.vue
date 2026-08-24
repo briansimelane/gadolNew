@@ -235,4 +235,15 @@ export default {
   background: rgba(255, 255, 255, 0.4);
   gap: 2px;
 }
+
+@media only screen and (max-width: 380px) {
+  .empty-card-placeholder {
+    width: 80px;
+    height: 80px;
+    font-size: 0.7rem;
+  }
+  .card-wrapper {
+    min-height: 85px;
+  }
+}
 </style>

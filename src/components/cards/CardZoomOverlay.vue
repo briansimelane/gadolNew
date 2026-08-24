@@ -9,7 +9,9 @@
     >
       <div class="zoom-container">
         <!-- Close Button -->
-        <button class="zoom-close-btn" @click="closeZoom" aria-label="Close zoom">&times;</button>
+        <button class="universal-close-btn" @click="closeZoom" aria-label="Close zoom" title="Close modal">
+          <i class="material-icons">close</i>
+        </button>
 
         <div class="zoom-card-wrapper">
           <ResourceCard 
@@ -628,6 +630,26 @@ export default {
   box-sizing: border-box;
 }
 
+.zoom-card-wrapper {
+  flex: 0 0 auto;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 8px 24px 8px 8px;
+  margin-right: 16px;
+  box-sizing: border-box;
+}
+
+.zoom-panel {
+  flex: 1 1 auto;
+  min-width: 0;
+  padding-left: 12px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  box-sizing: border-box;
+}
+
 @media only screen and (max-width: 600px) {
   .zoom-container {
     flex-direction: column;
@@ -636,48 +658,42 @@ export default {
     overflow-y: auto;
     padding: 16px;
   }
-}
 
-.zoom-close-btn {
-  position: absolute;
-  top: 14px;
-  right: 16px;
-  background: none;
-  border: none;
-  color: #555;
-  font-size: 26px;
-  cursor: pointer;
-  z-index: 10;
-  line-height: 1;
-}
+  .zoom-card-wrapper {
+    margin-right: 0;
+    padding-right: 8px;
+    margin-bottom: 12px;
+  }
 
-.zoom-close-btn:hover {
-  color: #000;
-}
-
-.zoom-card-wrapper {
-  flex: 0 0 auto;
-  display: flex;
-  justify-content: center;
-  align-items: flex-start;
-  padding: 8px;
-}
-
-.zoom-panel {
-  flex: 1 1 auto;
-  min-width: 0;
-  padding-left: 24px;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  box-sizing: border-box;
-}
-
-@media only screen and (max-width: 600px) {
   .zoom-panel {
     padding-left: 0;
-    padding-top: 16px;
+    padding-top: 12px;
     width: 100%;
+  }
+}
+
+@media only screen and (max-width: 480px) {
+  .zoom-backdrop {
+    padding: 6px;
+  }
+  .zoom-container {
+    padding: 12px 10px;
+    border-radius: 10px;
+    max-height: 95vh;
+  }
+  .zoom-card-wrapper {
+    max-width: 100%;
+    box-sizing: border-box;
+    padding: 4px;
+    margin-right: 0;
+  }
+  .zoom-title {
+    font-size: 16px;
+    padding-right: 24px;
+  }
+  .zoom-instructions {
+    font-size: 12px;
+    margin: 8px 0;
   }
 }
 

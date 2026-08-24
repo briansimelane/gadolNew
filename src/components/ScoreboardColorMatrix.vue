@@ -338,9 +338,9 @@ export default {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 8px;
+  gap: 4px 8px;
   font-size: 0.85rem;
-  flex-wrap: nowrap;
+  flex-wrap: wrap;
   width: 100%;
 }
 
@@ -408,5 +408,21 @@ export default {
   line-height: 1.2;
   white-space: nowrap;
   width: 100%;
+}
+
+@media only screen and (max-width: 420px) {
+  .row-resource-matrix {
+    gap: 3px;
+  }
+  .color-matrix-box {
+    padding: 3px 2px;
+  }
+  .color-matrix-box .sub-num {
+    font-size: 0.8rem;
+  }
+  .mini-card-icon, .mini-token-icon {
+    width: 12px;
+    height: 12px;
+  }
 }
 </style>

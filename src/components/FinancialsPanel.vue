@@ -15,7 +15,7 @@
             </small>
           </div>
         </div>
-        <button class="btn-flat white-text close-btn waves-effect" @click="$emit('close')" title="Return to Simulation Game">
+        <button class="universal-close-btn on-dark" @click="$emit('close')" aria-label="Close financials" title="Return to Simulation Game">
           <i class="material-icons">close</i>
         </button>
       </div>

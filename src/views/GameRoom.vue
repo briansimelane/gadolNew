@@ -266,6 +266,9 @@
     <teleport to="#modals">
       <div v-if="ModalTempResources" class="custom-modal-overlay" @click.self="ModalTempResources = false">
         <div class="custom-modal-content card white acquire-modal-card">
+          <button class="universal-close-btn" @click="ModalTempResources = false" title="Close modal">
+            <i class="material-icons">close</i>
+          </button>
           <div class="card-content">
             <span class="card-title teal-text text-darken-4 bold center">Acquire Temporary Tokens</span>
             <p class="center grey-text text-darken-1" style="font-size: 0.85rem; margin-bottom: 15px;">
@@ -351,6 +354,9 @@
     <teleport to="#modals">
       <div v-if="showClaimModal" class="custom-modal-overlay">
         <div class="custom-modal-content card white">
+          <button class="universal-close-btn" @click="cancelClaimSeat" title="Close modal">
+            <i class="material-icons">close</i>
+          </button>
           <div class="card-content">
             <span class="card-title teal-text text-darken-4 bold center" style="display: flex; flex-direction: column; align-items: center; gap: 8px; margin-bottom: 15px;">
               <i class="material-icons large teal-text text-darken-3">account_box</i>
@@ -390,6 +396,9 @@
     <teleport to="#modals">
       <div v-if="ModalGameEndPoints" class="custom-modal-overlay">
         <div class="custom-modal-content card white">
+          <button class="universal-close-btn" @click="ModalGameEndPoints = false" title="Close modal">
+            <i class="material-icons">close</i>
+          </button>
           <div class="card-content center">
             <i class="material-icons large amber-text">emoji_events</i>
             <h4 class="teal-text text-darken-4 bold" style="margin: 10px 0;">Game Over!</h4>
@@ -433,6 +442,9 @@
     <teleport to="#modals">
       <div v-if="ModalGameEndContracts" class="custom-modal-overlay">
         <div class="card-content center custom-modal-content card white">
+          <button class="universal-close-btn" @click="ModalGameEndContracts = false" title="Close modal">
+            <i class="material-icons">close</i>
+          </button>
           <div class="card-content center">
             <i class="material-icons large amber-text">emoji_events</i>
             <h4 class="teal-text text-darken-4 bold" style="margin: 10px 0;">Game Over!</h4>
@@ -480,7 +492,7 @@
             <h5 class="bold flex-header">
               <i class="material-icons left">card_membership</i> Facilitator Resource Allocation
             </h5>
-            <button class="btn-flat white-text close-modal-btn" @click="ModalFacilitatorGrant = false">
+            <button class="universal-close-btn on-dark" @click="ModalFacilitatorGrant = false" title="Close modal">
               <i class="material-icons">close</i>
             </button>
           </div>
@@ -2560,9 +2572,20 @@ export default {
   gap: 12px;
 }
 
-@media only screen and (max-width: 500px) {
+@media only screen and (max-width: 720px) {
   .resource-pairs-grid {
     grid-template-columns: 1fr;
+  }
+
+  .contracts-flex-wrapper {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+  }
+
+  .last-action-card {
+    width: 100%;
+    min-width: 0;
   }
 }
 

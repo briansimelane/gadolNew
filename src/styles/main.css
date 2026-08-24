@@ -27,7 +27,81 @@
   }
 }
 
-/* Main Styles across the pages */
+/* Universal Top-Right Modal Close Button ("X") */
+.universal-close-btn {
+  position: absolute;
+  top: 12px;
+  right: 14px;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.06);
+  border: none;
+  color: #546e7a;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 100;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: none;
+  outline: none;
+  padding: 0;
+}
+
+.universal-close-btn i,
+.universal-close-btn .material-icons {
+  font-size: 20px !important;
+  line-height: 1 !important;
+  color: inherit;
+}
+
+.universal-close-btn:hover {
+  background: #e53935;
+  color: #ffffff;
+  transform: scale(1.1);
+  box-shadow: 0 2px 8px rgba(229, 57, 53, 0.4);
+}
+
+.universal-close-btn:active {
+  transform: scale(0.95);
+}
+
+.universal-close-btn.on-dark {
+  background: rgba(255, 255, 255, 0.18);
+  color: #ffffff;
+}
+
+.universal-close-btn.on-dark:hover {
+  background: #e53935;
+  color: #ffffff;
+}
+
+/* Custom Modal Overlay & Content Box */
+.custom-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.65);
+  backdrop-filter: blur(4px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+  padding: 16px;
+  box-sizing: border-box;
+}
+
+.custom-modal-content {
+  position: relative !important;
+  max-width: 540px;
+  width: 100%;
+  border-radius: 12px;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.35);
+  box-sizing: border-box;
+}
 .Mymodal {
   background-color: #ffffff;
   position: fixed;
