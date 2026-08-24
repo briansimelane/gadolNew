@@ -2,6 +2,7 @@
   <div 
     class="resource-card-holder"
     :style="holderStyle"
+    :data-card-ref="card ? card.Ref : null"
   >
     <div 
       class="resource_card"

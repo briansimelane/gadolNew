@@ -2,6 +2,7 @@
   <div 
     class="contract-card-holder"
     :style="holderStyle"
+    :data-card-ref="card ? card.Ref : null"
   >
     <div 
       class="contract_card"

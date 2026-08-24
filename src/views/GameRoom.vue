@@ -1,5 +1,5 @@
 <template>
-  <div class="game-room-page gameRoomBg" v-if="gameData">
+  <div class="game-room-page gameRoomBg" v-if="gameData" ref="gameRoomContainerRef">
     <!-- Slim Navigation Bar -->
     <NavbarInRoom :roomId="id" />
 
@@ -647,6 +647,7 @@ import FinancialsPanel from '../components/FinancialsPanel.vue'
 import resetValues from '../assets/reset.json'
 import { updateDoc } from 'firebase/firestore'
 import M from 'materialize-css'
+import { useGameAnimations } from '../composables/useGameAnimations'
 
 export default {
   name: 'GameRoom',
@@ -670,6 +671,23 @@ export default {
     }
   },
   setup(props) {
+    const gameRoomContainerRef = ref(null)
+    const {
+      initAnimations,
+      cleanupAnimations,
+      animateTokenPurchase,
+      animateCardPurchase,
+      animateContractFulfillment
+    } = useGameAnimations()
+
+    onMounted(() => {
+      initAnimations(gameRoomContainerRef)
+    })
+
+    onUnmounted(() => {
+      cleanupAnimations()
+    })
+
     const { role, roomId, seat } = useSession()
     const { gameData, error, roomDocRef } = useRoom(props.id)
     const { zoomedCard, zoomType, zoomColor, openZoom, closeZoom } = useCardZoom()
@@ -1381,6 +1399,13 @@ export default {
 
     const BuyPermResource = (card) => {
       if (!activePlayer.value) return
+      const cardEl = document.querySelector(`[data-card-ref="${card.Ref}"]`)
+      if (cardEl) {
+        animateCardPurchase({ cardEl, cardData: card, color: card.Colour })
+      } else {
+        animateCardPurchase({ cardData: card, color: card.Colour })
+      }
+
       const scores = activePlayer.value.scores
 
       const greenTokensAdjust = Math.max(0, card.CostGreen - scores.greenPerm)
@@ -1457,6 +1482,11 @@ export default {
 
     const BuyContract = (card) => {
       if (!activePlayer.value) return
+      const contractEl = document.querySelector(`[data-card-ref="${card.Ref}"]`)
+      if (contractEl) {
+        animateContractFulfillment({ contractEl })
+      }
+
       const scores = activePlayer.value.scores
 
       if (scores.greenPerm < card.CostGreen ||
@@ -1536,6 +1566,7 @@ export default {
 
     const getTwoTokens = (colour) => {
       if (!activePlayer.value) return
+      animateTokenPurchase({ color: colour, count: 2 })
       const scores = activePlayer.value.scores
 
       let marketField = ''
@@ -1577,6 +1608,7 @@ export default {
 
     const getOneToken = (colour) => {
       if (!activePlayer.value) return
+      animateTokenPurchase({ color: colour, count: 1 })
       const scores = activePlayer.value.scores
 
       let marketField = ''
@@ -1719,7 +1751,8 @@ export default {
       handlePauseRoomTimer,
       handleResumeRoomTimer,
       handleAdjustRoomTime,
-      handleToggleRoomTimer
+      handleToggleRoomTimer,
+      gameRoomContainerRef
     }
   }
 }

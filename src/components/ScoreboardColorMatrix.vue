@@ -15,6 +15,8 @@
         :key="p.seat"
         class="team-matrix-row"
         :class="{ 'is-active-turn': (p.seat - 1) === currentTurnIndex }"
+        :data-seat="p.seat"
+        :data-is-active="(p.seat - 1) === currentTurnIndex"
         :style="{ borderLeftColor: getSeatAccentColor(p.seat) }"
       >
         <!-- Line 1: Team Name, Turn Indicator, and Joining Status -->
@@ -44,7 +46,7 @@
         <!-- Line 3: 5 Official Resource Colour Boxes with Asset Images -->
         <div class="row-line-3">
           <div class="row-resource-matrix">
-            <div v-for="c in resourceColors" :key="c.key" class="color-matrix-box" :class="c.key">
+            <div v-for="c in resourceColors" :key="c.key" class="color-matrix-box" :class="c.key" :data-color="c.key">
               <div class="color-box-values">
                 <!-- Permanent Cards Asset Image + Number -->
                 <div class="res-sub-val cards-val" title="Permanent Resource Cards">
