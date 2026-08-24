@@ -1803,7 +1803,63 @@ export default {
         return null
       }
       const log = gameData.value.gameLog
-      return log[log.length - 1] || null
+      const lastEntry = log[log.length - 1]
+
+      let targetSeat = lastEntry.seat
+      let targetName = lastEntry.name
+
+      // Collect recent log entries for this latest turn sequence
+      const recentTurnEntries = []
+      for (let i = log.length - 1; i >= 0; i--) {
+        const item = log[i]
+        if (item.seat === targetSeat) {
+          recentTurnEntries.unshift(item)
+        } else if (recentTurnEntries.length > 0) {
+          break
+        }
+      }
+
+      if (recentTurnEntries.length === 0) return lastEntry
+
+      const actionEntries = recentTurnEntries.filter(e => e.type !== 'TURN_END')
+      const hasEndedTurn = recentTurnEntries.some(e => e.type === 'TURN_END')
+
+      if (actionEntries.length === 0) {
+        return {
+          seat: targetSeat,
+          name: targetName,
+          text: 'ended turn',
+          ts: lastEntry.ts
+        }
+      }
+
+      // Format actions cleanly
+      let actionText = ''
+      if (actionEntries.length === 1) {
+        actionText = actionEntries[0].text
+      } else {
+        // Handle multiple single-token acquisitions or actions
+        const isAllSingleTokens = actionEntries.every(e => e.type === 'TOKEN_1')
+        if (isAllSingleTokens) {
+          const colors = actionEntries.map(e => (e.details?.colour || '').toUpperCase()).filter(Boolean)
+          if (colors.length > 0) {
+            actionText = `bought ${colors.length} tokens (${colors.join(', ')})`
+          } else {
+            actionText = actionEntries.map(e => e.text.replace(/\s*\(\d\/\d\)/, '')).join(', ')
+          }
+        } else {
+          actionText = actionEntries.map(e => e.text.replace(/\s*\(\d\/\d\)/, '')).join(' & ')
+        }
+      }
+
+      const finalText = hasEndedTurn ? `${actionText} and ended turn` : actionText
+
+      return {
+        seat: targetSeat,
+        name: targetName,
+        text: finalText,
+        ts: lastEntry.ts
+      }
     })
 
     const lastActionKey = ref(0)
@@ -2119,8 +2175,8 @@ export default {
   line-height: 1.25;
   word-break: break-word;
   display: -webkit-box;
-  -webkit-line-clamp: 2;
-  line-clamp: 2;
+  -webkit-line-clamp: 3;
+  line-clamp: 3;
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
