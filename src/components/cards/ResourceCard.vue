@@ -13,7 +13,7 @@
         :class="{ greyOut: dimmed }"
         @click="onClick"
       >
-        <div class="productsValue" v-if="card.Production > 0">{{ card.Production }}</div>
+        <div class="productsValue" v-if="card.Production !== undefined && card.Production !== null">{{ card.Production }}</div>
         <div class="redCost" v-if="card.CostRed > 0">{{ card.CostRed }}</div>
         <div class="greenCost" v-if="card.CostGreen > 0">{{ card.CostGreen }}</div>
         <div class="yellowCost" v-if="card.CostYellow > 0">{{ card.CostYellow }}</div>
@@ -121,9 +121,8 @@ export default {
 
 .manager-badge-overlay {
   position: absolute;
-  top: 50%;
-  left: -14px;
-  transform: translateY(-50%);
+  bottom: -4px;
+  left: -10px;
   min-width: 36px;
   height: 36px;
   padding: 4px 8px;
@@ -141,7 +140,7 @@ export default {
 }
 
 .manager-badge-overlay:hover {
-  transform: translateY(-50%) scale(1.1);
+  transform: scale(1.1);
 }
 
 .meeple-icon {

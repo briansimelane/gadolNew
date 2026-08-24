@@ -469,7 +469,7 @@ export function useGameAnimations() {
     }
 
     const deltaX = targetRect.left - 4 - (sourceRect.left + sourceRect.width / 2)
-    const deltaY = targetRect.top + targetRect.height / 2 - (sourceRect.top + sourceRect.height / 2)
+    const deltaY = targetRect.bottom - 16 - (sourceRect.top + sourceRect.height / 2)
 
     meeples.forEach((m, idx) => {
       gsap.to(m, {
@@ -523,7 +523,7 @@ export function useGameAnimations() {
       meeple.style.cssText = `
         position: fixed;
         left: ${sourceRect.left - 4 - 16}px;
-        top: ${sourceRect.top + sourceRect.height / 2 - 16}px;
+        top: ${sourceRect.bottom - 32}px;
         width: 32px;
         height: 32px;
         color: ${teamColor};

@@ -134,130 +134,159 @@
                 <p>No active games. Create one using the form on the left.</p>
               </div>
 
-              <ul v-else class="collapsible popout">
-                <li v-for="game in games" :key="game.id">
-                  <div class="collapsible-header teal lighten-5 teal-text text-darken-4" style="display: flex; align-items: center; justify-content: space-between;">
-                    <div style="display: flex; align-items: center; gap: 10px;">
-                      <i class="material-icons">room</i>
-                      <span class="bold">{{ game.name }}</span>
-                      <span class="chip white">{{ game.numPlayers }} Players</span>
-                      <span class="chip white">{{ game.rules }} rules</span>
-                    </div>
-                    <span class="grey-text text-darken-1" style="font-size: 0.8rem;">{{ formatDate(game.createdAt) }}</span>
-                  </div>
-                  <div class="collapsible-body white">
-                    <!-- Facilitator & Spectator Codes -->
-                    <div style="display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 15px;">
-                      <div style="flex: 1; min-width: 240px; display: flex; align-items: center; justify-content: space-between; background: #f5f5f5; padding: 10px; border-radius: 4px;">
-                        <span><strong>Facilitator Code:</strong> <code class="code-badge">{{ game.facilitatorCode }}</code></span>
-                        <button class="btn-small waves-effect waves-light teal darken-2" @click="copyText(game.facilitatorCode)">
-                          <i class="material-icons left">content_copy</i>Copy
-                        </button>
-                      </div>
-                      <div style="flex: 1; min-width: 240px; display: flex; align-items: center; justify-content: space-between; background: #e0f2f1; padding: 10px; border-radius: 4px;">
-                        <span><strong>Spectator Code:</strong> <code class="code-badge">{{ game.spectatorCode || 'SPEC-' + game.id.substring(0,4).toUpperCase() }}</code></span>
-                        <button class="btn-small waves-effect waves-light teal darken-2" @click="copyText(game.spectatorCode || 'SPEC-' + game.id.substring(0,4).toUpperCase())">
-                          <i class="material-icons left">content_copy</i>Copy
-                        </button>
-                      </div>
-                    </div>
-
-                    <!-- Team Codes Table -->
-                    <table class="striped responsive-table">
-                      <thead>
-                        <tr>
-                          <th>Team</th>
-                          <th>Access Code</th>
-                          <th>Team Status</th>
-                          <th class="center">Actions</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        <tr v-for="seatNum in parseInt(game.numPlayers)" :key="seatNum">
-                          <td><strong>Team {{ seatNum }}</strong></td>
-                          <td><code class="code-badge">{{ game.seatCodes[seatNum] }}</code></td>
-                          <td>
-                            <span v-if="game.players[seatNum - 1] && game.players[seatNum - 1].joined" class="green-text text-darken-2 bold">
-                              Joined: {{ game.players[seatNum - 1].name }}
-                            </span>
-                            <span v-else class="grey-text">Waiting...</span>
-                          </td>
-                          <td class="center">
-                            <button class="btn-flat" @click="copyText(game.seatCodes[seatNum])" title="Copy seat code">
-                              <i class="material-icons teal-text">content_copy</i>
+              <div v-else class="table-responsive">
+                <table class="striped highlight active-games-table">
+                  <thead>
+                    <tr>
+                      <th>Name of game</th>
+                      <th>Rules</th>
+                      <th>Number of players</th>
+                      <th>Date</th>
+                      <th class="center">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <template v-for="game in games" :key="game.id">
+                      <tr class="game-summary-row">
+                        <td>
+                          <strong class="teal-text text-darken-4" style="font-size: 0.95rem;">{{ game.name }}</strong>
+                        </td>
+                        <td>
+                          <span class="rule-badge">{{ (game.rules || 'standard').toUpperCase() }}</span>
+                        </td>
+                        <td>
+                          <span class="grey-text text-darken-3 bold">{{ game.numPlayers }} Players</span>
+                        </td>
+                        <td>
+                          <span class="grey-text text-darken-1" style="font-size: 0.85rem;">{{ formatDate(game.createdAt) }}</span>
+                        </td>
+                        <td class="center">
+                          <div style="display: inline-flex; gap: 8px; align-items: center; justify-content: center;">
+                            <button class="btn-small waves-effect waves-light teal darken-3 bold" @click="handleOpenGame(game.id)" title="Join / Open Game Room">
+                              <i class="material-icons left tiny" style="margin-right: 4px;">login</i>Join
                             </button>
-                            <button class="btn-flat" @click="handleRegenerateCode(game.id, seatNum)" title="Regenerate code">
-                              <i class="material-icons orange-text">refresh</i>
+                            <button class="btn-small waves-effect waves-light grey lighten-2 black-text" @click="toggleGameDetails(game.id)" :title="expandedGameIds.includes(game.id) ? 'Hide details' : 'Manage codes & controls'">
+                              <i class="material-icons tiny">{{ expandedGameIds.includes(game.id) ? 'expand_less' : 'expand_more' }}</i>
                             </button>
-                          </td>
-                        </tr>
-                      </tbody>
-                    </table>
+                          </div>
+                        </td>
+                      </tr>
 
-                    <!-- Timed Game Quick Time & Timer Controls -->
-                    <div v-if="game.timed === 'yes' || game.timed === true" style="margin-top: 15px; padding: 12px; background: #fff3e0; border-left: 4px solid #ff9800; border-radius: 4px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;">
-                      <div>
-                        <strong style="color: #e65100; display: flex; align-items: center; gap: 4px;">
-                          <i class="material-icons tiny">timer</i> Timed Game ({{ game.turnDurationSeconds || 60 }}s / turn)
-                        </strong>
-                        <span style="font-size: 0.85rem; color: #ef6c00;">
-                          Status: <strong>{{ getTimerStatusLabel(game) }}</strong>
-                        </span>
-                      </div>
-                      <div style="display: flex; flex-wrap: wrap; gap: 6px; align-items: center;">
-                        <!-- Primary Timer Control -->
-                        <button 
-                          v-if="!game.gameStarted && (game.timerStatus === 'paused' || game.timerStatus === 'not_started' || !game.timerStatus)" 
-                          class="btn-small waves-effect waves-light green darken-2 bold" 
-                          @click="handleStartTimer(game)"
-                        >
-                          <i class="material-icons left">play_arrow</i>Start Game
-                        </button>
-                        <button 
-                          v-else-if="game.timerStatus === 'running'" 
-                          class="btn-small waves-effect waves-light amber darken-3" 
-                          @click="handlePauseTimer(game)"
-                        >
-                          <i class="material-icons left">pause</i>Pause Timer
-                        </button>
-                        <button 
-                          v-else-if="game.timerStatus === 'paused'" 
-                          class="btn-small waves-effect waves-light green darken-3" 
-                          @click="handleResumeTimer(game)"
-                        >
-                          <i class="material-icons left">play_arrow</i>Resume Timer
-                        </button>
+                      <!-- Expanded Details Drawer -->
+                      <tr v-if="expandedGameIds.includes(game.id)" class="game-details-row">
+                        <td colspan="5" style="background: #fafafa; padding: 16px 20px; border-bottom: 2px solid #b2dfdb;">
+                          <!-- Facilitator & Spectator Codes -->
+                          <div style="display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 15px;">
+                            <div style="flex: 1; min-width: 220px; display: flex; align-items: center; justify-content: space-between; background: #ffffff; border: 1px solid #e0e0e0; padding: 6px 12px; border-radius: 6px;">
+                              <span style="font-size: 0.85rem;"><strong>Facilitator Code:</strong> <code class="code-badge-sm">{{ game.facilitatorCode }}</code></span>
+                              <button class="btn-small waves-effect waves-light teal darken-2 btn-compact-code" @click="copyText(game.facilitatorCode)">
+                                <i class="material-icons left tiny" style="margin-right: 2px;">content_copy</i>Copy
+                              </button>
+                            </div>
+                            <div style="flex: 1; min-width: 220px; display: flex; align-items: center; justify-content: space-between; background: #e0f2f1; border: 1px solid #b2dfdb; padding: 6px 12px; border-radius: 6px;">
+                              <span style="font-size: 0.85rem;"><strong>Spectator Code:</strong> <code class="code-badge-sm">{{ game.spectatorCode || 'SPEC-' + game.id.substring(0,4).toUpperCase() }}</code></span>
+                              <button class="btn-small waves-effect waves-light teal darken-2 btn-compact-code" @click="copyText(game.spectatorCode || 'SPEC-' + game.id.substring(0,4).toUpperCase())">
+                                <i class="material-icons left tiny" style="margin-right: 2px;">content_copy</i>Copy
+                              </button>
+                            </div>
+                          </div>
 
-                        <!-- Adjust Time Buttons (+30s, +60s, -30s, -60s) -->
-                        <div style="display: inline-flex; gap: 4px; border-left: 1px solid rgba(255,152,0,0.4); padding-left: 6px; margin-left: 4px;">
-                          <button class="btn-small waves-effect waves-light orange darken-2" @click="handleAdjustTurnTime(game, 30)" title="Add 30 seconds">
-                            +30s
-                          </button>
-                          <button class="btn-small waves-effect waves-light orange darken-4" @click="handleAdjustTurnTime(game, 60)" title="Add 60 seconds">
-                            +60s
-                          </button>
-                          <button class="btn-small waves-effect waves-light blue-grey darken-2" @click="handleAdjustTurnTime(game, -30)" title="Remove 30 seconds">
-                            -30s
-                          </button>
-                          <button class="btn-small waves-effect waves-light blue-grey darken-3" @click="handleAdjustTurnTime(game, -60)" title="Remove 60 seconds">
-                            -60s
-                          </button>
-                        </div>
-                      </div>
-                    </div>
+                          <!-- Team Codes Table -->
+                          <table class="striped responsive-table compact-inner-table" style="background: #ffffff; border-radius: 6px; overflow: hidden; border: 1px solid #e0e0e0;">
+                            <thead>
+                              <tr class="grey lighten-4">
+                                <th>Team</th>
+                                <th>Access Code</th>
+                                <th>Team Status</th>
+                                <th class="center">Actions</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              <tr v-for="seatNum in parseInt(game.numPlayers)" :key="seatNum">
+                                <td><strong>Team {{ seatNum }}</strong></td>
+                                <td><code class="code-badge-sm">{{ game.seatCodes[seatNum] }}</code></td>
+                                <td>
+                                  <span v-if="game.players[seatNum - 1] && game.players[seatNum - 1].joined" class="green-text text-darken-2 bold">
+                                    Joined: {{ game.players[seatNum - 1].name }}
+                                  </span>
+                                  <span v-else class="grey-text">Waiting...</span>
+                                </td>
+                                <td class="center">
+                                  <button class="btn-flat btn-small" @click="copyText(game.seatCodes[seatNum])" title="Copy seat code">
+                                    <i class="material-icons teal-text">content_copy</i>
+                                  </button>
+                                  <button class="btn-flat btn-small" @click="handleRegenerateCode(game.id, seatNum)" title="Regenerate code">
+                                    <i class="material-icons orange-text">refresh</i>
+                                  </button>
+                                </td>
+                              </tr>
+                            </tbody>
+                          </table>
 
-                    <!-- Open and Delete Actions -->
-                    <div class="right-align" style="margin-top: 20px; display: flex; justify-content: flex-end; gap: 10px;">
-                      <button class="btn waves-effect waves-light red darken-3" @click="handleDeleteGame(game.id, game.name)">
-                        <i class="material-icons left">delete</i>Delete Game
-                      </button>
-                      <button class="btn waves-effect waves-light teal darken-4" @click="handleOpenGame(game.id)">
-                        <i class="material-icons left">launch</i>Open Game Room
-                      </button>
-                    </div>
-                  </div>
-                </li>
-              </ul>
+                          <!-- Timed Game Quick Time & Timer Controls -->
+                          <div v-if="game.timed === 'yes' || game.timed === true" style="margin-top: 15px; padding: 12px 16px; background: #fff3e0; border-left: 4px solid #ff9800; border-radius: 6px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;">
+                            <div>
+                              <strong style="color: #e65100; display: flex; align-items: center; gap: 4px;">
+                                <i class="material-icons tiny">timer</i> Timed Game ({{ game.turnDurationSeconds || 60 }}s / turn)
+                              </strong>
+                              <span style="font-size: 0.85rem; color: #ef6c00;">
+                                Status: <strong>{{ getTimerStatusLabel(game) }}</strong>
+                              </span>
+                            </div>
+                            <div style="display: flex; flex-wrap: wrap; gap: 6px; align-items: center;">
+                              <!-- Primary Timer Control -->
+                              <button 
+                                v-if="!game.gameStarted && (game.timerStatus === 'paused' || game.timerStatus === 'not_started' || !game.timerStatus)" 
+                                class="btn-small waves-effect waves-light green darken-2 bold" 
+                                @click="handleStartTimer(game)"
+                              >
+                                <i class="material-icons left tiny">play_arrow</i>Start Game
+                              </button>
+                              <button 
+                                v-else-if="game.timerStatus === 'running'" 
+                                class="btn-small waves-effect waves-light amber darken-3" 
+                                @click="handlePauseTimer(game)"
+                              >
+                                <i class="material-icons left tiny">pause</i>Pause Timer
+                              </button>
+                              <button 
+                                v-else-if="game.timerStatus === 'paused'" 
+                                class="btn-small waves-effect waves-light green darken-3" 
+                                @click="handleResumeTimer(game)"
+                              >
+                                <i class="material-icons left tiny">play_arrow</i>Resume Timer
+                              </button>
+
+                              <!-- Adjust Time Buttons (+30s, +60s, -30s, -60s) -->
+                              <div style="display: inline-flex; gap: 4px; border-left: 1px solid rgba(255,152,0,0.4); padding-left: 6px; margin-left: 4px;">
+                                <button class="btn-small waves-effect waves-light orange darken-2" @click="handleAdjustTurnTime(game, 30)" title="Add 30 seconds">
+                                  +30s
+                                </button>
+                                <button class="btn-small waves-effect waves-light orange darken-4" @click="handleAdjustTurnTime(game, 60)" title="Add 60 seconds">
+                                  +60s
+                                </button>
+                                <button class="btn-small waves-effect waves-light blue-grey darken-2" @click="handleAdjustTurnTime(game, -30)" title="Remove 30 seconds">
+                                  -30s
+                                </button>
+                                <button class="btn-small waves-effect waves-light blue-grey darken-3" @click="handleAdjustTurnTime(game, -60)" title="Remove 60 seconds">
+                                  -60s
+                                </button>
+                              </div>
+                            </div>
+                          </div>
+
+                          <!-- Delete Action -->
+                          <div class="right-align" style="margin-top: 15px;">
+                            <button class="btn-small waves-effect waves-light red darken-3" @click="handleDeleteGame(game.id, game.name)">
+                              <i class="material-icons left tiny">delete</i>Delete Game
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    </template>
+                  </tbody>
+                </table>
+              </div>
 
             </div>
           </div>
@@ -550,6 +579,15 @@ export default {
       return date.toLocaleDateString() + ' ' + date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
     }
 
+    const expandedGameIds = ref([])
+    const toggleGameDetails = (gameId) => {
+      if (expandedGameIds.value.includes(gameId)) {
+        expandedGameIds.value = expandedGameIds.value.filter(id => id !== gameId)
+      } else {
+        expandedGameIds.value.push(gameId)
+      }
+    }
+
     return {
       roomName,
       numberPlayers,
@@ -560,6 +598,8 @@ export default {
       loadingGames,
       games,
       newlyCreatedGame,
+      expandedGameIds,
+      toggleGameDetails,
       handleCreateGame,
       getTimerStatusLabel,
       handleStartTimer,
@@ -597,5 +637,54 @@ export default {
   font-family: monospace;
   font-size: 1.1rem;
   font-weight: bold;
+}
+.code-badge-sm {
+  background: #eeeeee;
+  color: #c62828;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-family: monospace;
+  font-size: 0.9rem;
+  font-weight: bold;
+}
+.btn-compact-code {
+  height: 26px !important;
+  line-height: 26px !important;
+  padding: 0 8px !important;
+  font-size: 0.75rem !important;
+}
+.active-games-table {
+  width: 100%;
+  margin-top: 10px;
+  border-collapse: separate;
+  border-spacing: 0;
+}
+.active-games-table th {
+  font-weight: 700;
+  color: #004d40;
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border-bottom: 2px solid #b2dfdb;
+  padding: 10px 12px;
+}
+.active-games-table td {
+  padding: 10px 12px;
+  vertical-align: middle;
+}
+.game-summary-row:hover {
+  background-color: #f2f9f9;
+}
+.rule-badge {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 12px;
+  background-color: #e0f2f1;
+  color: #00695c;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+.compact-inner-table td, .compact-inner-table th {
+  padding: 6px 12px !important;
 }
 </style>
