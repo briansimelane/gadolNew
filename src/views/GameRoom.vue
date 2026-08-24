@@ -151,6 +151,12 @@
             :interactive="true"
             @select="c => handleCardClick(c, 'resource', 'black')"
           />
+          <InPlaySpaces 
+            :inPlayA="gameData.z12inPlayA || []" 
+            :inPlayB="gameData.z13inPlayB || []" 
+            :isMyTurn="isMyTurn" 
+            @selectCard="({ card, type, color, space, stack }) => handleCardClick(card, type, color, space, stack)" 
+          />
         </div>
 
         <!-- Upcoming Cards Collapsible -->
@@ -245,6 +251,7 @@
       :gameData="gameData"
       @action="handleZoomAction" 
       @allocateManagers="handleAllocateManagers"
+      @moveCard="handleMoveCard"
     />
 
     <!-- Game Log Slide-Over Panel -->
@@ -648,6 +655,7 @@ import ResourceCard from '../components/cards/ResourceCard.vue'
 import ContractCard from '../components/cards/ContractCard.vue'
 import CardZoomOverlay from '../components/cards/CardZoomOverlay.vue'
 import FinancialsPanel from '../components/FinancialsPanel.vue'
+import InPlaySpaces from '../components/InPlaySpaces.vue'
 import resetValues from '../assets/reset.json'
 import { updateDoc } from 'firebase/firestore'
 import M from 'materialize-css'
@@ -666,7 +674,8 @@ export default {
     FinancialsPanel,
     ResourceCard,
     ContractCard,
-    CardZoomOverlay
+    CardZoomOverlay,
+    InPlaySpaces
   },
   props: {
     id: {
@@ -683,7 +692,9 @@ export default {
       animateCardPurchase,
       animateContractFulfillment,
       animateManagerAllocation,
-      animateManagerReturn
+      animateManagerReturn,
+      animateMoveToInPlay,
+      animateCardDiscard
     } = useGameAnimations()
 
     onMounted(() => {
@@ -1341,29 +1352,37 @@ export default {
       const scores = activePlayer.value.scores
       const card = zoomedCard.value
 
-      if (zoomType.value === 'resource') {
+      const type = zoomType.value
+      const isContractCard = type === 'contract' || (type === 'inPlay' && (card.inPlayMeta?.kind === 'contract' || card.Value !== undefined || card.Colour === 'White'))
+
+      if (isContractCard) {
         return (
-          card.CostGreen <= scores.greenTemp + scores.greenPerm &&
-          card.CostRed <= scores.redTemp + scores.redPerm &&  
-          card.CostYellow <= scores.yellowTemp + scores.yellowPerm &&  
-          card.CostPurple <= scores.purpleTemp + scores.purplePerm &&
-          card.CostBlack <= scores.blackTemp + scores.blackPerm
+          (card.CostGreen || 0) <= (scores.greenPerm || 0) &&
+          (card.CostRed || 0) <= (scores.redPerm || 0) &&  
+          (card.CostYellow || 0) <= (scores.yellowPerm || 0) &&  
+          (card.CostPurple || 0) <= (scores.purplePerm || 0) &&
+          (card.CostBlack || 0) <= (scores.blackPerm || 0) &&
+          (card.Production || 0) <= (scores.production || 0)
         )
-      } else if (zoomType.value === 'contract') {
+      } else {
         return (
-          card.CostGreen <= scores.greenPerm &&
-          card.CostRed <= scores.redPerm &&  
-          card.CostYellow <= scores.yellowPerm &&  
-          card.CostPurple <= scores.purplePerm &&
-          card.CostBlack <= scores.blackPerm &&
-          card.Production <= scores.production
+          (card.CostGreen || 0) <= (scores.greenTemp || 0) + (scores.greenPerm || 0) &&
+          (card.CostRed || 0) <= (scores.redTemp || 0) + (scores.redPerm || 0) &&  
+          (card.CostYellow || 0) <= (scores.yellowTemp || 0) + (scores.yellowPerm || 0) &&  
+          (card.CostPurple || 0) <= (scores.purpleTemp || 0) + (scores.purplePerm || 0) &&
+          (card.CostBlack || 0) <= (scores.blackTemp || 0) + (scores.blackPerm || 0)
         )
       }
-      return false
     })
 
-    const handleCardClick = (card, type, color = null) => {
-      openZoom(card, type, color)
+    const handleCardClick = (card, type, color = null, targetSpace = null, stack = null) => {
+      if (!card) return
+      const cardObj = {
+        ...card,
+        inPlaySpaceTarget: targetSpace || card.inPlaySpaceTarget || 'A',
+        inPlayStack: stack ? JSON.parse(JSON.stringify(stack)) : (card.inPlayStack || null)
+      }
+      openZoom(cardObj, type, color)
     }
 
     const handleAcquireClick = () => {
@@ -1698,12 +1717,338 @@ export default {
       })
     }
 
-    const handleZoomAction = ({ card, type }) => {
+    const buyCardFromInPlay = (card, target) => {
+      if (!isMyTurn.value || !activePlayer.value) {
+        NotActivePlayer()
+        return
+      }
+
+      const targetKey = target === 'A' ? 'z12inPlayA' : 'z13inPlayB'
+      const stack = JSON.parse(JSON.stringify(gameData.value[targetKey] || []))
+      const idx = stack.findIndex(c => c.Ref === card.Ref)
+      if (idx === -1) {
+        M.toast({ html: `Card not found in Space ${target}` })
+        return
+      }
+
+      const [targetCard] = stack.splice(idx, 1)
+      delete targetCard.inPlayStack
+      delete targetCard.inPlaySpaceTarget
+
+      stack.forEach(c => {
+        delete c.inPlayStack
+        delete c.inPlaySpaceTarget
+      })
+
+      const isContractCard = targetCard.inPlayMeta?.kind === 'contract' || targetCard.Value !== undefined || targetCard.Colour === 'White'
+
+      const updatedPlayers = JSON.parse(JSON.stringify(gameData.value.players))
+      const pCopy = updatedPlayers[gameData.value.currentPlayer]
+
+      if (isContractCard) {
+        // Contract card purchase logic
+        if ((targetCard.CostGreen || 0) > pCopy.scores.greenPerm ||
+            (targetCard.CostRed || 0) > pCopy.scores.redPerm ||
+            (targetCard.CostYellow || 0) > pCopy.scores.yellowPerm ||
+            (targetCard.CostPurple || 0) > pCopy.scores.purplePerm ||
+            (targetCard.CostBlack || 0) > pCopy.scores.blackPerm ||
+            (targetCard.Production || 0) > pCopy.scores.production) {
+          M.toast({ html: 'Insufficient permanent resources or production capacity!' })
+          return
+        }
+
+        pCopy.scores.value += targetCard.Value
+        pCopy.scores.production -= (targetCard.Production || 0)
+        pCopy.scores.cash += (targetCard.Cash || 0)
+        pCopy.scores.debtors += (targetCard.Debtors || 0)
+
+        pCopy.scores.greenPerm -= (targetCard.CostGreen || 0)
+        pCopy.scores.redPerm -= (targetCard.CostRed || 0)
+        pCopy.scores.yellowPerm -= (targetCard.CostYellow || 0)
+        pCopy.scores.purplePerm -= (targetCard.CostPurple || 0)
+        pCopy.scores.blackPerm -= (targetCard.CostBlack || 0)
+
+        pCopy.scores.costs += ((targetCard.Production || 0) + (targetCard.CostGreen || 0) + (targetCard.CostRed || 0) + (targetCard.CostYellow || 0) + (targetCard.CostPurple || 0) + (targetCard.CostBlack || 0))
+
+        pCopy.contractsCompleted = [
+          ...(pCopy.contractsCompleted || []),
+          { ...targetCard, completedOnTurn: gameData.value?.turnNumber || 1 }
+        ]
+
+        const text = `completed a contract from In Play Space ${target} worth ${targetCard.Value} points`
+        const actionText = `${pCopy.name} ${text}`
+        const entry = logEntry('BUY_CONTRACT', text, { ref: targetCard.Ref, value: targetCard.Value, fromInPlay: true, target })
+        const updatedLog = getUpdatedLog(entry)
+
+        const sourceEl = document.querySelector(`[data-card-ref="${targetCard.Ref}"]`) || document.querySelector('.zoom-backdrop .resource_card, .zoom-backdrop .contract_card')
+        animateContractFulfillment({ contractEl: sourceEl, cardData: targetCard })
+
+        updateDoc(roomDocRef, {
+          players: updatedPlayers,
+          [targetKey]: stack,
+          lastAction: actionText,
+          gameLog: updatedLog
+        }).then(() => {
+          M.toast({ html: `Completed Contract from In Play Space ${target}!` })
+          nextPlayer()
+        }).catch(err => {
+          console.error('Error completing contract from in play:', err)
+          M.toast({ html: 'Failed to complete contract. Please try again.' })
+        })
+      } else {
+        // Resource card purchase logic
+        const scores = pCopy.scores
+
+        if ((targetCard.CostGreen || 0) > (scores.greenTemp || 0) + (scores.greenPerm || 0) ||
+            (targetCard.CostRed || 0) > (scores.redTemp || 0) + (scores.redPerm || 0) ||
+            (targetCard.CostYellow || 0) > (scores.yellowTemp || 0) + (scores.yellowPerm || 0) ||
+            (targetCard.CostPurple || 0) > (scores.purpleTemp || 0) + (scores.purplePerm || 0) ||
+            (targetCard.CostBlack || 0) > (scores.blackTemp || 0) + (scores.blackPerm || 0)) {
+          M.toast({ html: 'Not enough resources to buy this card!' })
+          return
+        }
+
+        const greenTokensAdjust = Math.max(0, (targetCard.CostGreen || 0) - (scores.greenPerm || 0))
+        const redTokensAdjust = Math.max(0, (targetCard.CostRed || 0) - (scores.redPerm || 0))
+        const yellowTokensAdjust = Math.max(0, (targetCard.CostYellow || 0) - (scores.yellowPerm || 0))
+        const purpleTokensAdjust = Math.max(0, (targetCard.CostPurple || 0) - (scores.purplePerm || 0))
+        const blackTokensAdjust = Math.max(0, (targetCard.CostBlack || 0) - (scores.blackPerm || 0))
+        const totalTempSpent = greenTokensAdjust + redTokensAdjust + yellowTokensAdjust + purpleTokensAdjust + blackTokensAdjust
+
+        const colorLower = (targetCard.inPlayMeta?.colour || targetCard.Colour || 'green').toLowerCase()
+        pCopy.scores.production += (targetCard.Production || 0)
+
+        if (colorLower === 'green') pCopy.scores.greenPerm += 1
+        else if (colorLower === 'yellow') pCopy.scores.yellowPerm += 1
+        else if (colorLower === 'red') pCopy.scores.redPerm += 1
+        else if (colorLower === 'purple') pCopy.scores.purplePerm += 1
+        else if (colorLower === 'black') pCopy.scores.blackPerm += 1
+
+        pCopy.scores.greenTemp -= greenTokensAdjust
+        pCopy.scores.redTemp -= redTokensAdjust
+        pCopy.scores.yellowTemp -= yellowTokensAdjust
+        pCopy.scores.purpleTemp -= purpleTokensAdjust
+        pCopy.scores.blackTemp -= blackTokensAdjust
+
+        pCopy.scores.cash += totalTempSpent
+
+        const categoryMap = {
+          green: 'Property',
+          yellow: 'Equipment',
+          red: 'People',
+          purple: 'Operations',
+          black: 'Outsource'
+        }
+        const categoryName = categoryMap[colorLower] || colorLower.toUpperCase()
+        let text = `bought a ${categoryName} card from In Play Space ${target} (+${targetCard.Production || 0} prod)`
+        if (totalTempSpent > 0) {
+          text += `, paying with ${totalTempSpent} temp token${totalTempSpent > 1 ? 's' : ''}`
+        }
+        const actionText = `${pCopy.name} ${text}`
+        const entry = logEntry('BUY_PERM', text, { colour: categoryName, ref: targetCard.Ref, fromInPlay: true, target })
+        const updatedLog = getUpdatedLog(entry)
+
+        const sourceEl = document.querySelector(`[data-card-ref="${targetCard.Ref}"]`) || document.querySelector('.zoom-backdrop .resource_card, .zoom-backdrop .contract_card')
+        animateCardPurchase({ cardEl: sourceEl, cardData: targetCard, color: colorLower })
+
+        updateDoc(roomDocRef, {
+          z08marketGreenTokens: gameData.value.z08marketGreenTokens + greenTokensAdjust,
+          z07marketRedTokens: gameData.value.z07marketRedTokens + redTokensAdjust,
+          z09marketYellowTokens: gameData.value.z09marketYellowTokens + yellowTokensAdjust,
+          z10marketPurpleTokens: gameData.value.z10marketPurpleTokens + purpleTokensAdjust,
+          z11marketBlackTokens: gameData.value.z11marketBlackTokens + blackTokensAdjust,
+          players: updatedPlayers,
+          [targetKey]: stack,
+          lastAction: actionText,
+          gameLog: updatedLog
+        }).then(() => {
+          M.toast({ html: `Bought ${categoryName} card from In Play Space ${target}` })
+          nextPlayer()
+        }).catch(err => {
+          console.error('Error buying in play card:', err)
+          M.toast({ html: 'Failed to buy card. Please try again.' })
+        })
+      }
+    }
+
+    const handleZoomAction = ({ card, type, target }) => {
       if (type === 'resource') {
         BuyPermResource(card)
       } else if (type === 'contract') {
         BuyContract(card)
+      } else if (type === 'inPlayBuy') {
+        buyCardFromInPlay(card, target || card?.inPlaySpaceTarget || 'A')
+      } else if (type === 'discard') {
+        handleDiscardCard(target || card?.inPlaySpaceTarget || 'A')
       }
+    }
+
+    const handleMoveCard = ({ card, kind, colour, target }) => {
+      if (!isMyTurn.value || !activePlayer.value) {
+        NotActivePlayer()
+        return
+      }
+
+      if (!target || (target !== 'A' && target !== 'B')) {
+        M.toast({ html: 'Select Space A or Space B to move card' })
+        return
+      }
+
+      // Check Secret Contract guard
+      const pCopySeat = activePlayer.value.seat
+      if (activePlayer.value.secretContractCard && activePlayer.value.secretContractCard.Ref === card.Ref) {
+        M.toast({ html: 'Team Secret Contract cannot be moved.' })
+        return
+      }
+
+      // Check Reserved Cards guard
+      const currentAllocatedCount = card.allocatedManagersCount || 0
+      const reservedBySeat = card.reservedBySeat
+
+      if (currentAllocatedCount > 0 && reservedBySeat !== pCopySeat) {
+        M.toast({ html: `This card is reserved by Team ${reservedBySeat} and cannot be moved.` })
+        return
+      }
+
+      // Determine source field key
+      const colLower = (colour || card.Colour || '').toLowerCase()
+      let key = ''
+      if (kind === 'contract' || colLower === 'white') {
+        key = 'z00contractCards'
+      } else if (colLower === 'green') {
+        key = 'z01greenCards'
+      } else if (colLower === 'yellow') {
+        key = 'z02yellowCards'
+      } else if (colLower === 'red') {
+        key = 'z03redCards'
+      } else if (colLower === 'purple') {
+        key = 'z04purpleCards'
+      } else if (colLower === 'black') {
+        key = 'z05blackCards'
+      } else {
+        key = 'z00contractCards'
+      }
+
+      const deck = [...(gameData.value[key] || [])]
+      const idx = deck.findIndex(c => c.Ref === card.Ref)
+      if (idx === -1) {
+        M.toast({ html: 'Card not found on board.' })
+        return
+      }
+
+      const [moved] = deck.splice(idx, 1)
+
+      const updatedPlayers = JSON.parse(JSON.stringify(gameData.value.players))
+      const pCopy = updatedPlayers[gameData.value.currentPlayer]
+
+      // Reclaim active team's managers if reserved by active team
+      if (currentAllocatedCount > 0 && reservedBySeat === pCopy.seat) {
+        const countToReturn = currentAllocatedCount
+        pCopy.scores.managersAvailable = Math.min(4, (pCopy.scores.managersAvailable ?? 0) + countToReturn)
+        animateManagerReturn({ cardRef: card.Ref, seat: pCopy.seat, count: countToReturn })
+      }
+
+      const movedCopy = {
+        ...moved,
+        reservedBySeat: null,
+        allocatedManagersCount: 0,
+        inPlayMeta: {
+          fromField: key,
+          kind: kind || (key === 'z00contractCards' ? 'contract' : 'resource'),
+          colour: card.Colour || colour || 'White',
+          movedBySeat: pCopy.seat,
+          movedOnTurn: gameData.value.turnNumber || 1
+        }
+      }
+
+      const targetKey = target === 'A' ? 'z12inPlayA' : 'z13inPlayB'
+      const stack = JSON.parse(JSON.stringify(gameData.value[targetKey] || []))
+      stack.push(movedCopy)
+
+      const categoryMap = {
+        green: 'Property',
+        yellow: 'Equipment',
+        red: 'People',
+        purple: 'Operations',
+        black: 'Outsource',
+        white: 'Contract'
+      }
+      const label = key === 'z00contractCards' ? 'Contract' : (categoryMap[colLower] || 'Resource')
+      const text = `moved a ${label} card into In Play Space ${target}`
+      const actionText = `${pCopy.name} ${text}`
+      const entry = logEntry('MOVE_CARD', text, { ref: card.Ref, kind, colour: colLower, target })
+      const updatedLog = getUpdatedLog(entry)
+
+      const sourceEl = document.querySelector(`[data-card-ref="${card.Ref}"]`) || document.querySelector('.zoom-backdrop .resource_card, .zoom-backdrop .contract_card')
+      animateMoveToInPlay({ cardEl: sourceEl, cardData: card, targetSpace: target })
+
+      updateDoc(roomDocRef, {
+        [key]: deck,
+        [targetKey]: stack,
+        players: updatedPlayers,
+        lastAction: actionText,
+        gameLog: updatedLog
+      }).then(() => {
+        M.toast({ html: `Moved card to Space ${target}` })
+        nextPlayer()
+      }).catch(err => {
+        console.error('Error moving card to in play:', err)
+        M.toast({ html: 'Failed to move card. Please try again.' })
+      })
+    }
+
+    const handleDiscardCard = (target) => {
+      if (!isMyTurn.value || !activePlayer.value) {
+        NotActivePlayer()
+        return
+      }
+
+      const targetKey = target === 'A' ? 'z12inPlayA' : 'z13inPlayB'
+      const stack = JSON.parse(JSON.stringify(gameData.value[targetKey] || []))
+      if (stack.length === 0) {
+        M.toast({ html: `In Play Space ${target} is empty.` })
+        return
+      }
+
+      const removed = stack.pop()
+      delete removed.inPlayStack
+      delete removed.inPlaySpaceTarget
+
+      stack.forEach(c => {
+        delete c.inPlayStack
+        delete c.inPlaySpaceTarget
+      })
+
+      const updatedPlayers = JSON.parse(JSON.stringify(gameData.value.players))
+      const pCopy = updatedPlayers[gameData.value.currentPlayer]
+
+      const discard = JSON.parse(JSON.stringify(gameData.value.z14discardPile || []))
+      discard.push({
+        ...removed,
+        discardedBySeat: pCopy.seat,
+        discardedOnTurn: gameData.value.turnNumber || 1
+      })
+
+      const text = `discarded top card from In Play Space ${target}`
+      const actionText = `${pCopy.name} ${text}`
+      const entry = logEntry('DISCARD_CARD', text, { ref: removed.Ref, target })
+      const updatedLog = getUpdatedLog(entry)
+
+      const sourceEl = document.querySelector(`[data-card-ref="${removed.Ref}"]`) || document.querySelector(`[data-inplay-space="${target}"]`) || document.querySelector('.zoom-backdrop .resource_card, .zoom-backdrop .contract_card')
+      animateCardDiscard({ cardEl: sourceEl, cardData: removed, targetSpace: target })
+
+      updateDoc(roomDocRef, {
+        [targetKey]: stack,
+        z14discardPile: discard,
+        lastAction: actionText,
+        gameLog: updatedLog
+      }).then(() => {
+        M.toast({ html: `Discarded top card from Space ${target}` })
+        nextPlayer()
+      }).catch(err => {
+        console.error('Error discarding card:', err)
+        M.toast({ html: 'Failed to discard card. Please try again.' })
+      })
     }
 
     const getTwoTokens = (colour) => {
@@ -1928,6 +2273,8 @@ export default {
       roomDocRef,
       handleZoomAction,
       handleAllocateManagers,
+      handleMoveCard,
+      handleDiscardCard,
       tempTokensCount,
       tokenTakenGreen,
       tokenTakenRed,

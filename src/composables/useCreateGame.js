@@ -171,7 +171,7 @@ export default function useCreateGame() {
         createdByName: facilitatorName || 'Facilitator',
         createdAt: new Date().toISOString(),
         status: 'OPEN',
-        schemaVersion: 3,
+        schemaVersion: 4,
 
         name: roomName || 'Game Room',
         numPlayers: String(numberPlayers || 4),
@@ -213,6 +213,9 @@ export default function useCreateGame() {
         z09marketYellowTokens: resetValues?.temporaryResources?.yellow || 12,
         z10marketPurpleTokens: resetValues?.temporaryResources?.purple || 12,
         z11marketBlackTokens: resetValues?.temporaryResources?.black || 12,
+        z12inPlayA: [],
+        z13inPlayB: [],
+        z14discardPile: [],
         
         players: playersArray,
         facilitatorCode: facilitatorCode || `FAC-0000`,

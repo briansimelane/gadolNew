@@ -568,6 +568,249 @@ export function useGameAnimations() {
     })
   }
 
+  /**
+   * Action F: Moving a Card to In Play Space (Space A or Space B)
+   * Card flies from Market / Zoom Overlay directly to the In Play Space tile.
+   */
+  const animateMoveToInPlay = async ({
+    cardEl = null,
+    cardData = null,
+    targetSpace = 'A',
+    stateUpdateCallback = null
+  }) => {
+    const sourceCard = cardEl ||
+      (cardData ? document.querySelector(`[data-card-ref="${cardData.Ref}"]`) : null) ||
+      document.querySelector('.zoom-backdrop .resource_card, .zoom-backdrop .contract_card') ||
+      document.querySelector('.resource-card-holder')
+
+    const targetArea = document.querySelector(`[data-inplay-space="${targetSpace}"]`) ||
+      document.querySelector('.in-play-pair-tile') ||
+      document.body
+
+    if (!sourceCard || !targetArea) {
+      if (stateUpdateCallback) await stateUpdateCallback()
+      return
+    }
+
+    const cardRect = sourceCard.getBoundingClientRect()
+    const targetRect = targetArea.getBoundingClientRect()
+
+    const clone = sourceCard.cloneNode(true)
+    clone.className += ' animated-card-clone'
+    clone.style.cssText = `
+      position: fixed;
+      left: ${cardRect.left}px;
+      top: ${cardRect.top}px;
+      width: ${cardRect.width}px;
+      height: ${cardRect.height}px;
+      z-index: 100000;
+      pointer-events: none;
+      box-shadow: 0 16px 36px rgba(0, 121, 107, 0.7), 0 0 25px rgba(0, 150, 136, 0.8);
+      transform-origin: center center;
+      will-change: transform, opacity;
+    `
+    document.body.appendChild(clone)
+
+    if (stateUpdateCallback) {
+      await stateUpdateCallback()
+      await nextTick()
+    }
+
+    const deltaX = targetRect.left + targetRect.width / 2 - (cardRect.left + cardRect.width / 2)
+    const deltaY = targetRect.top + targetRect.height / 2 - (cardRect.top + cardRect.height / 2)
+
+    const tl = gsap.timeline({
+      onComplete: () => {
+        gsap.fromTo(
+          targetArea,
+          { scale: 1.08, outline: '3px solid #00796b' },
+          { scale: 1, outline: 'none', duration: 0.4, ease: 'back.out(2)' }
+        )
+        clone.remove()
+      }
+    })
+
+    tl.to(clone, {
+      scale: 1.15,
+      rotation: targetSpace === 'B' ? 6 : -6,
+      duration: 0.25,
+      ease: 'power2.out'
+    })
+
+    tl.to(clone, {
+      x: deltaX,
+      y: deltaY,
+      scale: 0.5,
+      rotation: 0,
+      duration: 0.6,
+      ease: 'power2.inOut'
+    })
+
+    tl.to(clone, {
+      opacity: 0,
+      scale: 0.3,
+      duration: 0.15
+    })
+  }
+
+  /**
+   * Action G: Discarding a Card from In Play Space
+   * High-impact card explosion with glowing shockwave ring and 20 360-degree card shrapnel shards.
+   */
+  const animateCardDiscard = async ({
+    cardEl = null,
+    cardData = null,
+    targetSpace = 'A',
+    stateUpdateCallback = null
+  }) => {
+    const sourceCard = cardEl ||
+      (cardData ? document.querySelector(`[data-card-ref="${cardData.Ref}"]`) : null) ||
+      document.querySelector('.zoom-backdrop .resource_card, .zoom-backdrop .contract_card') ||
+      document.querySelector(`[data-inplay-space="${targetSpace}"]`) ||
+      document.querySelector('.in-play-pair-tile')
+
+    if (!sourceCard) {
+      if (stateUpdateCallback) await stateUpdateCallback()
+      return
+    }
+
+    const cardRect = sourceCard.getBoundingClientRect()
+    const centerX = cardRect.left + cardRect.width / 2
+    const centerY = cardRect.top + cardRect.height / 2
+
+    // Main Card Clone
+    const clone = sourceCard.cloneNode(true)
+    clone.className += ' animated-card-clone'
+    clone.style.cssText = `
+      position: fixed;
+      left: ${cardRect.left}px;
+      top: ${cardRect.top}px;
+      width: ${cardRect.width}px;
+      height: ${cardRect.height}px;
+      z-index: 100000;
+      pointer-events: none;
+      box-shadow: 0 0 35px #ff3d00, 0 0 70px #ff9100;
+      transform-origin: center center;
+      will-change: transform, opacity, filter;
+    `
+    document.body.appendChild(clone)
+
+    // Shockwave Ring Element
+    const shockwave = document.createElement('div')
+    shockwave.style.cssText = `
+      position: fixed;
+      left: ${centerX - 25}px;
+      top: ${centerY - 25}px;
+      width: 50px;
+      height: 50px;
+      border: 4px solid #ff3d00;
+      border-radius: 50%;
+      z-index: 100001;
+      pointer-events: none;
+      box-shadow: 0 0 20px #ff9100, inset 0 0 20px #ff3d00;
+      opacity: 1;
+      transform-origin: center center;
+    `
+    document.body.appendChild(shockwave)
+
+    // 20 Fiery Card Shards / Shrapnel Elements
+    const shards = []
+    const shardColors = ['#ff3d00', '#ff9100', '#ffea00', '#dd2c00', '#ff6d00', '#ffffff', '#26a69a']
+
+    for (let i = 0; i < 20; i++) {
+      const shard = document.createElement('div')
+      const size = 6 + Math.floor(Math.random() * 12)
+      const color = shardColors[Math.floor(Math.random() * shardColors.length)]
+      shard.style.cssText = `
+        position: fixed;
+        left: ${centerX - size / 2}px;
+        top: ${centerY - size / 2}px;
+        width: ${size}px;
+        height: ${size * (0.6 + Math.random() * 1.2)}px;
+        background: ${color};
+        border-radius: ${Math.random() > 0.5 ? '2px' : '50%'};
+        z-index: 100002;
+        pointer-events: none;
+        box-shadow: 0 0 10px ${color};
+        will-change: transform, opacity;
+      `
+      document.body.appendChild(shard)
+      shards.push(shard)
+    }
+
+    if (stateUpdateCallback) {
+      await stateUpdateCallback()
+      await nextTick()
+    }
+
+    const tl = gsap.timeline({
+      onComplete: () => {
+        clone.remove()
+        shockwave.remove()
+        shards.forEach(s => s.remove())
+      }
+    })
+
+    // Phase 1: Rapid Charge-Up & Intense Vibration
+    tl.to(clone, {
+      scale: 1.18,
+      filter: 'brightness(1.8) saturate(2)',
+      duration: 0.18,
+      ease: 'power2.out'
+    })
+    .to(clone, {
+      x: (Math.random() - 0.5) * 16,
+      y: (Math.random() - 0.5) * 16,
+      rotation: (Math.random() - 0.5) * 14,
+      duration: 0.08,
+      repeat: 3,
+      yoyo: true,
+      ease: 'rough'
+    })
+
+    // Phase 2: BOOM! Card Flash Expand & Shatter Dissolve
+    tl.to(clone, {
+      scale: 1.5,
+      opacity: 0,
+      filter: 'brightness(4) contrast(2)',
+      duration: 0.15,
+      ease: 'power4.out'
+    })
+
+    // Shockwave expansion
+    gsap.to(shockwave, {
+      width: 280,
+      height: 280,
+      x: -115,
+      y: -115,
+      opacity: 0,
+      borderWidth: 1,
+      duration: 0.45,
+      ease: 'power2.out',
+      delay: 0.18
+    })
+
+    // Shrapnel Shards 360-Degree Radial Explosion Physics
+    shards.forEach((s, idx) => {
+      const angle = (idx / 20) * Math.PI * 2 + (Math.random() - 0.5) * 0.4
+      const distance = 80 + Math.random() * 160
+      const targetX = Math.cos(angle) * distance
+      const targetY = Math.sin(angle) * distance
+      const rotationSpeed = (Math.random() - 0.5) * 1080
+
+      gsap.to(s, {
+        x: targetX,
+        y: targetY,
+        rotation: rotationSpeed,
+        scale: 0.2,
+        opacity: 0,
+        duration: 0.5 + Math.random() * 0.25,
+        ease: 'power3.out',
+        delay: 0.18
+      })
+    })
+  }
+
   return {
     initAnimations,
     cleanupAnimations,
@@ -575,6 +818,8 @@ export function useGameAnimations() {
     animateCardPurchase,
     animateContractFulfillment,
     animateManagerAllocation,
-    animateManagerReturn
+    animateManagerReturn,
+    animateMoveToInPlay,
+    animateCardDiscard
   }
 }

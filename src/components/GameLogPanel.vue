@@ -263,6 +263,16 @@ export default {
   font-weight: 700;
 }
 
+.log-entry-row.MOVE_CARD {
+  background-color: #e0f2f1;
+  border-left: 3px solid #00796b;
+}
+
+.log-entry-row.DISCARD_CARD {
+  background-color: #fbe9e7;
+  border-left: 3px solid #d84315;
+}
+
 .log-entry-row:last-child {
   border-bottom: none;
 }
